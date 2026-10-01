@@ -1,0 +1,22 @@
+name: Décision
+description: Instruire un choix avant de l'inscrire dans la documentation.
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Décision à prendre
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options et conséquences
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources et incertitudes
+  - type: textarea
+    id: choix
+    attributes:
+      label: Choix retenu
+      description: Laisser vide tant que le choix n'a pas été fait ; une proposition n'est pas une validation.

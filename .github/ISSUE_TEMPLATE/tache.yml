@@ -1,0 +1,27 @@
+name: Tâche
+description: Décrire un résultat concret pour Sanctuary Release.
+body:
+  - type: textarea
+    id: resultat
+    attributes:
+      label: Résultat attendu
+      description: Décrire le comportement ou le livrable souhaité et son utilité.
+    validations:
+      required: true
+  - type: textarea
+    id: contexte
+    attributes:
+      label: Contexte et sources
+      description: Composant, phase, documents, décisions et dépendances.
+  - type: textarea
+    id: criteres
+    attributes:
+      label: Critères de réussite
+      description: Comment constater que le résultat est obtenu.
+    validations:
+      required: true
+  - type: textarea
+    id: perimetre
+    attributes:
+      label: Périmètre et limites
+      description: Actions demandées, contraintes et questions encore ouvertes.
