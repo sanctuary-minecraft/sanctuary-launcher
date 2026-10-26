@@ -48,5 +48,6 @@ réussis, sans modifier son checkout de travail.
   `property270,claims272,claims277,claims278`, `sanctuaryAtlasOnly=true`.
   Les tests vérifient à nouveau la commande unifiée sur la base commune.
   Journal : `build/release295/check-build.log`.
-- Publication Gitea, canal, CT 350, téléchargement Web et Prism : à consigner
-  après livraison ; cette préparation ne prouve pas leur mise à jour.
+- **Publication effectuée** : Gitea, canal client/serveur, CT 350, téléchargement
+  Web et instance Prism historique en beta.295. [Reçu complet](release-beta295.md),
+  sauvegardes et limite de l’instance importée encore ouverte.
