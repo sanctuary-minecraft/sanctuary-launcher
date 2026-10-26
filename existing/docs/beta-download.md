@@ -24,8 +24,12 @@ standard. Le MRpack beta.280 reste accessible par son ancienne adresse pour
 compatibilité des liens, sans devenir un deuxième bouton du site. Le parcours
 manuel de configuration et son lien dans le pied de page sont retirés.
 
-L'archive légère contient uniquement `instance.cfg`, `mmc-pack.json`, l'icône et
-`minecraft/packwiz-installer-bootstrap.jar`. Elle démarre avec zéro mod local.
+L'archive contient uniquement `instance.cfg`, `mmc-pack.json`, l'icône,
+`minecraft/packwiz-installer-bootstrap.jar` et, à partir de la préparation
+beta.291, `minecraft/packwiz-installer.jar` avec le
+[logo Sanctuary embarqué](packwiz-logo-beta291.md). Elle démarre avec zéro mod
+local. L'installateur est vérifié par SHA-256 et conservé par
+`--bootstrap-no-update` ; la mise à jour automatique des mods reste active.
 L'instance est nommée **Sanctuary Beta**, avec `ManagedPack=false`,
 `OverrideCommands=true`, la sélection automatique de Java et le canal stable :
 

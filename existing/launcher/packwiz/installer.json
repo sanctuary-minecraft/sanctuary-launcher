@@ -1,0 +1,7 @@
+{
+  "upstream_version": "v0.5.14",
+  "upstream_url": "https://github.com/packwiz/packwiz-installer/releases/download/v0.5.14/packwiz-installer.jar",
+  "upstream_sha256": "c9f646908d340d84773948a9a7d98bc1dae250d35e1016dc6e2b8459760b5598",
+  "logo_sha256": "efee73a6c812c89b2900d41f6446c0f906ccf85136b6c226daf42870a41a5157",
+  "installer_sha256": "9e2912fdd05e5c23721acd58cd5c61bbf13061e453627e8f4df9a4c53f7aa875"
+}
