@@ -6,7 +6,10 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QPushButton>
-#include <QScrollArea>
+#include <QAbstractScrollArea>
+#include <QFrame>
+#include <QMainWindow>
+#include "ui/SanctuaryWorkspace.h"
 #include <QSignalSpy>
 #include <QTest>
 #include <QUrl>
@@ -201,21 +204,63 @@ private slots:
         const auto capture = qEnvironmentVariable("SANCTUARY_CAPTURE_DIR");
         if (!capture.isEmpty()) QVERIFY(QDir().mkpath(capture));
         for (bool french : {true, false}) {
-            SanctuaryHome home;
-            home.setLocalMode(true);
-            home.setState(false, false, french);
-            home.resize(1280, 800);
-            home.show();
-            for (const auto& scenario : {"start", "microsoft", "apply", "pending", "pending-ready", "sync", "accepted", "ready", "rejected", "revoked"}) {
-                home.setLocalScenario(scenario);
-                QApplication::processEvents();
-                QVERIFY(home.width() <= 1280);
-                auto* scroll = home.findChild<QScrollArea*>();
-                QVERIFY(scroll->widget()->width() <= scroll->viewport()->width());
-                const auto heading = label(home,"packHeading");
-                QVERIFY(heading->height() >= heading->fontMetrics().height());
-                if (!capture.isEmpty() && QStringList{"start","pending","ready"}.contains(scenario))
-                    QVERIFY(home.grab().save(capture + "/" + scenario + (french ? "-fr.png" : "-en.png")));
+            QMainWindow window;
+            auto* workspace = new SanctuaryWorkspace(&window);
+            window.setCentralWidget(workspace);
+            auto* home = new SanctuaryHome;
+            home->setEmbedded(true);
+            home->setLocalMode(true);
+            home->setState(false, false, french);
+            home->setPackState(true, false, "beta.373", french ? "Pack vérifié" : "Verified pack");
+            workspace->setPages({home});
+            workspace->setFrench(french);
+            for (const QSize size : {QSize(1000, 680), QSize(1120, 760), QSize(1280, 800)}) {
+                window.resize(size);
+                window.show();
+                int footerBottom = -1;
+                for (const auto& scenario : {"start", "microsoft", "apply", "pending", "pending-ready", "sync", "accepted", "ready", "rejected", "revoked"}) {
+                    home->setLocalScenario(scenario);
+                    QApplication::processEvents();
+                    if (window.size() != size) {
+                        qInfo() << french << size << scenario << "minimum" << home->minimumSizeHint();
+                        if (!capture.isEmpty()) window.grab().save(capture + "/overflow.png");
+                    }
+                    QCOMPARE(window.size(), size); // The page must not grow beyond the supported window.
+                    for (auto* scroll : home->findChildren<QAbstractScrollArea*>())
+                        QVERIFY(!scroll->isVisible()); // The scenario combo's closed popup may own a list view.
+                    auto* header = home->findChild<QWidget*>("homeHeader");
+                    auto* body = home->findChild<QWidget*>("homeBody");
+                    auto* footer = home->findChild<QWidget*>("footer");
+                    auto* play = action(*home,"play");
+                    QVERIFY(header->geometry().bottom() < body->geometry().top());
+                    QVERIFY(body->geometry().bottom() < footer->geometry().top());
+                    QCOMPARE(play->parentWidget(), footer);
+                    QVERIFY(play->geometry().right() >= footer->width() - 2);
+                    QVERIFY(play->geometry().bottom() >= footer->height() - 2);
+                    const int bottom = footer->mapTo(home, footer->rect().bottomRight()).y();
+                    if (footerBottom >= 0) QCOMPARE(bottom, footerBottom);
+                    footerBottom = bottom;
+                    QVERIFY(home->rect().contains(footer->mapTo(home, footer->rect().bottomRight())));
+                    if (home->findChild<QWidget*>("inlineAccounts")->isVisible()) {
+                        auto* steps = home->findChild<QWidget*>("steps");
+                        QVERIFY(body->rect().contains(steps->mapTo(body, steps->rect().bottomRight())));
+                    }
+                    auto* toggle = home->communityUnlocked() ? action(*home,"readyCodeToggle") : action(*home,"codeToggle");
+                    if (toggle->isVisible()) {
+                        QTest::mouseClick(toggle, Qt::LeftButton);
+                        QApplication::processEvents();
+                        QCOMPARE(window.size(), size);
+                        QVERIFY(body->geometry().bottom() < footer->geometry().top());
+                        QCOMPARE(footer->mapTo(home, footer->rect().bottomRight()).y(), footerBottom);
+                        if (home->findChild<QWidget*>("inlineAccounts")->isVisible()) {
+                            auto* steps = home->findChild<QWidget*>("steps");
+                            QVERIFY(body->rect().contains(steps->mapTo(body, steps->rect().bottomRight())));
+                        }
+                        QTest::mouseClick(toggle, Qt::LeftButton);
+                    }
+                    if (!capture.isEmpty() && size == QSize(1120, 760) && QStringList{"start","pending","ready"}.contains(scenario))
+                        QVERIFY(window.grab().save(capture + "/" + scenario + (french ? "-fr.png" : "-en.png")));
+                }
             }
         }
     }

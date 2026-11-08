@@ -10,9 +10,13 @@ La version **0.1.0 de développement** fonctionne localement sur macOS Apple Sil
 consulte les dernières publications FR/EN du site dans un onglet séparé.
 Dans Accueil, le bloc des cinq étapes apparaît tant que le parcours n'est pas
 prêt : Discord, Microsoft, accès Sanctuary, code de personnage facultatif,
-installation. Le titre suit l'étape active, y compris l'attente d'admission.
+installation. L'accueil tient sans défilement dans la fenêtre : le header
+nomme l'étape active, le body contient les étapes et le footer garde Jouer
+en bas à droite, même pendant l'attente d'admission.
 Lorsque les prérequis sont réunis, ce bloc disparaît au profit de **Jouer**,
-**Intendance**, **Gazette** et **Tableau d'affichage**.
+**Intendance**, **Gazette** et **Tableau d'affichage**. Ces rubriques occupent
+des panneaux fixes avec un aperçu et un lien de lecture complète ; le footer
+reste à sa place.
 
 Les comptes et l'accès sont **simulés dans le profil local de développement**.
 Le pack téléchargé est réel. Le bouton Jouer local teste le parcours sans
@@ -39,9 +43,10 @@ Sanctuary. Les réglages globaux s'ouvrent également dans cette fenêtre.
 Les sous-dialogues utiles, sélecteurs de fichiers et ouvertures explicites
 du navigateur ou du gestionnaire de fichiers restent natifs.
 
-Voir le [cahier des charges 0.5](docs/cahier-des-charges.md), le
+Voir le [cahier des charges 0.6](docs/cahier-des-charges.md), le
 [contrat des outils](docs/outils-prism.md) et la
-[recette du lot local](docs/implementation/launcher-local-20261108.md).
+[recette du lot local](docs/implementation/launcher-local-20261108.md), complétée
+par la [recette de l'accueil fixe](docs/implementation/accueil-fixe-20261108.md).
 Les [maquettes conservées](docs/design/README.md) documentent les recherches
 précédentes ; l'application native devient la référence de travail.
 

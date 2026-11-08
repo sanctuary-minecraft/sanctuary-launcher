@@ -169,6 +169,7 @@ bool SanctuaryWorkspace::selectPage(QString id)
     m_stack->setCurrentWidget(dynamic_cast<QWidget*>(next));
     for (auto it = m_navigation.begin(); it != m_navigation.end(); ++it) it.value()->setChecked(it.key() == id);
     m_title->setText(name(next));
+    m_title->setVisible(id != "home"); // Home owns the current-step header.
     m_save->setVisible(id != "home" && id != "news");
     m_feedback->clear();
     next->opened();

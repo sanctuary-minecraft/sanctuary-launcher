@@ -11,8 +11,46 @@
 #include <QRegularExpression>
 #include <QTextBrowser>
 #include <QTextDocument>
+#include <QTextLayout>
+#include <QResizeEvent>
 #include <QUrlQuery>
 #include <QVBoxLayout>
+
+// Bounded text preview: no inner scroll area, even for a long community post.
+class SanctuaryExcerpt : public QLabel {
+public:
+    explicit SanctuaryExcerpt(QWidget* parent) : QLabel(parent)
+    {
+        setTextFormat(Qt::PlainText);
+        setAlignment(Qt::AlignTop | Qt::AlignLeft);
+        setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        setMinimumSize(0, 0);
+    }
+    void setExcerpt(const QString& text) { m_text = text.simplified(); reflow(); }
+protected:
+    void resizeEvent(QResizeEvent* event) override { QLabel::resizeEvent(event); reflow(); }
+private:
+    void reflow()
+    {
+        const auto metrics = fontMetrics();
+        const int lines = qBound(1, height() / qMax(1, metrics.lineSpacing()), 8);
+        QTextLayout layout(m_text, font());
+        layout.beginLayout();
+        QStringList visible;
+        for (int i = 0; i < lines; ++i) {
+            auto line = layout.createLine();
+            if (!line.isValid()) break;
+            line.setLineWidth(qMax(1, width()));
+            const auto remaining = m_text.mid(line.textStart());
+            visible.append(i == lines - 1 ? metrics.elidedText(remaining, Qt::ElideRight, width())
+                                          : m_text.mid(line.textStart(), line.textLength()).trimmed());
+        }
+        layout.endLayout();
+        QLabel::setText(visible.join('\n'));
+        setAccessibleName(m_text);
+    }
+    QString m_text;
+};
 
 SanctuaryFeed::SanctuaryFeed(const QString& kind, QWidget* parent) : QWidget(parent), m_kind(kind)
 {
@@ -27,18 +65,35 @@ SanctuaryFeed::SanctuaryFeed(const QString& kind, QWidget* parent) : QWidget(par
     m_refresh->setObjectName("refresh-" + kind);
     top->addWidget(m_refresh);
     layout->addLayout(top);
-    m_content = new QTextBrowser(this);
-    m_content->setObjectName("feedContent-" + kind);
-    m_content->setOpenLinks(false);
-    m_content->setMinimumHeight(kind == "news" ? 260 : 110);
-    m_content->document()->setBaseUrl(QUrl("https://sanctuary-minecraft.net/"));
-    m_content->document()->setDefaultStyleSheet("body {color:#1f2328; font-size:14px;} h2,h3 {font-size:18px;} a {color:#0969da;} p {margin-bottom:12px;}");
-    layout->addWidget(m_content, 1);
+    if (kind == "news") {
+        m_content = new QTextBrowser(this);
+        m_content->setObjectName("feedContent-" + kind);
+        m_content->setOpenLinks(false);
+        m_content->setMinimumHeight(260);
+        m_content->document()->setBaseUrl(QUrl("https://sanctuary-minecraft.net/"));
+        m_content->document()->setDefaultStyleSheet("body {color:#1f2328; font-size:14px;} h2,h3 {font-size:18px;} a {color:#0969da;} p {margin-bottom:12px;}");
+        layout->addWidget(m_content, 1);
+        connect(m_content, &QTextBrowser::anchorClicked, this, [this](const QUrl& link) {
+            const auto url = QUrl("https://sanctuary-minecraft.net/").resolved(link);
+            if (url.scheme() == "https" && url.host() == "sanctuary-minecraft.net") emit linkRequested(url);
+        });
+    } else {
+        m_excerpt = new SanctuaryExcerpt(this);
+        m_excerpt->setObjectName("feedExcerpt-" + kind);
+        layout->addWidget(m_excerpt, 1);
+        m_read = new QPushButton(this);
+        m_read->setObjectName("read-" + kind);
+        layout->addWidget(m_read, 0, Qt::AlignLeft);
+        connect(m_read, &QPushButton::clicked, this, [this] {
+            QUrl url("https://sanctuary-minecraft.net/communaute");
+            QUrlQuery query;
+            query.addQueryItem("kind", m_kind);
+            query.addQueryItem("lang", m_french ? "fr" : "en");
+            url.setQuery(query);
+            emit linkRequested(url);
+        });
+    }
     connect(m_refresh, &QPushButton::clicked, this, &SanctuaryFeed::reload);
-    connect(m_content, &QTextBrowser::anchorClicked, this, [this](const QUrl& link) {
-        const auto url = QUrl("https://sanctuary-minecraft.net/").resolved(link);
-        if (url.scheme() == "https" && url.host() == "sanctuary-minecraft.net") emit linkRequested(url);
-    });
     setFrench(true);
 }
 
@@ -46,7 +101,21 @@ void SanctuaryFeed::setFrench(bool french)
 {
     m_french = french;
     m_refresh->setText(french ? "Actualiser" : "Refresh");
-    if (m_content->toPlainText().isEmpty()) m_status->setText(french ? "Contenu du site Sanctuary" : "Content from the Sanctuary website");
+    if (m_read) m_read->setText(french ? "Lire sur le site" : "Read on the website");
+    if ((m_content && m_content->toPlainText().isEmpty()) || (m_excerpt && m_excerpt->text().isEmpty()))
+        m_status->setText(french ? "Contenu du site Sanctuary" : "Content from the Sanctuary website");
+}
+
+void SanctuaryFeed::setContent(const QString& content, bool html)
+{
+    if (m_content) {
+        if (html) m_content->setHtml(content);
+        else m_content->setPlainText(content);
+    } else {
+        QTextDocument document;
+        document.setHtml(html ? content : QString());
+        m_excerpt->setExcerpt(html ? document.toPlainText() : content);
+    }
 }
 
 QString SanctuaryFeed::publicNewsArticles(const QString& html)
@@ -100,7 +169,7 @@ void SanctuaryFeed::reload()
         m_reply = nullptr;
         if (m_kind != "news" && (status == 401 || status == 403 || (status >= 300 && status < 400))) {
             m_status->setText(m_french ? "Session Discord du site nécessaire" : "Website Discord session required");
-            m_content->setPlainText(m_french
+            setContent(m_french
                 ? "Les publications communautaires restent privées. En mode local, les comptes sont simulés : aucun contenu privé n'est affiché."
                 : "Community posts stay private. Accounts are simulated in local mode, so no private content is displayed.");
             return;
@@ -113,10 +182,10 @@ void SanctuaryFeed::reload()
                                            : QJsonDocument::fromJson(bytes).object().value("html").toString();
         if (content.isEmpty()) {
             m_status->setText(m_french ? "Aucune publication disponible" : "No posts available");
-            m_content->clear();
+            setContent({});
             return;
         }
-        m_content->setHtml(content);
+        setContent(content, true);
         m_status->setText(m_french ? "Dernières publications du site" : "Latest website posts");
     });
 }

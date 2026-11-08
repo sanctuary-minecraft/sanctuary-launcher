@@ -6,7 +6,7 @@ Base Prism **11.1.1**, commit `7d2d3c1ec6fcf8255ebacd02d9f792688575dfb4`.
 Le sous-module `libraries/libnbtplusplus` reste épinglé à
 `3538933614059f0f44388a2b16f3db25ce42285b`.
 Le lot `codex/launcher-local-onboarding` porte le
-[cahier des charges 0.5](cahier-des-charges.md) : fenêtre unique, Accueil et
+[cahier des charges 0.6](cahier-des-charges.md) : fenêtre unique, Accueil et
 Actualités dans la navigation, cinq étapes avant préparation puis rubriques
 communautaires. La [recette](implementation/launcher-local-20261108.md)
 distingue l'installation réelle et les comptes simulés.
@@ -44,8 +44,10 @@ Les autres plateformes restent à compiler et à tester.
 
 - `SanctuaryWorkspace` héberge les `BasePage` natives dans un `QStackedWidget`,
   avec navigation persistante. Accueil et Actualités précèdent les pages du jeu.
-- `SanctuaryHome` affiche les prérequis et états locaux, puis masque le bloc
-  des étapes quand le parcours est prêt. Le code SGA n'entre pas dans cette condition.
+- `SanctuaryHome` utilise un header d'étape, un body flexible et un footer
+  fixe avec Jouer en bas à droite. Aucun `QScrollArea` ne contient l'accueil.
+  Le body passe des cinq étapes aux trois panneaux communautaires ; leurs
+  aperçus sont bornés, sans défilement. Le code SGA reste facultatif.
 - `SanctuaryFeed` lit les actualités publiques existantes et les routes privées
   communautaires du site, en lecture seule. Une réponse privée 401/403 reste
   une demande de session, sans redirection silencieuse vers Discord.
@@ -89,7 +91,11 @@ la navigation dans une seule fenêtre, les formulaires invalides, le lecteur
 d'actualités et les empreintes du pack. Les PNG produits sont des rendus de
 widgets Qt, distincts des observations de la fenêtre native.
 
-La recette native comprend l'import réel du site et deux passages packwiz
+La [recette de l'accueil fixe](implementation/accueil-fixe-20261108.md)
+contrôle les dix scénarios, deux langues et trois tailles, y compris le code
+SGA ouvert : footer visible, boutons accessibles, aucun défilement de page.
+
+La recette native du lot précédent comprend l'import réel du site et deux passages packwiz
 sur la même instance, avec conservation de sentinelles locales et d'un mod
 facultatif désactivé. Elle ne valide ni Minecraft, ni personnage, ni serveur,
 ni Vulkan/shaders/Sound Physics. Les essais graphiques futurs ciblent Vulkan.

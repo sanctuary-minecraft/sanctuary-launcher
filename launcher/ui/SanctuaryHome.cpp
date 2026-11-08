@@ -10,8 +10,8 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QPushButton>
-#include <QScrollArea>
 #include <QStyle>
+#include <QStackedWidget>
 #include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -49,12 +49,13 @@ struct SanctuaryHome::Ui {
     struct Row { QFrame* frame; QLabel *number, *title, *detail, *status; QPushButton* action; };
     std::array<Row, 5> rows;
     QLabel *eyebrow, *heading, *subtitle, *server, *notice, *historical, *help, *footer, *code, *codeHelp;
-    QWidget *previewControls, *codePanel, *setupPanel, *community, *readyCodePanel;
+    QWidget *previewControls, *codePanel, *setupPanel, *community, *readyCodePanel, *toolsPanel;
     QFrame *chromeHeader, *chromeFooter;
     QList<SanctuaryFeed*> feeds;
     QLabel* readyCode;
     QPushButton *readyCodeToggle, *readyCodeCopy;
     QComboBox* scenarios;
+    QStackedWidget* body;
     QLabel *packSummary, *feedback;
     QPushButton* setupToggle;
     QPushButton *reset, *play, *mods, *shaders, *instanceSettings, *tools, *settings, *news, *site, *wiki, *copy, *sponsor;
@@ -66,12 +67,12 @@ SanctuaryHome::SanctuaryHome(QWidget* parent) : QWidget(parent), m_ui(std::make_
     initializeSanctuaryResources();
     setObjectName("sanctuaryHome");
     setStyleSheet(R"(
-        QWidget#sanctuaryHome, #sanctuaryHome QScrollArea, #sanctuaryHome QWidget#surface { background: #fff; color: #1f2328; }
+        QWidget#sanctuaryHome, #sanctuaryHome QWidget#surface { background: #fff; color: #1f2328; }
         #sanctuaryHome { font-family: "SF Pro Text", "Segoe UI", sans-serif; font-size: 14px; }
         #sanctuaryHome QLabel { color: #1f2328; border: none; background: transparent; }
         #sanctuaryHome QLabel#heading { font-size: 21px; font-weight: 700; }
         #sanctuaryHome QLabel#eyebrow { font-size: 14px; font-weight: 600; color: #57606a; }
-        #sanctuaryHome QLabel#subtitle { font-size: 16px; color: #57606a; }
+        #sanctuaryHome QLabel#subtitle { font-size: 13px; color: #57606a; }
         #sanctuaryHome QLabel[muted="true"] { color: #57606a; font-size: 12px; }
         #sanctuaryHome QFrame#header { border: none; border-bottom: 1px solid #d0d7de; }
         #sanctuaryHome QFrame#footer { border: none; border-top: 1px solid #d0d7de; }
@@ -79,8 +80,8 @@ SanctuaryHome::SanctuaryHome(QWidget* parent) : QWidget(parent), m_ui(std::make_
         #sanctuaryHome QFrame[stepRow="true"] { border: none; border-bottom: 1px solid #d8dee4; background: transparent; }
         #sanctuaryHome QFrame[active="true"] { background: #f6f8fa; }
         #sanctuaryHome QFrame[waiting="true"] { background: #fff8e5; }
-        #sanctuaryHome QLabel[rowTitle="true"] { font-size: 16px; font-weight: 600; }
-        #sanctuaryHome QLabel[number="true"] { border: 1px solid #8c959f; border-radius: 16px; color: #57606a; font-size: 17px; font-weight: 600; }
+        #sanctuaryHome QLabel[rowTitle="true"] { font-size: 14px; font-weight: 600; }
+        #sanctuaryHome QLabel[number="true"] { border: 1px solid #8c959f; border-radius: 14px; color: #57606a; font-size: 14px; font-weight: 600; }
         #sanctuaryHome QLabel[number="true"][kind="complete"] { border-color: #1a7f37; color: #1a7f37; }
         #sanctuaryHome QLabel[number="true"][kind="current"] { background: #1a7f37; border-color: #1a7f37; color: white; }
         #sanctuaryHome QLabel[number="true"][kind="waiting"] { border-color: #9a6700; color: #9a6700; }
@@ -96,7 +97,7 @@ SanctuaryHome::SanctuaryHome(QWidget* parent) : QWidget(parent), m_ui(std::make_
         #sanctuaryHome QPushButton:disabled { background: #eaeef2; color: #6e7781; border-color: #eaeef2; }
         #sanctuaryHome QPushButton[link="true"] { color: #0969da; background: transparent; border: none; padding: 3px; font-weight: 400; text-align: left; }
         #sanctuaryHome QPushButton[link="true"]:focus { border: 1px solid #0969da; }
-        #sanctuaryHome QScrollArea { border: none; }
+        #sanctuaryHome QFrame[communityCard="true"] { border: 1px solid #d0d7de; border-radius: 5px; }
         #sanctuaryHome QComboBox { background: white; color: #24292f; border: 1px solid #d0d7de; border-radius: 4px; padding: 5px 10px; min-height: 22px; }
         #sanctuaryHome QProgressBar { border: 1px solid #d0d7de; border-radius: 3px; background: white; color: #24292f; text-align: center; }
         #sanctuaryHome QProgressBar::chunk { background: #dafbe1; }
@@ -132,6 +133,8 @@ void SanctuaryHome::setPackState(bool verified, bool busy, const QString& versio
 void SanctuaryHome::showFeedback(const QString& message)
 {
     m_ui->feedback->setText(message);
+    m_ui->feedback->setToolTip(message);
+    m_ui->feedback->setVisible(!message.isEmpty());
 }
 
 void SanctuaryHome::setEmbedded(bool embedded)
@@ -158,41 +161,34 @@ void SanctuaryHome::buildUi()
     auto& u = *m_ui;
     auto* outer = new QVBoxLayout(this);
     outer->setContentsMargins(0, 0, 0, 0);
-    auto* scroll = new QScrollArea(this);
-    scroll->setWidgetResizable(true);
-    scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    auto* surface = new QWidget(scroll);
+    auto* surface = new QWidget(this);
     surface->setObjectName("surface");
     auto* horizontal = new QHBoxLayout(surface);
-    horizontal->setContentsMargins(24, 18, 24, 18);
+    horizontal->setContentsMargins(12, 4, 12, 0);
     horizontal->addStretch();
     auto* column = new QWidget(surface);
     column->setMaximumWidth(960);
-    auto* body = new QVBoxLayout(column);
-    body->setContentsMargins(0, 0, 0, 0);
-    body->setSpacing(9);
+    auto* page = new QVBoxLayout(column);
+    page->setContentsMargins(0, 0, 0, 0);
+    page->setSpacing(8);
     horizontal->addWidget(column, 1);
     horizontal->addStretch();
-    scroll->setWidget(surface);
-    outer->addWidget(scroll);
-    auto* header = new QFrame(column);
-    header->setObjectName("header");
-    u.chromeHeader = header;
-    auto* top = new QHBoxLayout(header);
-    top->setContentsMargins(0, 0, 0, 15);
-    auto* wordmark = label(header, "wordmark");
-    wordmark->setPixmap(QPixmap(":/sanctuary/wordmark.png").scaledToWidth(215, Qt::SmoothTransformation));
+    outer->addWidget(surface);
+
+    u.chromeHeader = new QFrame(column);
+    u.chromeHeader->setObjectName("header");
+    auto* brand = new QHBoxLayout(u.chromeHeader);
+    brand->setContentsMargins(0, 0, 0, 6);
+    auto* wordmark = label(u.chromeHeader, "wordmark");
+    wordmark->setPixmap(QPixmap(":/sanctuary/wordmark.png").scaledToWidth(180, Qt::SmoothTransformation));
     wordmark->setAccessibleName("Sanctuary");
-    top->addWidget(wordmark);
-    auto* launcher = label(header, "launcherTitle");
-    launcher->setText("Launcher");
-    top->addWidget(launcher);
-    top->addStretch();
-    u.server = label(header, "serverStatus");
+    brand->addWidget(wordmark);
+    brand->addStretch();
+    u.server = label(u.chromeHeader, "serverStatus");
     u.server->setProperty("muted", true);
-    u.server->setWordWrap(false);
-    top->addWidget(u.server);
-    body->addWidget(header);
+    brand->addWidget(u.server);
+    page->addWidget(u.chromeHeader);
+
     u.previewControls = new QWidget(column);
     auto* preview = new QHBoxLayout(u.previewControls);
     preview->setContentsMargins(0, 0, 0, 0);
@@ -211,28 +207,36 @@ void SanctuaryHome::buildUi()
     u.reset = button(u.previewControls, "resetPreview");
     preview->addWidget(u.reset);
     connect(u.reset, &QPushButton::clicked, this, [this] { setLocalScenario("start"); });
-    body->addWidget(u.previewControls);
-    auto* packHeading = label(column, "packHeading");
-    packHeading->setText("Sanctuary Beta");
-    packHeading->setStyleSheet("font-size: 28px; font-weight: 700;");
-    body->addWidget(packHeading);
-    u.packSummary = label(column, "packSummary");
-    body->addWidget(u.packSummary);
-    u.feedback = label(column, "feedback");
+    page->addWidget(u.previewControls);
+
+    auto* header = new QFrame(column);
+    header->setObjectName("homeHeader");
+    auto* heading = new QVBoxLayout(header);
+    heading->setContentsMargins(0, 0, 0, 4);
+    heading->setSpacing(2);
+    u.eyebrow = label(header, "eyebrow");
+    u.heading = label(header, "heading");
+    u.subtitle = label(header, "subtitle");
+    heading->addWidget(u.eyebrow);
+    heading->addWidget(u.heading);
+    heading->addWidget(u.subtitle);
+    u.feedback = label(header, "feedback");
     u.feedback->setProperty("muted", true);
-    body->addWidget(u.feedback);
-    u.setupPanel = new QWidget(column);
+    u.feedback->setMaximumHeight(u.feedback->fontMetrics().lineSpacing() * 2);
+    u.feedback->hide();
+    heading->addWidget(u.feedback);
+    page->addWidget(header);
+
+    auto* body = new QStackedWidget(column);
+    u.body = body;
+    body->setObjectName("homeBody");
+    page->addWidget(body, 1);
+    u.setupPanel = new QWidget(body);
     u.setupPanel->setObjectName("inlineAccounts");
     auto* details = new QVBoxLayout(u.setupPanel);
-    details->setContentsMargins(0, 5, 0, 5);
-    details->setSpacing(6);
-    u.eyebrow = label(column, "eyebrow");
-    u.heading = label(column, "heading");
-    u.subtitle = label(column, "subtitle");
-    details->addWidget(u.eyebrow);
-    details->addWidget(u.heading);
-    details->addWidget(u.subtitle);
-    auto* steps = new QFrame(column);
+    details->setContentsMargins(0, 0, 0, 0);
+    details->setSpacing(0);
+    auto* steps = new QFrame(u.setupPanel);
     steps->setObjectName("steps");
     auto* rows = new QVBoxLayout(steps);
     rows->setContentsMargins(1, 1, 1, 1);
@@ -243,13 +247,13 @@ void SanctuaryHome::buildUi()
         r.frame->setObjectName(QString("step%1").arg(i + 1));
         r.frame->setProperty("stepRow", true);
         auto* line = new QGridLayout(r.frame);
-        line->setContentsMargins(16, 11, 16, 11);
-        line->setHorizontalSpacing(18);
-        line->setVerticalSpacing(4);
+        line->setContentsMargins(12, 5, 12, 5);
+        line->setHorizontalSpacing(12);
+        line->setVerticalSpacing(2);
         r.number = label(r.frame, QString("number%1").arg(i + 1));
         r.number->setText(QString::number(i + 1));
         r.number->setProperty("number", true);
-        r.number->setFixedSize(34, 34);
+        r.number->setFixedSize(28, 28);
         r.number->setAlignment(Qt::AlignCenter);
         line->addWidget(r.number, 0, 0, 2, 1, Qt::AlignVCenter);
         r.title = label(r.frame, QString("title%1").arg(i + 1));
@@ -263,27 +267,29 @@ void SanctuaryHome::buildUi()
         r.status->setProperty("badge", true);
         r.status->setAlignment(Qt::AlignCenter);
         r.action = button(r.frame, QStringList{"discord", "microsoft", "access", "codeToggle", "install"}[i]);
+        r.action->setMinimumHeight(28);
         line->addWidget(r.status, 0, 2, 2, 1, Qt::AlignVCenter);
         line->addWidget(r.action, 0, 2, 2, 1, Qt::AlignVCenter);
         if (i == 2) {
             u.historical = label(r.frame, "historicalBadge");
             u.historical->setProperty("badge", true);
             u.historical->setWordWrap(false);
-            line->addWidget(u.historical, 2, 1, 1, 1, Qt::AlignLeft);
+            line->addWidget(u.historical, 2, 1, 1, 2, Qt::AlignLeft);
             u.sponsor = button(r.frame, "sponsor");
             u.sponsor->setProperty("link", true);
+            u.sponsor->setMinimumHeight(24);
             line->addWidget(u.sponsor, 3, 1);
         }
         if (i == 3) {
             u.codePanel = new QWidget(r.frame);
             auto* codeLayout = new QHBoxLayout(u.codePanel);
-            codeLayout->setContentsMargins(0, 3, 0, 0);
+            codeLayout->setContentsMargins(0, 2, 0, 0);
             u.code = label(u.codePanel, "codeValue");
             const int fontId = QFontDatabase::addApplicationFont(":/sanctuary/Sga-Regular.ttf");
             const auto families = QFontDatabase::applicationFontFamilies(fontId);
             if (!families.isEmpty()) {
-                QFont font(families.first(), 22);
-                font.setLetterSpacing(QFont::AbsoluteSpacing, 5);
+                QFont font(families.first(), 20);
+                font.setLetterSpacing(QFont::AbsoluteSpacing, 4);
                 u.code->setFont(font);
             }
             codeLayout->addWidget(u.code);
@@ -295,63 +301,109 @@ void SanctuaryHome::buildUi()
             u.codeHelp->setProperty("muted", true);
             line->addWidget(u.codeHelp, 3, 1, 1, 2);
         }
-        if (i == 4) {
-            u.progress = new QProgressBar(r.frame);
-            u.progress->setObjectName("installationProgress");
-            u.progress->setRange(0, 100);
-
-        }
         rows->addWidget(r.frame);
     }
     details->addWidget(steps);
-    body->addWidget(u.progress);
-    u.help = label(column, "helpText");
-    u.help->setProperty("muted", true);
-    body->addWidget(u.help);
-    auto* launch = new QHBoxLayout;
-    u.play = button(column, "play");
-    u.play->setMinimumWidth(135);
-    u.play->setProperty("primary", true);
-    launch->addWidget(u.play);
-    launch->addWidget(u.rows[4].action);
-    u.mods = button(column, "mods");
-    u.shaders = button(column, "shaders");
-    u.instanceSettings = button(column, "instanceSettings");
-
-    launch->addStretch();
-    u.tools = button(column, "advanced");
-    launch->addWidget(u.tools);
-    body->addLayout(launch);
-    auto* shortcuts = new QGridLayout;
-    shortcuts->setSpacing(8);
-    shortcuts->addWidget(u.mods, 0, 0);
-    shortcuts->addWidget(u.shaders, 0, 2);
-    shortcuts->addWidget(u.instanceSettings, 2, 0);
-    struct Shortcut { const char* id; const char* fr; const char* en; int row; int column; };
-    const Shortcut extra[] = {
-        {"resourcepacks", "Packs de ressources", "Resource packs", 0, 1},
-        {"screenshots", "Captures d'écran", "Screenshots", 1, 0},
-        {"worlds", "Mondes", "Worlds", 1, 1},
-        {"servers", "Serveurs", "Servers", 1, 2},
-        {"version", "Versions", "Versions", 2, 1},
-        {"console", "Journaux", "Logs", 2, 2}
-    };
-    for (const auto& shortcut : extra) {
-        auto* entry = button(column, shortcut.id);
-        entry->setProperty("labelFr", shortcut.fr);
-        entry->setProperty("labelEn", shortcut.en);
-        shortcuts->addWidget(entry, shortcut.row, shortcut.column);
-        const QString page(shortcut.id);
-        connect(entry, &QPushButton::clicked, this, [this, page] { emit instanceToolRequested(page); });
-    }
-    body->addLayout(shortcuts);
-    u.setupToggle = button(column, "setupToggle");
-    body->addWidget(u.setupToggle);
+    details->addStretch();
     body->addWidget(u.setupPanel);
-    u.setupPanel->show();
-    connect(u.setupToggle, &QPushButton::clicked, this, &SanctuaryHome::accountsRequested);
-    u.readyCodeToggle = button(column, "readyCodeToggle");
-    body->addWidget(u.readyCodeToggle);
+
+    u.community = new QWidget(body);
+    u.community->setObjectName("communityHome");
+    auto* community = new QGridLayout(u.community);
+    community->setContentsMargins(0, 0, 0, 0);
+    community->setSpacing(10);
+    struct FeedSection { const char* kind; const char* fr; const char* en; int row; int column; int span; };
+    const FeedSection sections[] = {{"article","Gazette","Gazette",0,0,2},
+        {"bulletin","Intendance","Stewardship",0,1,1}, {"notice","Tableau d'affichage","Notice board",1,1,1}};
+    for (const auto& section : sections) {
+        auto* card = new QFrame(u.community);
+        card->setObjectName("communityCard-" + QString(section.kind));
+        card->setProperty("communityCard", true);
+        auto* cardLayout = new QVBoxLayout(card);
+        cardLayout->setContentsMargins(10, 8, 10, 8);
+        cardLayout->setSpacing(5);
+        auto* title = label(card, "communityTitle-" + QString(section.kind));
+        title->setProperty("labelFr", section.fr);
+        title->setProperty("labelEn", section.en);
+        title->setStyleSheet("font-size: 16px; font-weight: 600;");
+        cardLayout->addWidget(title);
+        auto* feed = new SanctuaryFeed(section.kind, card);
+        u.feeds.append(feed);
+        cardLayout->addWidget(feed, 1);
+        community->addWidget(card, section.row, section.column, section.span, 1);
+        connect(feed, &SanctuaryFeed::linkRequested, this, &SanctuaryHome::linkRequested);
+    }
+    community->setColumnStretch(0, 1);
+    community->setColumnStretch(1, 1);
+    community->setRowStretch(0, 1);
+    community->setRowStretch(1, 1);
+    body->addWidget(u.community);
+
+    // Standalone widget tools are hidden when the persistent native sidebar is present.
+    u.toolsPanel = new QWidget(column);
+    auto* shortcuts = new QHBoxLayout(u.toolsPanel);
+    shortcuts->setContentsMargins(0, 0, 0, 0);
+    u.mods = button(u.toolsPanel, "mods");
+    u.shaders = button(u.toolsPanel, "shaders");
+    u.instanceSettings = button(u.toolsPanel, "instanceSettings");
+    u.tools = button(u.toolsPanel, "advanced");
+    for (auto* entry : {u.mods, u.shaders, u.instanceSettings, u.tools}) shortcuts->addWidget(entry);
+    page->addWidget(u.toolsPanel);
+
+    auto* footer = new QFrame(column);
+    footer->setObjectName("footer");
+    u.chromeFooter = footer;
+    auto* footerLayout = new QVBoxLayout(footer);
+    footerLayout->setContentsMargins(0, 8, 0, 0);
+    footerLayout->setSpacing(4);
+    u.progress = new QProgressBar(footer);
+    u.progress->setObjectName("installationProgress");
+    footerLayout->addWidget(u.progress);
+    auto* foot = new QHBoxLayout;
+    auto* info = new QVBoxLayout;
+    info->setSpacing(2);
+    auto* packLine = new QHBoxLayout;
+    auto* packHeading = label(footer, "packHeading");
+    packHeading->setText("Sanctuary Beta");
+    packHeading->setWordWrap(false);
+    packHeading->setStyleSheet("font-weight:600;");
+    packLine->addWidget(packHeading);
+    u.packSummary = label(footer, "packSummary");
+    u.packSummary->setProperty("muted", true);
+    u.packSummary->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    u.packSummary->setMaximumHeight(u.packSummary->fontMetrics().lineSpacing() * 2);
+    packLine->addWidget(u.packSummary, 1);
+    info->addLayout(packLine);
+    auto* links = new QHBoxLayout;
+    u.news = button(footer, "news");
+    u.site = button(footer, "site");
+    u.wiki = button(footer, "help");
+    u.settings = button(footer, "settings");
+    u.setupToggle = button(footer, "setupToggle");
+    u.readyCodeToggle = button(footer, "readyCodeToggle");
+    for (auto* link : {u.news, u.site, u.wiki, u.settings, u.setupToggle, u.readyCodeToggle}) {
+        link->setProperty("link", true);
+        link->setMinimumHeight(22);
+        links->addWidget(link);
+    }
+    links->addStretch();
+    info->addLayout(links);
+    foot->addLayout(info, 1);
+    foot->addWidget(u.rows[4].action, 0, Qt::AlignBottom);
+    u.play = button(footer, "play");
+    u.play->setMinimumSize(120, 38);
+    u.play->setProperty("primary", true);
+    foot->addWidget(u.play, 0, Qt::AlignRight | Qt::AlignBottom);
+    u.help = label(footer, "helpText");
+    u.help->setProperty("muted", true);
+    info->addWidget(u.help);
+    u.footer = label(footer, "footerVersion");
+    u.footer->setProperty("muted", true);
+    info->addWidget(u.footer);
+    footerLayout->addLayout(foot);
+    page->addWidget(footer);
+
+    // Optional code appears in a compact panel above the footer, never as a prerequisite.
     u.readyCodePanel = new QWidget(column);
     auto* readyCodeLayout = new QHBoxLayout(u.readyCodePanel);
     readyCodeLayout->setContentsMargins(0, 0, 0, 0);
@@ -361,47 +413,10 @@ void SanctuaryHome::buildUi()
     u.readyCodeCopy = button(u.readyCodePanel, "readyCodeCopy");
     readyCodeLayout->addWidget(u.readyCodeCopy);
     readyCodeLayout->addStretch();
-    body->addWidget(u.readyCodePanel);
+    page->insertWidget(page->count() - 1, u.readyCodePanel);
+    connect(u.setupToggle, &QPushButton::clicked, this, &SanctuaryHome::accountsRequested);
     connect(u.readyCodeToggle, &QPushButton::clicked, this, [this] { m_codeVisible = !m_codeVisible; refresh(); });
     connect(u.readyCodeCopy, &QPushButton::clicked, u.copy, &QPushButton::click);
-    u.community = new QWidget(column);
-    u.community->setObjectName("communityHome");
-    auto* community = new QVBoxLayout(u.community);
-    community->setContentsMargins(0, 0, 0, 0);
-    struct FeedSection { const char* kind; const char* fr; const char* en; };
-    const FeedSection sections[] = {{"bulletin","Intendance","Stewardship"},{"article","Gazette","Gazette"},{"notice","Tableau d'affichage","Notice board"}};
-    for (const auto& section : sections) {
-        auto* title = label(u.community, "communityTitle-" + QString(section.kind));
-        title->setProperty("labelFr", section.fr);
-        title->setProperty("labelEn", section.en);
-        title->setStyleSheet("font-size: 18px; font-weight: 600; padding-top: 10px;");
-        community->addWidget(title);
-        auto* feed = new SanctuaryFeed(section.kind, u.community);
-        u.feeds.append(feed);
-        community->addWidget(feed);
-        connect(feed, &SanctuaryFeed::linkRequested, this, &SanctuaryHome::linkRequested);
-    }
-    body->addWidget(u.community);
-    auto* footer = new QFrame(column);
-    footer->setObjectName("footer");
-    u.chromeFooter = footer;
-    auto* foot = new QHBoxLayout(footer);
-    foot->setContentsMargins(0, 10, 0, 0);
-    u.news = button(footer, "news");
-    u.site = button(footer, "site");
-    u.wiki = button(footer, "help");
-    u.settings = button(footer, "settings");
-    for (auto* link : {u.news, u.site, u.wiki, u.settings}) {
-        link->setProperty("link", true);
-        foot->addWidget(link);
-    }
-    foot->addStretch();
-    u.footer = label(footer, "footerVersion");
-    u.footer->setProperty("muted", true);
-    u.footer->setWordWrap(false);
-    foot->addWidget(u.footer);
-    body->addWidget(footer);
-    body->addStretch();
     connect(u.rows[0].action, &QPushButton::clicked, this, [this] {
         if (m_localMode) { m_local.discord = true; commitLocalChange(); }
         else emit linkRequested(QUrl("https://sanctuary-minecraft.net/candidature"));
@@ -556,8 +571,9 @@ void SanctuaryHome::refresh()
         subtitle = text("Votre progression est conservée entre les ouvertures.", "Your progress is kept between sessions.");
     }
     u.eyebrow->setText(text("Étape %1 · %2", "Step %1 · %2").arg(active).arg(titles[active - 1]));
-    u.heading->setText(heading);
-    u.subtitle->setText(subtitle);
+    u.heading->setText(communityUnlocked() ? text("Sanctuary", "Sanctuary") : heading);
+    u.subtitle->setText(communityUnlocked() ? text("Les nouvelles de votre communauté.", "The latest from your community.") : subtitle);
+    u.eyebrow->setVisible(!communityUnlocked());
     const std::array<bool, 5> complete{discord, microsoft, admitted, false, installed};
     for (int i = 0; i < 5; ++i) {
         auto& r = u.rows[i];
@@ -647,14 +663,13 @@ void SanctuaryHome::refresh()
     u.progress->setValue(qMax(0, percent));
     u.progress->setFormat(m_realPack ? "%p%" : text("Simulation · %p%", "Simulation · %p%"));
     u.packSummary->setText(m_realPack ? m_packMessage : text("Installation locale de développement", "Local development installation"));
+    u.packSummary->setToolTip(u.packSummary->text());
     const bool ready = communityUnlocked();
-    u.setupPanel->setVisible(!ready);
+    u.body->setCurrentWidget(ready ? u.community : u.setupPanel);
     u.setupToggle->setVisible(ready);
-    u.setupToggle->setText(text("Gérer mes comptes", "Manage my accounts"));
-    u.community->setVisible(ready);
+    u.setupToggle->setText(text("Mes comptes", "My accounts"));
     u.readyCodeToggle->setVisible(ready);
-    u.readyCodeToggle->setText(m_codeVisible ? text("Masquer mon code SGA · facultatif", "Hide my SGA code · optional")
-                                          : text("Afficher mon code SGA · facultatif", "Show my SGA code · optional"));
+    u.readyCodeToggle->setText(m_codeVisible ? text("Masquer le code SGA", "Hide SGA code") : text("Code SGA · facultatif", "SGA code · optional"));
     u.readyCodePanel->setVisible(ready && m_codeVisible);
     u.readyCode->setText("SANCTUARYDEMO");
     u.readyCodeCopy->setText(text("Copier le code fictif", "Copy fictional code"));
@@ -664,17 +679,11 @@ void SanctuaryHome::refresh()
     for (auto* feed : u.feeds) feed->setFrench(m_french);
     if (ready && !m_communityVisible) for (auto* feed : u.feeds) feed->reload();
     m_communityVisible = ready;
-    for (auto* shortcut : findChildren<QPushButton*>()) {
-        if (shortcut->property("labelFr").isValid()) {
-            shortcut->setText(shortcut->property(m_french ? "labelFr" : "labelEn").toString());
-            shortcut->setVisible(!m_embedded);
-        }
-    }
     u.play->setText(text("Jouer", "Play"));
     u.play->setEnabled(m_localMode && discord && microsoft && admitted && installed && !installing);
     u.play->setToolTip(text("En mode local, ce bouton vérifie le parcours sans lancer Minecraft.", "In local mode, this checks the flow without launching Minecraft."));
-    u.help->setText(m_realPack ? text("Pack officiel réel. En mode local, comptes et accès restent simulés ; les essais du serveur et du personnage attendent Mojang.",
-                                    "Real official pack. In local mode, accounts and access remain simulated; server and character tests await Mojang.")
+    u.help->setText(m_realPack ? text("Comptes et accès locaux. Les essais du jeu et du serveur attendent Mojang.",
+                                    "Local accounts and access. Game and server tests await Mojang.")
                     : m_localMode ? text("Simulation locale uniquement. Minecraft, serveur et personnage seront testés après l'approbation Mojang.",
                                                   "Local simulation only. Minecraft, server and character tests await Mojang approval.")
                                     : text("Connexion et accès au serveur en attente du raccordement Microsoft/Mojang.", "Sign-in and server access await Microsoft/Mojang integration."));
@@ -684,6 +693,10 @@ void SanctuaryHome::refresh()
     for (auto* shortcut : {u.mods, u.shaders, u.instanceSettings}) shortcut->setVisible(!m_embedded && (m_localMode || m_instanceReady));
     u.tools->setText(text("Tous les outils", "All tools"));
     u.tools->setVisible(!m_embedded);
+    u.toolsPanel->setVisible(!m_embedded);
+    u.site->setVisible(!m_embedded);
+    u.news->setVisible(!m_embedded);
+    u.footer->setVisible(!m_embedded);
     u.settings->setText(text("Réglages du launcher", "Launcher settings"));
     u.news->setText(text("Actualités", "News"));
     u.site->setText("Site Sanctuary");
