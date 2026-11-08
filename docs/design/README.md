@@ -37,9 +37,9 @@ admis. Aucun téléchargement n'est en cours sur l'image : Installer est une
 action à lancer. Jouer reste indisponible tant que le jeu n'est pas prêt.
 Cette maquette ne prouve aucune connexion, licence, admission ou installation.
 
-L'image illustre la dernière préférence exprimée ; elle n'a pas encore reçu
-une validation distincte après sa génération. Les états d'attente et d'erreur
-restent à décliner. Le contrat prévoit déjà l'installation pendant l'attente,
+Koka valide cette composition puis demande les
+[autres étapes et l'attente d'accès](parcours-cinq-etapes-2026-11-08.md).
+Les états d'erreur restent à décliner. Le contrat prévoit l'installation pendant l'attente,
 le contrôle serveur de l'admission et la reprise des sessions et préférences.
 Le titre suit l'action active : Connecter Discord, Connecter Microsoft, Accès
 Sanctuary — En attente, Installer Sanctuary, puis Jouer à Sanctuary lorsque

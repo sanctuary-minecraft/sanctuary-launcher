@@ -1,7 +1,7 @@
 {
   "date": "2026-11-08",
   "method": "Built-in Imagegen, using the first white five-row preparation mockup and the actual website wordmark as input. Generated file copied without pixel changes or resizing.",
-  "approval_scope": "Koka requests a return to one grouped block numbered 1–5, with the active step as page title, while retaining the website wordmark, optional SGA code, historical beta badge and full Prism tools. This image illustrates that requested direction; the exact new frame has not received a separate subsequent approval.",
+  "approval_scope": "Koka approved the single-block five-step installation frame, with the active-step title, website wordmark, optional SGA code, historical beta badge and full Prism tools, then requested the other stages on the same basis. The generated state variations are recorded separately.",
   "previous_composition": "../blanc-trois-blocs-2026-11-08/provenance.json",
   "input_layout": "../blanc-2026-11-08/preparation.png",
   "wordmark": {
@@ -25,5 +25,6 @@
       "sha256": "9d31a9dd0a5c97cbf031744b7a5db2df1438e1f96dd33602801d0f85a02801ed"
     }
   ],
-  "prompts": "prompt.txt"
+  "prompts": "prompt.txt",
+  "state_variations": "etapes/provenance.json"
 }

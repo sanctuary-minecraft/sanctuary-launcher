@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-08",
+  "method": "Built-in Imagegen, one independent state per call, grounded in the approved installation screenshot. Discord state received a targeted correction to keep future steps neutral. Final generated PNGs copied without pixel changes or resizing.",
+  "approval_scope": "Koka approved the single-block installation frame and asked for the other stages with a changing title, especially waiting for access. These six new images illustrate that request and have not received a separate subsequent approval.",
+  "input_layout": "../installation-reference.png",
+  "additional_sga_visual_reference": "../../blanc-2026-11-08/pret-a-jouer.png",
+  "wordmark_source": "../provenance.json",
+  "mock_data": "All profiles, server occupancy, statuses and glyphs are fictional; no real account, code, session or admission is verified. 12/20 means simultaneous occupancy, not a community-member limit.",
+  "sga_implementation_note": "The glyph example is a visual sample, not an encoded valid admission string. Use the actual SGA font and existing player code when implementing the authenticated optional view.",
+  "files": [
+    {
+      "file": "01-discord.png",
+      "title": "Connecter Discord",
+      "active_step": 1,
+      "mock_state": "No accounts linked; future numbered circles remain neutral.",
+      "width": 1485,
+      "height": 1059,
+      "bytes": 1634899,
+      "sha256": "b124edea8eb3d9e0a11582f07f6b3197001a49defab4eab434df48ac441dd7b1"
+    },
+    {
+      "file": "02-microsoft.png",
+      "title": "Connecter Microsoft",
+      "active_step": 2,
+      "mock_state": "Discord linked; Microsoft not linked; no admission claimed.",
+      "width": 1485,
+      "height": 1059,
+      "bytes": 1427951,
+      "sha256": "2af21117a8a53703bc7d03b098c016318ef6d35d1713026cbb792936e46c262c"
+    },
+    {
+      "file": "03-candidature.png",
+      "title": "Demander à rejoindre Sanctuary",
+      "active_step": 3,
+      "mock_state": "Verified accounts; no candidature submitted; explicit send action; optional sponsorship link.",
+      "width": 1485,
+      "height": 1059,
+      "bytes": 1257177,
+      "sha256": "bd75e0f6c36b2594ad8d86e8663fb956c142f05d438e72d701ef4e6b0b1a8b94"
+    },
+    {
+      "file": "03-attente.png",
+      "title": "Accès Sanctuary — En attente",
+      "active_step": 3,
+      "mock_state": "Submitted candidature, no admission; amber waiting status, installation available, Play disabled, code hidden.",
+      "width": 1485,
+      "height": 1059,
+      "bytes": 1222486,
+      "sha256": "e45b45c01459fb55460dcd9f1dd985b74968b3a4db528fbd8069021044ce9d9c"
+    },
+    {
+      "file": "04-code-facultatif.png",
+      "title": "Mon code de personnage",
+      "active_step": 4,
+      "mock_state": "Accepted historical player; game installed; voluntarily opened fictional glyph example; Play available regardless of copy.",
+      "width": 1485,
+      "height": 1059,
+      "bytes": 1259311,
+      "sha256": "54ce7abb75507c107a7605c30adde43eaaa6580d76d1bd8694b237c9ab4bcbb8"
+    },
+    {
+      "file": "05-pret-a-jouer.png",
+      "title": "Jouer à Sanctuary",
+      "active_step": 5,
+      "mock_state": "Accepted historical player, game installed, optional code not opened; Play enabled.",
+      "width": 1485,
+      "height": 1059,
+      "bytes": 1254481,
+      "sha256": "89becb020967ba15cafc290a8c444c2cd0e4e9d652dd9e0be0029031b2715e56"
+    }
+  ],
+  "prompts": "prompts.json"
+}
