@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>@Launcher_AppID@</id>
+  <name>@Launcher_DisplayName@</name>
+  <summary>Dedicated Sanctuary Minecraft launcher, based on Prism Launcher</summary>
+  <developer id="net.sanctuary-minecraft"><name>Sanctuary</name></developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <description>
+    <p>Sanctuary Launcher is an independent Prism Launcher fork with a dedicated Sanctuary home screen.</p>
+    <p>This first development build does not yet provide Microsoft sign-in or a complete guided installation.</p>
+  </description>
+  <url type="homepage">https://sanctuary-minecraft.net/</url>
+  <url type="bugtracker">@Launcher_BUG_TRACKER_URL@</url>
+  <launchable type="desktop-id">@Launcher_AppID@.desktop</launchable>
+  <provides><binary>@Launcher_APP_BINARY_NAME@</binary></provides>
+  <content_rating type="oars-1.1"/>
+</component>

@@ -1,13 +1,14 @@
 # Cahier des charges de Sanctuary Launcher
 
-Version documentaire 0.1, préparée le **8 novembre 2026**. Sanctuary Launcher
+Version documentaire 0.2, actualisée le **8 novembre 2026**. Sanctuary Launcher
 doit installer le pack Sanctuary, présenter ses actualités et rejoindre son
 serveur depuis une application dédiée fondée sur Prism Launcher.
 
-La [maquette d'accueil](design/README.md) est validée par Koka. Ce cahier cadre
-le développement futur ; les propositions à confirmer sont identifiées en fin
-de document. Il ne constitue pas une implémentation du fork, une application
-Microsoft enregistrée ou un exécutable livré.
+La [maquette d'accueil](design/README.md) est validée par Koka. Le développement
+est désormais demandé. Un premier lot natif fondé sur Prism compile localement
+avec un accueil Qt FR/EN ; son [état vérifié](developpement.md) distingue ce qui
+fonctionne des objectifs restants. Ce cahier décrit la cible complète, sans
+valider une application Microsoft ni une distribution pour les joueurs.
 
 ## 1. Objectif et périmètre
 
@@ -44,20 +45,21 @@ ne doivent pas devenir des constantes dispersées dans le launcher.
 | Sound Physics Remastered | Option client sélectionnée par défaut ; les métadonnées actuelles décrivent son moteur comme désactivé par défaut |
 | Shaders Sanctuary | Présents dans le mod ; le profil de première installation reste à adapter |
 | Actualités FR/EN | Existantes dans le site ; aucun flux dédié au launcher exposé |
-| Fork et application Microsoft Sanctuary | À créer lors de leurs étapes respectives |
+| Fork Sanctuary | Base Prism et accueil Qt compilés localement ; recette complète à poursuivre |
+| Application Microsoft Sanctuary | À créer lors de son étape ; connexion désactivée dans le premier lot |
 | Mise à jour de l'application launcher | Chaîne à préparer, distincte de celle du pack |
 
-La base proposée est **Prism 11.1.1**, dernière release stable vérifiée sur
+La base retenue est **Prism 11.1.1**, dernière release stable vérifiée sur
 GitHub le 8 novembre, commit `7d2d3c1ec6fcf8255ebacd02d9f792688575dfb4`.
 Son [CMake](https://github.com/PrismLauncher/PrismLauncher/blob/11.1.1/CMakeLists.txt)
-utilise C++20 et Qt 6. Le premier ticket de développement confirmera cette
-base et sa compatibilité avec le pack exact avant l'import du code amont.
+utilise C++20 et Qt 6. Son import et une compilation macOS locale sont réalisés ;
+la compatibilité avec le pack exact reste à éprouver par installation et jeu.
 
-`sanctuary-launcher` reste la destination du projet. L'import futur devra
-conserver l'historique Prism et celui de ce dépôt, ses documents, `existing/`
-et les archives Release. Un remote `upstream` suivra Prism ; les mises à niveau
-amont seront revues et testées avant intégration. Aucune réécriture Electron
-ou Tauri n'est prévue.
+`sanctuary-launcher` est la destination du projet. L'import conserve l'historique
+Prism et celui de ce dépôt, ses documents, `existing/` et les archives Release.
+Le tag `upstream/prism/11.1.1` fixe la base et un remote `upstream` suit Prism ;
+les mises à niveau amont seront revues et testées avant intégration. Aucune
+réécriture Electron ou Tauri n'est prévue.
 
 La [politique des forks Prism](https://github.com/PrismLauncher/PrismLauncher#forkingredistributingcustom-builds-policy)
 prévoit une identité distincte et le remplacement ou la désactivation des
@@ -268,7 +270,8 @@ une copie de fichiers ou une maquette.
 ## 11. Tickets futurs et points ouverts
 
 Chaque ticket aura un résultat vérifiable et une branche `codex/<sujet>`.
-Ce découpage prépare le travail ; aucune issue ou implémentation n'est créée ici.
+Ce découpage définit les résultats visés ; les tickets ne sont pas encore des
+issues GitHub. Le premier lot couvre la base et une partie de l'accueil.
 
 | Ticket prévu | Résultat |
 | --- | --- |
@@ -283,10 +286,11 @@ Ce découpage prépare le travail ; aucune issue ou implémentation n'est créé
 
 LAUNCH-02 à LAUNCH-05 peuvent avancer sans l'accès Microsoft. Les vrais essais
 de compte et de multijoueur de LAUNCH-06/07 dépendent de cet accès et de comptes
-autorisés. Le développement attend une demande d'implémentation : le présent
-travail concerne uniquement la référence visuelle et le cadrage.
+autorisés. Le développement est engagé à la demande de Koka ; l'import manuel
+prérempli du premier lot ne valide pas encore LAUNCH-03. Les actualités restent
+embarquées tant que LAUNCH-04 n'a pas livré son contrat et son flux.
 
-Avant les étapes concernées, confirmer la base Prism et les plateformes,
+Avant les étapes concernées, valider les plateformes de distribution,
 mesurer le profil graphique/mémoire, choisir la reprise d'une instance Prism,
 valider le contrat du flux public et résoudre stockage protégé des jetons,
 signature, mise à jour de l'application et fourniture des sources du fork.

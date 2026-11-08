@@ -1,0 +1,4 @@
+<RCC><qresource prefix="/sanctuary">
+  <file>wordmark.png</file><file>sky.png</file><file>icon.png</file>
+  <file>island.png</file><file>button.png</file>
+</qresource></RCC>
