@@ -57,6 +57,7 @@ struct SanctuaryHome::Ui {
     QPushButton* startSetup;
     QFrame *chromeHeader, *chromeFooter;
     QList<SanctuaryFeed*> feeds;
+    QList<QLabel*> feedTitles;
     QLabel* readyCode;
     QPushButton *readyCodeToggle, *readyCodeCopy;
     QComboBox* scenarios;
@@ -80,6 +81,7 @@ SanctuaryHome::SanctuaryHome(QWidget* parent, View view) : QWidget(parent), m_ui
         #sanctuaryHome QLabel#heading[dashboard="true"] { font-size: 23px; font-weight: 600; }
         #sanctuaryHome QLabel#eyebrow { font-size: 14px; font-weight: 600; color: #57606a; }
         #sanctuaryHome QLabel#subtitle { font-size: 13px; color: #57606a; }
+        #sanctuaryHome QLabel[communityTitle="true"] { font-size: 14px; font-weight: 600; color: #57606a; }
         #sanctuaryHome QLabel[muted="true"] { color: #57606a; font-size: 12px; }
         #sanctuaryHome QFrame#header { border: none; border-bottom: 1px solid #d0d7de; }
         #sanctuaryHome QFrame#footer { border: none; border-top: 1px solid #d0d7de; }
@@ -371,7 +373,7 @@ void SanctuaryHome::buildUi()
     community->setSpacing(10);
     struct FeedSection { const char* kind; const char* fr; const char* en; int row; int column; int columns; };
     const FeedSection sections[] = {{"bulletin","Intendance","Stewardship",0,0,2},
-        {"article","Gazette","Gazette",1,0,1}, {"notice","Tableau d'affichage","Notice board",1,1,1}};
+        {"article","Gazette","Gazette",1,0,1}, {"notice","Tableau d’affichage","Notice board",1,1,1}};
     for (const auto& section : sections) {
         auto* card = new QFrame(u.community);
         card->setObjectName("communityCard-" + QString(section.kind));
@@ -379,6 +381,12 @@ void SanctuaryHome::buildUi()
         auto* cardLayout = new QVBoxLayout(card);
         cardLayout->setContentsMargins(12, 12, 12, 12);
         cardLayout->setSpacing(5);
+        auto* title = label(card, "communityTitle-" + QString(section.kind));
+        title->setProperty("communityTitle", true);
+        title->setProperty("labelFr", QString(section.fr));
+        title->setProperty("labelEn", QString(section.en));
+        u.feedTitles.append(title);
+        cardLayout->addWidget(title);
         auto* feed = new SanctuaryFeed(section.kind, card);
         u.feeds.append(feed);
         cardLayout->addWidget(feed, 1);
@@ -775,6 +783,7 @@ void SanctuaryHome::refresh()
     u.readyCodePanel->setVisible(!m_onlineSession && ready && m_codeVisible);
     u.readyCode->setText("SANCTUARYDEMO");
     u.readyCodeCopy->setText(text("Copier le code fictif", "Copy fictional code"));
+    for (auto* title : u.feedTitles) title->setText(title->property(m_french ? "labelFr" : "labelEn").toString());
     for (auto* feed : u.feeds) feed->setFrench(m_french);
     if (ready && !m_communityVisible) for (auto* feed : u.feeds) feed->reload();
     m_communityVisible = ready;

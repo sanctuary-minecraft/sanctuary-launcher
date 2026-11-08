@@ -17,8 +17,9 @@ le fond gris très léger des tableaux natifs (#f6f8fa).
 
 Intendance en haut sans visage, Gazette à gauche et Tableau à droite avec le
 visage du skin Minecraft de chaque auteur près du titre. L’intérieur conserve
-la présentation Sanctuary : résumés, visages et publications dépliables, sans
-nouveau titre de rubrique. Un clic déplie le texte et les images de la Gazette ;
+la présentation Sanctuary : résumés, visages et publications dépliables. Les
+titres Intendance, Gazette et Tableau d’affichage restent en haut de leur cadre,
+au-dessus du contenu défilant. Un clic déplie le texte et les images de la Gazette ;
 le flux peut défiler. Le header commence au niveau du logo et Jouer reste dans
 le footer fixe.
 

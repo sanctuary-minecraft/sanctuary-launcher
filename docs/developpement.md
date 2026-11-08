@@ -50,7 +50,8 @@ Les autres plateformes restent à compiler et à tester.
 - `SanctuaryHome` utilise un header d'étape, un body flexible et un footer
   fixe avec Jouer en bas à droite. Aucun `QScrollArea` ne contient l'accueil.
   Deux vues partagent les mêmes contrôleurs : Dashboard affiche Accueil,
-  la date/heure en sous-titre et les trois flux encadrés sur fond #f6f8fa ;
+  la date/heure en sous-titre et les trois flux encadrés sur fond #f6f8fa,
+  avec titres FR/EN fixes au-dessus de chaque flux défilant ;
   Setup conserve les cinq étapes après Discord. Adaptive reste
   le composant de référence pour les tests historiques. Le footer reste fixe ;
   les publications ouvertes peuvent défiler dans les flux. Le code SGA reste facultatif.

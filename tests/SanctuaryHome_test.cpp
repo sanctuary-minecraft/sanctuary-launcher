@@ -307,7 +307,11 @@ private slots:
         QVERIFY(home->findChild<QLabel*>("eyebrow")->isHidden());
         QVERIFY(home->findChild<QLabel*>("subtitle")->isVisible());
         QVERIFY(home->findChild<QWidget*>("inlineAccounts")->isHidden());
-        QVERIFY(home->findChildren<QLabel*>(QRegularExpression("communityTitle-.*")).isEmpty());
+        QCOMPARE(home->findChildren<QLabel*>(QRegularExpression("communityTitle-.*")).size(),3);
+        home->setState(true,false,false);
+        QCOMPARE(home->findChild<QLabel*>("communityTitle-notice")->text(),QString("Notice board"));
+        home->setState(true,false,true);
+        QCOMPARE(home->findChild<QLabel*>("communityTitle-notice")->text(),QString("Tableau d’affichage"));
         QVERIFY(workspace->selectPage("setup"));
         QApplication::processEvents();
         QVERIFY(setup->findChild<QWidget*>("inlineAccounts")->isVisible());

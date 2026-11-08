@@ -264,8 +264,9 @@ une navigation clavier, un focus visible et les textes lisibles.
 - **Body** : les cinq étapes restent ensemble dans Bien démarrer ; les trois
   flux restent dans Accueil, chacun encadré d’une bordure fine #d0d7de,
   sur le fond gris très léger #f6f8fa des tableaux natifs. Les contenus
-  dépliables gardent leur présentation Sanctuary, sans titre de rubrique
-  supplémentaire à l’intérieur.
+  dépliables gardent leur présentation Sanctuary. Chaque cadre porte son titre
+  en haut : Intendance, Gazette et Tableau d’affichage (Stewardship, Gazette et
+  Notice board en anglais). Le titre reste fixe au-dessus du flux défilant.
 - **Footer** : version/état du pack, installation/mise à jour et **Jouer ancré
   tout en bas à droite**. Sa position ne dépend pas de la longueur du body.
 

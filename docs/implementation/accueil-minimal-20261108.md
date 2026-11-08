@@ -104,3 +104,18 @@ contrôlé aux trois tailles prévues ; capture 1120 × 760 dans
 positions des flux et footer visible. Publications de test, pas de nouvelle
 validation de photos privées ni d’essai Minecraft. Aucun changement Web,
 pack, monde, serveur ou instance Prism personnelle.
+
+## Ajustement LAUNCH-20 — titres des cadres
+
+Branche `codex/launcher-feed-headings`. Les titres Intendance, Gazette et
+Tableau d’affichage sont rétablis dans le haut des cadres, au-dessus de chaque
+flux défilant. Libellés FR/EN actualisés avec la langue. Le contenu dépliable,
+les photos et les visages de Gazette/Tableau sont conservés ; Intendance reste
+sans visage.
+
+Script Run `--verify` réussi : 25 suites CTest passent et profil local isolé
+relancé. Test existant adapté, dont changement FR/EN du titre du Tableau.
+Rendu Qt contrôlé aux trois tailles prévues ; capture 1120 × 760 dans
+`build/native/captures-headings/minimal-home-fr.png`, publications de test.
+Les cadres, leurs titres, les contenus ouverts et le footer restent lisibles.
+Aucun changement Web, pack, serveur, monde ou essai Minecraft.
