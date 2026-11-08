@@ -1,52 +1,52 @@
-# Référence visuelle de Sanctuary Launcher
+# Direction visuelle de Sanctuary Launcher
 
-Cette maquette d'accueil a été **validée par Koka le 8 novembre 2026**. Elle
-sert de référence pour le futur fork de Prism. Les autres écrans restent à
-concevoir selon le [cahier des charges](../cahier-des-charges.md).
+La **DA blanche, sobre et centrée, inspirée de GitHub**, est retenue par Koka
+le **8 novembre 2026**. Le parcours de référence est désormais **Mes comptes →
+Mon accès → Mon jeu**, avec un code de personnage SGA facultatif. Le
+[cahier des charges 0.3](../cahier-des-charges.md) définit le comportement cible.
 
-![Accueil de Sanctuary Launcher validé le 8 novembre 2026](accueil-sanctuary-reference-2026-11-08.png)
+## Principes retenus
 
-## Fichier conservé
+- Fond blanc uni, sans paysage ni textures ; colonne de contenu centrée.
+- Texte sombre lisible sans empattement, espaces réguliers et traits gris fins.
+- Commandes compactes ; vert pour les validations, ambre pour l'attente, liens
+  identifiables et statuts compréhensibles sans dépendre uniquement de la couleur.
+- Connexions Discord et Microsoft dans Mes comptes ; candidature, parrainage et
+  marqueur historique bêta dans Mon accès ; installation, Jouer, mods et shaders
+  dans Mon jeu.
+- Code SGA disponible sous Afficher mon code, avec Copier, après admission :
+  aucune case obligatoire à cocher ni copie à effectuer pour jouer normalement.
+- Retour quotidien centré sur Jouer, avec reprise des comptes et du dossier.
 
-| Propriété | Valeur |
+## Maquettes de direction conservées
+
+Ces trois images sont les états d'une même exploration blanche, pas des
+captures du launcher implémenté. **Elles précèdent la réflexion finale** : les
+cinq lignes de validation et l'installation bloquée pendant l'attente qui y
+figurent ne sont plus le contrat du parcours. La révision 0.3 retient trois
+blocs, une installation possible pendant l'attente et le code en second plan.
+Une nouvelle composition en trois blocs reste à dessiner avant son intégration.
+
+| Image | Usage |
 | --- | --- |
-| Fichier | `accueil-sanctuary-reference-2026-11-08.png` |
-| Dimensions réelles | 1487 × 1058 pixels |
-| Taille | 1 799 686 octets |
-| SHA-256 | `363d675a1e54944c6b4b941ff15ca671a0c43d094c96e2d04579201cb3f67f83` |
-| Création | Imagegen, le 8 novembre 2026 |
-| État | Maquette statique approuvée, original sans retouche ni redimensionnement |
+| [Préparation](blanc-2026-11-08/preparation.png) | Direction claire, centrage, alignements et commandes |
+| [Candidature en attente](blanc-2026-11-08/candidature-en-attente.png) | Statuts lisibles, attente distincte d'une erreur de compte |
+| [Prêt à jouer](blanc-2026-11-08/pret-a-jouer.png) | État validé, exemple SGA fictif, accès Jouer/Mods/Shaders/Réglages |
 
-La composition visait un écran de bureau de 1440 × 1024 ; les dimensions
-ci-dessus sont celles du PNG effectivement généré et validé. Le paysage est
-une illustration d'intention, pas une capture du monde en production. Les
-actualités reprennent les publications 372, 370 et 369 du site. Le statut
-serveur, le pack installé et l'état du compte sont des états d'exemple.
+![Direction blanche — état de préparation avant révision en trois blocs](blanc-2026-11-08/preparation.png)
 
-## Principes à conserver
+Les fichiers sont copiés sans retouche ni redimensionnement. Dimensions,
+tailles et SHA-256 sont consignés dans
+[le registre de provenance](blanc-2026-11-08/provenance.json). Génération Imagegen
+le 8 novembre 2026, avec les composants GitHub/Primer pour leur sobriété et
+une planche SGA pour les glyphes. Le nom Sanctuary est rendu en texte simple
+pour cette exploration. Aucun code personnel réel ni statut de compte réel
+n'est représenté.
 
-- Ciel Minecraft derrière l'interface ; panneaux sombres transparents,
-  traits fins, géométrie rectangulaire et texte blanc lisible.
-- Mot-symbole Sanctuary existant, typographie monospace et boutons gris en
-  relief inspirés du site.
-- Navigation à gauche ; paysage en haut ; actualités en liste en dessous ;
-  zone Jouer à droite avec version du pack et état serveur.
-- Compte en haut à droite, réglages en bas à gauche et lien vers le site.
+## Archive et application existante
 
-La validation porte sur la hiérarchie et la direction visuelle. Les versions,
-actualités et statuts devront venir des données réelles. Le mot « Aperçu » du
-pied de page sera remplacé par la vraie version du launcher lorsqu'elle existera.
-Les traductions, focus clavier et états d'erreur doivent rester lisibles.
-
-## Références de création
-
-La génération a utilisé la capture de l'[accueil Sanctuary](https://sanctuary-minecraft.net/)
-observé le 8 novembre, le [mot-symbole existant](https://github.com/sanctuary-minecraft/sanctuary-web/blob/main/public/images/minecraft.png)
-et une [image de prairie du projet](https://github.com/sanctuary-minecraft/sanctuary-web/blob/main/public/images/carousel/sanctuary-meadow.png).
-Les [styles du site](https://github.com/sanctuary-minecraft/sanctuary-web/blob/main/public/css/sanctuary.css)
-précisent les surfaces, traits et polices à reprendre.
-
-L'intention de génération était un accueil unique en français, fidèle au site,
-avec les trois dernières actualités, une grande zone Jouer et un compte non
-connecté. Cette image n'est pas un prototype interactif. Toute révision future
-recevra un nouveau nom et sa propre validation, sans écraser cet original.
+La [première maquette à paysage](archive-accueil-2026-11-08.md) et son PNG
+original restent conservés avec leur empreinte. Cette direction historique
+ne définit plus la cible visuelle. L'[accueil Qt déjà compilé](../implementation/accueil-qt-fr.png)
+l'utilise encore ; cette révision documentaire ne modifie pas l'application.
+Les ressources d'origine et leur provenance restent dans [assets.md](assets.md).

@@ -1,7 +1,13 @@
 # Origine des images du premier lot
 
+Ces ressources décrivent le premier lot à paysage, conservé pour l'historique.
+La [direction blanche désormais retenue](README.md) possède son
+[registre de provenance](blanc-2026-11-08/provenance.json) distinct ; aucune
+ressource du binaire n'est remplacée par la révision documentaire 0.3.
+
 La maquette validée `accueil-sanctuary-reference-2026-11-08.png` reste
-inchangée, avec l'empreinte conservée dans le [registre visuel](README.md).
+inchangée, avec l'empreinte conservée dans le
+[registre historique](archive-accueil-2026-11-08.md).
 Les images consommées par l'application sont versionnées dans
 `launcher/resources/sanctuary/`, et non dans un cache personnel.
 

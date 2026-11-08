@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-08",
+  "method": "Built-in Imagegen; original generated pixels, copied without resizing or retouching.",
+  "approval_scope": "White visual direction retained; five-row mockups precede the three-block journey and optional SGA-code decision. docs/cahier-des-charges.md 0.3 governs behavior.",
+  "references": [
+    "https://github.com/primer/react",
+    "https://gaming.stackexchange.com/questions/129696/whats-the-minecraft-enchantment-alphabet"
+  ],
+  "files": [
+    {
+      "file": "preparation.png",
+      "width": 1487,
+      "height": 1058,
+      "bytes": 1147141,
+      "sha256": "184436df9a5787657f2499bf9eb2239df822552e1ad2375da34742ef0221d7f4"
+    },
+    {
+      "file": "candidature-en-attente.png",
+      "width": 1487,
+      "height": 1058,
+      "bytes": 1199247,
+      "sha256": "b98b2adaee87fd2fe951b0b0f9a12b89c9d7043aec4e74d8fd4597f577a67a31"
+    },
+    {
+      "file": "pret-a-jouer.png",
+      "width": 1487,
+      "height": 1058,
+      "bytes": 1179171,
+      "sha256": "8c6b79a0737e1c2ddcd580d95218c3b9ea30248177845f8c5c44b1048886c05e"
+    }
+  ]
+}

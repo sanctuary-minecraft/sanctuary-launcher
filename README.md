@@ -4,10 +4,24 @@ Fork natif de **Prism Launcher 11.1.1**, avec un accueil Qt dédié à Sanctuary
 Le premier lot **0.1.0 de développement** compile localement sur macOS Apple
 Silicon. Il ne constitue pas encore une distribution pour les joueurs.
 
+## Direction retenue
+
+Le [cahier des charges 0.3](docs/cahier-des-charges.md) retient les trois blocs
+**Mes comptes, Mon accès et Mon jeu**, la **DA blanche** et le code SGA
+facultatif dans le parcours normal. L'installation pourra être préparée
+pendant l'attente ; l'admission du serveur reste nécessaire pour le rejoindre.
+Les joueurs historiques de la bêta auront un marqueur distinct. Les vingt
+places simultanées actuelles ne plafonnent pas le nombre de membres.
+
+Les [maquettes blanches](docs/design/README.md) servent de références de DA ;
+leur ancien découpage en cinq validations est remplacé par ces trois blocs.
+Cette cible n'est pas encore portée dans l'application compilée ci-dessous.
+
 ## Premier lot disponible
 
-- Accueil FR/EN conforme à la [référence approuvée](docs/design/README.md) :
-  paysage, navigation, actualités et zone Installer/Jouer.
+- Accueil FR/EN du premier lot, fondé sur la
+  [référence historique](docs/design/archive-accueil-2026-11-08.md) : paysage,
+  navigation, actualités et zone Installer/Jouer.
 - Trois actualités embarquées du site, avec leurs liens de lecture. Leur
   récupération automatique reste à ajouter.
 - Bouton Installer ouvrant l'import Prism avec l'archive officielle Sanctuary

@@ -8,6 +8,14 @@ La fusion conserve les deux historiques Git. Le sous-module
 `libraries/libnbtplusplus` reste épinglé au commit amont
 `3538933614059f0f44388a2b16f3db25ce42285b`.
 
+La cible retenue depuis la révision 0.3 du [cahier des charges](cahier-des-charges.md)
+est la DA blanche et les trois blocs **Mes comptes, Mon accès, Mon jeu**, avec
+code SGA facultatif, installation possible pendant l'attente et activation
+normale sans saisie du code. Le tableau ci-dessous décrit le premier lot
+existant à paysage, pas l'implémentation de cette nouvelle cible. Le raccordement
+des admissions et l'activation automatique exigent encore des contrats côté
+site et mod ; les critères de recette correspondants restent à exécuter.
+
 | Partie | État vérifiable |
 | --- | --- |
 | LAUNCH-01, base et identité | Source Prism importée ; binaire, App ID, icônes macOS/Windows et données propres ; compilation macOS locale |
