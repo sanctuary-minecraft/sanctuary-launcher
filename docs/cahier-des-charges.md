@@ -8,7 +8,7 @@ La [maquette d'accueil](design/README.md) est validée par Koka. Le développeme
 est désormais demandé. Un premier lot natif fondé sur Prism compile localement
 avec un accueil Qt FR/EN ; son [état vérifié](developpement.md) distingue ce qui
 fonctionne des objectifs restants. Ce cahier décrit la cible complète, sans
-valider une application Microsoft ni une distribution pour les joueurs.
+valider une connexion Minecraft ni une distribution pour les joueurs.
 
 ## 1. Objectif et périmètre
 
@@ -46,7 +46,7 @@ ne doivent pas devenir des constantes dispersées dans le launcher.
 | Shaders Sanctuary | Présents dans le mod ; le profil de première installation reste à adapter |
 | Actualités FR/EN | Existantes dans le site ; aucun flux dédié au launcher exposé |
 | Fork Sanctuary | Base Prism et accueil Qt compilés localement ; recette complète à poursuivre |
-| Application Microsoft Sanctuary | À créer lors de son étape ; connexion désactivée dans le premier lot |
+| Application Microsoft Sanctuary | Créée le 8 novembre, flux clients publics activés ; accès Minecraft et intégration au fork en attente |
 | Mise à jour de l'application launcher | Chaîne à préparer, distincte de celle du pack |
 
 La base retenue est **Prism 11.1.1**, dernière release stable vérifiée sur
@@ -126,8 +126,9 @@ Les parcours actuels sont documentés dans
 
 **AUTH-01.** Utiliser une application **Sanctuary Launcher** et son propre
 Client ID autorisé pour Minecraft. L'[enregistrement Entra](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
-et la [demande AppID Minecraft](https://aka.ms/mce-reviewappid) restent à faire.
-Koka a choisi son compte Microsoft existant pour reprendre l'administration ;
+est réalisé : voir les [identifiants et paramètres enregistrés](microsoft.md).
+La [demande AppID Minecraft](https://aka.ms/mce-reviewappid) reste à envoyer.
+Le compte d'administration est rattaché à son nouvel annuaire Azure ;
 la création d'un compte dédié n'est pas un préalable imposé.
 
 **AUTH-02.** Reprendre le flux adapté de la base Prism retenue. La saisie des

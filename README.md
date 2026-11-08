@@ -16,8 +16,10 @@ Silicon. Il ne constitue pas encore une distribution pour les joueurs.
   l'action Sanctuary ou `Alt+Home` dans les outils avancés.
 - Identité et dossier de données Sanctuary distincts de Prism ; aucune
   reprise automatique des comptes et instances d'un autre launcher.
-- Connexion Microsoft désactivée tant que l'application Sanctuary n'a pas
-  son propre Client ID. Le bouton Jouer reste alors désactivé après import.
+- [Application Microsoft Sanctuary créée](docs/microsoft.md), avec son propre
+  Client ID et les flux clients publics activés. Son accès Minecraft reste
+  à demander et son raccordement au binaire reste à réaliser ; la connexion
+  et le bouton Jouer restent désactivés dans ce premier lot.
 
 ![Rendu Qt de l'accueil français, 1280 × 800](docs/implementation/accueil-qt-fr.png)
 

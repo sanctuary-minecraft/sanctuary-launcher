@@ -14,7 +14,7 @@ La fusion conserve les deux historiques Git. Le sous-module
 | LAUNCH-02, accueil | Widget natif Qt FR/EN, liens, commandes Réglages/Outils avancés ; rendus contrôlés à 1280 × 800 |
 | Installation | Import Prism existant avec URL officielle préremplie ; parcours réel non encore testé |
 | Actualités | Instantané embarqué des publications beta.372, beta.370 et beta.369 ; liens vers le site |
-| Comptes et jeu | Client ID absent, connexion et Jouer désactivés ; aucun test Microsoft ni Minecraft |
+| Comptes et jeu | Application Entra créée ; Client ID non raccordé au binaire, connexion et Jouer désactivés ; aucun test de connexion Minecraft |
 | Distribution | Bundle de développement lié à Homebrew ; aucun paquet autonome ni déploiement |
 
 Le profil mémorisé est désigné par `SanctuaryInstanceId`, enregistré pendant
@@ -106,6 +106,7 @@ Poursuivre LAUNCH-03 sur un dossier de développement isolé : verrouiller le
 pack officiel, vérifier métadonnées/empreintes, gérer interruption et reprise,
 et tester deux installations/synchronisations sans duplication. LAUNCH-04
 définit ensuite le flux public d'actualités dans le site. L'application Entra
-et l'accès Minecraft pourront être traités séparément avant LAUNCH-06/07.
+est [créée et documentée](microsoft.md) ; l'accès Minecraft puis le raccordement
+du Client ID restent à traiter avant les essais LAUNCH-06/07.
 Les objectifs et critères complets restent dans le
 [cahier des charges](cahier-des-charges.md).
