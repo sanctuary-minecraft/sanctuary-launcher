@@ -14,5 +14,8 @@
     }
   ],
   "source_history_policy": "Original commit IDs and release tags retained in sanctuary and sanctuary-web; component projections retain filtered file histories.",
-  "runtime_status": "Source import only; no deployment or new standalone service."
+  "runtime_status": "Source import only; no deployment or new standalone service.",
+  "migration_verified": true,
+  "gitea_status": "archived-read-only",
+  "receipt": "https://github.com/sanctuary-minecraft/sanctuary-docs/blob/main/docs/github-migration-20261108.json"
 }
