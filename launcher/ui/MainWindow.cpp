@@ -127,6 +127,11 @@
 
 #include "KonamiCode.h"
 #include "SanctuaryHome.h"
+#include "SanctuaryWorkspace.h"
+#include "SanctuaryFeed.h"
+#include "SanctuaryPack.h"
+#include "InstancePageProvider.h"
+#include <QJsonDocument>
 #include <QStackedWidget>
 #include <QDesktopServices>
 
@@ -436,82 +441,137 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     retranslateUi();
 
-    // Preserve Prism's existing tools behind a dedicated Sanctuary entry point.
-    // Its data directory and accounts are separate from the installed Prism app.
-    auto* advanced = takeCentralWidget();
+    // Keep Prism's implementation, but expose one Sanctuary instance in one window.
+    auto* legacy = takeCentralWidget();
     m_sanctuaryStack = new QStackedWidget(this);
     m_sanctuaryHome = new SanctuaryHome(m_sanctuaryStack);
-    m_sanctuaryStack->addWidget(m_sanctuaryHome);
-    m_sanctuaryStack->addWidget(advanced);
+    m_sanctuaryHome->setLocalMode(APPLICATION->settings()->get("SanctuaryLocalMode").toBool(),
+        QJsonDocument::fromJson(APPLICATION->settings()->get("SanctuaryLocalState").toString().toUtf8()).object());
+    m_sanctuaryPack = new SanctuaryPack(this);
+    connect(m_sanctuaryHome, &SanctuaryHome::localStateChanged, this, [](const QJsonObject& state) {
+        APPLICATION->settings()->set("SanctuaryLocalState", QString::fromUtf8(QJsonDocument(state).toJson(QJsonDocument::Compact)));
+    });
+    connect(m_sanctuaryHome, &SanctuaryHome::localPlayRequested, this, [this] {
+        const bool fr = APPLICATION->settings()->get("Language").toString().startsWith("fr");
+        m_sanctuaryHome->showFeedback(fr ? "Parcours local prêt. Le jeu et la connexion au serveur attendent l'approbation Mojang."
+                                       : "Local flow ready. Game launch and server connection await Mojang approval.");
+    });
+    m_sanctuaryHome->setEmbedded(true);
+    m_sanctuaryWorkspace = new SanctuaryWorkspace(m_sanctuaryStack);
+    m_sanctuaryNews = new SanctuaryNewsPage;
+    m_sanctuaryWorkspace->setPages({m_sanctuaryHome, m_sanctuaryNews});
+    connect(m_sanctuaryWorkspace, &SanctuaryWorkspace::homeRequested, this, &MainWindow::showSanctuaryHome);
+    connect(m_sanctuaryNews, &SanctuaryNewsPage::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
+    m_sanctuaryStack->addWidget(m_sanctuaryWorkspace);
+    m_sanctuaryStack->addWidget(legacy); // Never selected by Sanctuary navigation; no existing instance data is removed.
     setCentralWidget(m_sanctuaryStack);
-    setMinimumSize(1080, 720);
-    resize(1280, 860);
+    setMinimumSize(1000, 680);
+    resize(1120, 760);
+    setWindowTitle("Sanctuary Launcher — Sanctuary Beta");
     connect(m_sanctuaryHome, &SanctuaryHome::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
-    connect(m_sanctuaryHome, &SanctuaryHome::settingsRequested, this, &MainWindow::on_actionSettings_triggered);
-    connect(m_sanctuaryHome, &SanctuaryHome::accountsRequested, this, [this] {
-        APPLICATION->ShowGlobalSettings(this, "accounts");
+    connect(m_sanctuaryHome, &SanctuaryHome::settingsRequested, this, [this] { showSanctuarySettings(); });
+    connect(m_sanctuaryHome, &SanctuaryHome::accountsRequested, this, [this] { showSanctuarySettings("accounts"); });
+    connect(m_sanctuaryHome, &SanctuaryHome::advancedRequested, this, [this] { showSanctuaryTools("mods"); });
+    connect(m_sanctuaryHome, &SanctuaryHome::instanceToolRequested, this, &MainWindow::showSanctuaryTools);
+    connect(m_sanctuaryHome, &SanctuaryHome::installRequested, this, [this] {
+        if (m_sanctuaryPack->busy()) m_sanctuaryPack->cancel();
+        else m_sanctuaryPack->installOrUpdate();
     });
-    connect(m_sanctuaryHome, &SanctuaryHome::advancedRequested, this, [this] {
-        m_sanctuaryStack->setCurrentIndex(1);
-        ui->mainToolBar->show();
-        ui->instanceToolBar->show();
-        ui->statusBar->show();
-    });
+    connect(m_sanctuaryPack, &SanctuaryPack::changed, this, &MainWindow::refreshSanctuaryHome);
+    connect(m_sanctuaryPack, &SanctuaryPack::instanceReady, this, &MainWindow::refreshSanctuaryHome);
+    connect(APPLICATION->instances(), &InstanceList::dataIsInvalid, this, &MainWindow::refreshSanctuaryHome);
     auto* homeAction = new QAction(tr("Sanctuary"), this);
     homeAction->setShortcut(QKeySequence(Qt::ALT | Qt::Key_Home));
     connect(homeAction, &QAction::triggered, this, &MainWindow::showSanctuaryHome);
-    ui->mainToolBar->insertAction(ui->actionAddInstance, homeAction);
-    connect(m_sanctuaryHome, &SanctuaryHome::installRequested, this, [this] {
-        const auto id = APPLICATION->settings()->get("SanctuaryInstanceId").toString();
-        if (APPLICATION->instances()->getInstanceById(id)) {
-            refreshSanctuaryHome();
-            return;
-        }
-        m_installingSanctuary = true;
-        addInstance("https://sanctuary-minecraft.net/downloads/sanctuary-prism.zip");
-        m_installingSanctuary = false;
-        QTimer::singleShot(0, this, &MainWindow::refreshSanctuaryHome);
-    });
-    connect(APPLICATION->instances(), &InstanceList::instanceSelectRequest, this, [this](const QString& id) {
-        if (m_installingSanctuary) {
-            APPLICATION->settings()->set("SanctuaryInstanceId", id);
-        } else {
-            QTimer::singleShot(0, this, &MainWindow::refreshSanctuaryHome);
-        }
-    });
-    connect(APPLICATION->instances(), &InstanceList::dataIsInvalid, this, &MainWindow::refreshSanctuaryHome);
-    connect(m_sanctuaryHome, &SanctuaryHome::playRequested, this, [this] {
-        // Keep the upstream account/license validation. Never turn a pending
-        // Sanctuary Microsoft application into an automatic offline launch.
-        if (!(APPLICATION->capabilities() & Application::SupportsMSA))
-            return;
-        const auto id = APPLICATION->settings()->get("SanctuaryInstanceId").toString();
-        if (!APPLICATION->instances()->getInstanceById(id))
-            return;
-        setSelectedInstanceById(id);
-        on_actionLaunchInstance_triggered();
-    });
+    addAction(homeAction);
+    // The underlying multi-instance model is preserved; its generic controls are not the Sanctuary UI.
+    for (const auto& name : {"actionAddInstance", "actionCopyInstance", "actionDeleteInstance", "actionRenameInstance",
+                            "actionChangeInstGroup", "actionLaunchInstance", "actionLaunchInstanceOffline"}) {
+        if (auto* action = findChild<QAction*>(name)) { action->setVisible(false); action->setEnabled(false); }
+    }
     QTimer::singleShot(0, this, &MainWindow::showSanctuaryHome);
 }
 
 void MainWindow::refreshSanctuaryHome()
 {
-    if (!m_sanctuaryHome || m_installingSanctuary)
-        return;
-    const auto id = APPLICATION->settings()->get("SanctuaryInstanceId").toString();
-    m_sanctuaryHome->setState(APPLICATION->instances()->getInstanceById(id) != nullptr,
+    if (!m_sanctuaryHome || !m_sanctuaryPack) return;
+    m_sanctuaryHome->setState(m_sanctuaryPack->instance() != nullptr,
                             APPLICATION->capabilities() & Application::SupportsMSA,
                             APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+    m_sanctuaryHome->setPackState(m_sanctuaryPack->verified(), m_sanctuaryPack->busy(),
+                                m_sanctuaryPack->version(), m_sanctuaryPack->message(), m_sanctuaryPack->progress());
+    ensureSanctuaryPages();
+    if (m_sanctuaryWorkspace) {
+        m_sanctuaryWorkspace->setGameBusy(m_sanctuaryPack->busy());
+        m_sanctuaryWorkspace->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+    }
+    if (m_sanctuaryNews) m_sanctuaryNews->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
 }
 
 void MainWindow::showSanctuaryHome()
 {
+    if (m_sanctuaryWorkspace && m_sanctuaryStack->currentWidget() == m_sanctuaryWorkspace && !m_sanctuaryWorkspace->saveAll()) return;
+    if (m_sanctuarySettings && m_sanctuaryStack->currentWidget() == m_sanctuarySettings && !m_sanctuarySettings->saveAll()) return;
     refreshSanctuaryHome();
-    m_sanctuaryStack->setCurrentIndex(0);
+    m_sanctuaryWorkspace->selectPage("home");
+    m_sanctuaryStack->setCurrentWidget(m_sanctuaryWorkspace);
     ui->mainToolBar->hide();
     ui->instanceToolBar->hide();
     ui->newsToolBar->hide();
     ui->statusBar->hide();
+}
+
+void MainWindow::showSanctuaryTools(const QString& page)
+{
+    const bool fr = APPLICATION->settings()->get("Language").toString().startsWith("fr");
+    if (page == "home" || page == "news") {
+        m_sanctuaryWorkspace->selectPage(page);
+        m_sanctuaryStack->setCurrentWidget(m_sanctuaryWorkspace);
+        return;
+    }
+    if (m_sanctuaryPack->busy()) {
+        showSanctuaryHome();
+        m_sanctuaryHome->showFeedback(fr ? "La synchronisation du pack est en cours. Attendez sa fin pour modifier les fichiers."
+                                       : "Pack synchronization is in progress. Wait before editing its files.");
+        return;
+    }
+    auto* instance = m_sanctuaryPack->instance();
+    if (!instance) {
+        showSanctuaryHome();
+        m_sanctuaryHome->showFeedback(fr ? "Installez Sanctuary Beta pour ouvrir ses outils. Les réglages du launcher restent accessibles."
+                                       : "Install Sanctuary Beta to open its tools. Launcher settings remain available.");
+        return;
+    }
+    ensureSanctuaryPages();
+    m_sanctuaryWorkspace->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+    m_sanctuaryWorkspace->refreshContainer();
+    if (!page.isEmpty()) m_sanctuaryWorkspace->selectPage(page);
+    m_sanctuaryStack->setCurrentWidget(m_sanctuaryWorkspace);
+}
+
+void MainWindow::ensureSanctuaryPages()
+{
+    if (!m_sanctuaryWorkspace || m_sanctuaryInstancePagesLoaded || !m_sanctuaryPack->instance()) return;
+    InstancePageProvider provider(m_sanctuaryPack->instance());
+    m_sanctuaryWorkspace->appendPages(provider.getPages());
+    m_sanctuaryInstancePagesLoaded = true;
+}
+
+void MainWindow::showSanctuarySettings(const QString& page)
+{
+    if (!m_sanctuaryStack) return;
+    if (!m_sanctuarySettings) {
+        m_sanctuarySettings = new SanctuaryWorkspace(m_sanctuaryStack);
+        m_sanctuarySettings->setPages(APPLICATION->createSanctuarySettingsPages(), true);
+        m_sanctuaryStack->addWidget(m_sanctuarySettings);
+        connect(m_sanctuarySettings, &SanctuaryWorkspace::homeRequested, this, &MainWindow::showSanctuaryHome);
+        connect(m_sanctuarySettings, &SanctuaryWorkspace::settingsApplied, APPLICATION, &Application::globalSettingsApplied);
+        connect(m_sanctuarySettings, &SanctuaryWorkspace::settingsApplied, this, &MainWindow::refreshSanctuaryHome);
+    }
+    m_sanctuarySettings->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+    emit APPLICATION->globalSettingsAboutToOpen();
+    if (!page.isEmpty()) m_sanctuarySettings->selectPage(page);
+    m_sanctuaryStack->setCurrentWidget(m_sanctuarySettings);
 }
 
 // macOS always has a native menu bar, so these fixes are not applicable
@@ -1477,7 +1537,7 @@ void MainWindow::on_actionEditInstance_triggered()
         return;
 
     if (m_selectedInstance->canEdit()) {
-        APPLICATION->showInstanceWindow(m_selectedInstance);
+        showSanctuaryTools("mods");
     } else {
         CustomMessageBox::selectable(this, tr("Instance not editable"),
                                      tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."),
@@ -1661,6 +1721,15 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    if (m_sanctuaryPack && m_sanctuaryPack->busy()) {
+        m_sanctuaryPack->cancel();
+        event->ignore();
+        return;
+    }
+    if ((m_sanctuaryWorkspace && !m_sanctuaryWorkspace->saveAll()) || (m_sanctuarySettings && !m_sanctuarySettings->saveAll())) {
+        event->ignore();
+        return;
+    }
     // Save the window state and geometry.
     APPLICATION->settings()->set("MainWindowState", QString::fromUtf8(saveState().toBase64()));
     APPLICATION->settings()->set("MainWindowGeometry", QString::fromUtf8(saveGeometry().toBase64()));

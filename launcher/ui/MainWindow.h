@@ -67,6 +67,9 @@ class LabeledToolButton;
 namespace Ui {
 class MainWindow;
 }
+class SanctuaryPack;
+class SanctuaryWorkspace;
+class SanctuaryNewsPage;
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -83,13 +86,20 @@ class MainWindow : public QMainWindow {
     void updatesAllowedChanged(bool allowed);
 
     void processURLs(QList<QUrl> urls);
+    void showSanctuarySettings(const QString& page = {});
 
    private:
     void showSanctuaryHome();
     void refreshSanctuaryHome();
     SanctuaryHome* m_sanctuaryHome = nullptr;
     QStackedWidget* m_sanctuaryStack = nullptr;
-    bool m_installingSanctuary = false;
+    SanctuaryPack* m_sanctuaryPack = nullptr;
+    SanctuaryWorkspace* m_sanctuaryWorkspace = nullptr;
+    SanctuaryWorkspace* m_sanctuarySettings = nullptr;
+    SanctuaryNewsPage* m_sanctuaryNews = nullptr;
+    bool m_sanctuaryInstancePagesLoaded = false;
+    void ensureSanctuaryPages();
+    void showSanctuaryTools(const QString& page);
 
    signals:
     void isClosing();

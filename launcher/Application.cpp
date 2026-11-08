@@ -794,6 +794,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("InstRenamingMode", "AskEverytime");
         m_settings->registerSetting("SelectedInstance", QString());
         m_settings->registerSetting("SanctuaryInstanceId", QString());
+        m_settings->registerSetting("SanctuaryLocalMode", false);
+        m_settings->registerSetting("SanctuaryLocalState", QString());
+        m_settings->registerSetting("SanctuaryPackVersion", QString());
+        m_settings->registerSetting("SanctuaryPackHash", QString());
 
         // Window state and geometry
         m_settings->registerSetting("MainWindowState", "");
@@ -1187,6 +1191,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
 bool Application::createSetupWizard()
 {
+    // Local UI development uses its own data directory and never needs an account or game runtime.
+    if (settings()->get("SanctuaryLocalMode").toBool())
+        return false;
     bool javaRequired = [this]() {
         if (BuildConfig.JAVA_DOWNLOADER_ENABLED && settings()->get("AutomaticJavaDownload").toBool()) {
             return false;
@@ -1629,6 +1636,10 @@ void Application::controllerFinished()
 
 void Application::ShowGlobalSettings(class QWidget* parent, QString open_page)
 {
+    if (m_mainWindow) {
+        m_mainWindow->showSanctuarySettings(open_page);
+        return;
+    }
     if (!m_globalSettingsProvider) {
         return;
     }
@@ -1639,6 +1650,11 @@ void Application::ShowGlobalSettings(class QWidget* parent, QString open_page)
         connect(&dlg, &PageDialog::applied, this, &Application::globalSettingsApplied);
         dlg.exec();
     }
+}
+
+QList<BasePage*> Application::createSanctuarySettingsPages()
+{
+    return m_globalSettingsProvider ? m_globalSettingsProvider->getPages() : QList<BasePage*>{};
 }
 
 MainWindow* Application::showMainWindow(bool minimized)

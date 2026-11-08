@@ -1,21 +1,22 @@
 # Cahier des charges de Sanctuary Launcher
 
-Version documentaire 0.4, actualisée le **8 novembre 2026**. Sanctuary Launcher
-doit installer le pack Sanctuary, présenter ses actualités et rejoindre son
-serveur depuis une application dédiée fondée sur Prism Launcher.
+Version documentaire **0.5**, actualisée le **8 novembre 2026**. Sanctuary
+Launcher est un fork natif de Prism avec une fenêtre principale blanche,
+une seule instance officielle Sanctuary Beta et ses outils intégrés.
 
-Koka retient la **DA blanche** et revient à **un seul bloc de cinq étapes
-numérotées**, avec le **titre de l'étape en cours** en haut de page. Cette
-préférence remplace le découpage Mes comptes / Mon accès / Mon jeu de la
-révision 0.3. Le code de personnage en SGA reste facultatif et toutes les
-options de Prism sont conservées. Les [références visuelles](design/README.md)
-présentent cette direction, avec le mot-symbole du site en haut à gauche,
-et conservent les explorations antérieures.
+La nouvelle décision de Koka conserve les cinq étapes dans **Accueil**,
+premier onglet avant les journaux, et ajoute **Actualités** séparément.
+Avant préparation, Accueil présente le bloc des étapes avec le titre actif.
+Quand comptes, admission et pack sont prêts, les étapes sont masquées et
+l'accueil affiche Jouer, Intendance, Gazette et Tableau d'affichage.
+Le code SGA reste facultatif. Cette organisation remplace la page
+d'onboarding dédiée et la navigation multi-instance exposée précédemment.
 
-Le premier lot natif fondé sur Prism compile localement avec l'ancien accueil
-Qt FR/EN ; son [état vérifié](developpement.md) reste distinct de la cible.
-Cette révision est documentaire : la nouvelle interface, les connexions et
-l'activation automatique ne sont pas implémentées par sa mise à jour.
+Le lot natif local porte cette interface et l'installation réelle du pack.
+Les comptes/admissions sont simulés pour les essais sans Microsoft ; les
+liaisons authentifiées, le jeu et l'activation automatique restent à livrer.
+Voir la [recette réelle](implementation/launcher-local-20261108.md).
+Les [maquettes](design/README.md) restent des références historiques.
 
 ## 1. Objectif et périmètre
 
@@ -28,7 +29,7 @@ ses préférences ; seules les actions nécessaires lui sont redemandées.
 
 Le parcours principal ne demande pas de connaître Prism, Java, Fabric ou
 packwiz. **L'ensemble des outils de Prism reste accessible**, avec les pages
-de gestion du jeu, des instances et les réglages globaux. L'accueil Sanctuary
+de gestion du jeu et les réglages globaux dans la même fenêtre. L'accueil Sanctuary
 ne réduit pas ces possibilités. Le site conserve le dossier Sanctuary associé à
 Discord ; aucun nouveau compte à mot de passe ni service Discord autonome
 n'est créé. Le nouveau parcours exige des adaptations du site et du mod,
@@ -46,7 +47,8 @@ d'évolution, **hors périmètre de la V1 et sans déploiement planifié à ce s
 | Fork de Prism avec identité Sanctuary | Conserver les mécanismes de lancement utiles de Prism et cibler les adaptations |
 | DA blanche, sobre et centrée, inspirée de GitHub | Fond blanc sans décor, typographie lisible, traits gris fins et couleurs d'état discrètes |
 | Un bloc, cinq étapes numérotées | Discord, Microsoft, accès, code facultatif et installation ; titre lié à l'étape active |
-| Toutes les options de Prism conservées | Accès Tous les outils depuis l'accueil ; gestion complète des instances et réglages globaux accessibles |
+| Outils Prism intégrés | Pages natives de l'instance et réglages globaux dans la fenêtre Sanctuary ; une seule installation officielle |
+| Accueil et Actualités | Étapes avant préparation, puis Jouer et communauté ; publications du site dans Actualités |
 | Code SGA facultatif | Affichage/Copier à la demande et parcours manuel de secours ; aucun blocage normal sur la copie du code |
 | Installation possible pendant l'attente | Préparer le jeu ne vaut pas admission au serveur |
 | GitHub comme référence | Sources dans l'organisation `sanctuary-minecraft`, Gitea archivé |
@@ -67,8 +69,8 @@ ne doivent pas devenir des constantes dispersées dans le launcher.
 | Favori du serveur | Ajout initial géré par le mod ; ce n'est pas une connexion directe |
 | Sound Physics Remastered | Option client sélectionnée par défaut ; les métadonnées actuelles décrivent son moteur comme désactivé par défaut |
 | Shaders Sanctuary | Présents dans le mod ; le profil de première installation reste à adapter |
-| Actualités FR/EN | Existantes dans le site ; aucun flux dédié au launcher exposé |
-| Fork Sanctuary | Base Prism et accueil Qt compilés localement ; recette complète à poursuivre |
+| Actualités FR/EN | Lecture native de la page publique `/actualites` ; contrat JSON/cache durable encore à préparer |
+| Fork Sanctuary | Fenêtre blanche, navigation native intégrée et pack beta.373 installés/testés localement ; jeu non testé |
 | Application Microsoft Sanctuary | Créée le 8 novembre, flux clients publics activés ; accès Minecraft et intégration au fork en attente |
 | Admission actuelle du site et du mod | Candidature acceptée/parrainée, synchronisation whitelist, puis code obligatoire à la première création du personnage |
 | Parcours en un bloc de cinq étapes, dont le code facultatif | Cible retenue ; liaisons authentifiées et activation sans saisie restent à développer |
@@ -115,7 +117,7 @@ consignes et commandes restent lisibles en français ou en anglais.
 **Discord**, **Microsoft**, **Accès Sanctuary**, **Code de personnage** et
 **Installation**. La ligne active est mise en évidence et le titre principal
 nomme son action ou son état, plutôt que d'afficher « Bienvenue sur Sanctuary ».
-Les étapes déjà accomplies restent visibles et mémorisées. La ligne 4 porte
+Les étapes déjà accomplies restent visibles et mémorisées tant que le bloc est nécessaire. Dès que les prérequis obligatoires sont réunis, masquer le bloc complet. La ligne 4 porte
 **Facultatif**, sans case ou validation requise pour débloquer l'installation
 ou Jouer. Ne pas présenter « 5/5 validées » comme condition de lancement.
 
@@ -218,8 +220,8 @@ supplémentaire. Les contrôles serveur restent obligatoires à l'arrivée, mêm
 si le launcher affichait précédemment un état prêt.
 
 **GAME-03.** Garder les raccourcis **Mods**, **Shaders** et **Réglages** utiles
-au jeu installé, ainsi que **Tous les outils** pour la gestion complète de Prism.
-Ces raccourcis ne limitent pas les fonctions disponibles. Une installation
+au jeu installé via la barre latérale des pages natives de Prism.
+Cette navigation reste disponible dans la même fenêtre. Une installation
 préparée peut être configurée pendant l'attente ;
 son droit d'entrée au serveur demeure distinct. Conserver les préférences aux
 lancements et mises à jour suivants, sans réexécuter l'assistant complet.
@@ -231,10 +233,18 @@ lancements et mises à jour suivants, sans réexécuter l'assistant complet.
 information absente ou périmée donne un état inconnu. Les mentions de version,
 de disponibilité et de compte de la maquette ne sont jamais des textes fixes.
 
-**UI-03.** Après préparation, donner la priorité à Jouer et aux outils du jeu.
-Garder les actualités accessibles sans alourdir le parcours de première arrivée : liste
-de publications avec version, date, titre, résumé et lien de lecture. Wiki,
-Communauté et Site Sanctuary ouvrent le navigateur. La V1 n'embarque pas tout le site.
+**UI-03.** **Accueil** est le premier onglet, au-dessus des journaux du jeu.
+Un onglet **Actualités** distinct présente les dernières versions, dates,
+titres et résumés publiés sur le site. Ne pas recopier une rédaction statique.
+
+Avant préparation, Accueil affiche les cinq lignes et masque Intendance,
+Gazette et Tableau d'affichage. Quand les comptes sont valides, l'admission
+est confirmée et le pack vérifié, masquer les étapes et montrer **Jouer**,
+**Intendance**, **Gazette** et **Tableau d'affichage**. Le code SGA n'est pas
+une condition de cette transition ; il reste consultable à la demande.
+Une session à renouveler ou un accès retiré remet les étapes nécessaires
+sans effacer les préférences. Les rubriques communautaires gardent les
+permissions du site et ne deviennent pas publiques par leur intégration.
 
 **UI-04.** Garder l'essentiel lisible à 1280 × 800 et à la taille de référence,
 y compris avec l'échelle système et les textes anglais. Prévoir navigation
@@ -255,36 +265,34 @@ clavier, focus visible et commandes compréhensibles sans dépendre d'une image.
 | Jeu en cours | État En cours de jeu ; pas de second lancement sur le même dossier |
 | Échec | Cause utile, Réessayer et accès au diagnostic, sans boucle de relancement |
 
-### 3.7 Tous les outils de Prism
+### 3.7 Outils natifs dans la fenêtre Sanctuary
 
-**PRISM-01.** Depuis **Tous les outils** dans l'accueil, ouvrir les pages de gestion
-complètes de l'instance Sanctuary sélectionnée : mods, packs de ressources,
-packs de shaders, captures d'écran, mondes, serveurs, versions/composants,
-réglages, console et autres journaux. Conserver aussi les autres pages prévues
-par Prism, dont notes, gestion de modpack et datapacks lorsqu'applicables.
-Le [contrat des outils Prism](outils-prism.md) précise l'inventaire et les accès.
+**PRISM-01.** La navigation persistante ouvre les pages complètes de
+l'instance officielle : mods, ressources, shaders, captures, mondes, serveurs,
+versions, notes, réglages, console et autres journaux. Conserver les pages
+spécialisées lorsqu'applicables ; voir le [contrat Prism](outils-prism.md).
 
-**PRISM-02.** Réutiliser les pages natives et leurs fonctions, sans les remplacer
-par un gestionnaire Sanctuary limité. Conserver les règles de visibilité liées
-au type d'instance et à sa version réelle ; la présence d'une page ne prouve
-pas la compatibilité de tous les contenus téléchargeables.
+**PRISM-02.** Réutiliser les pages natives dans un conteneur Sanctuary commun,
+sans ouvrir un second éditeur générique Prism. Leurs sous-dialogues utiles,
+sélecteurs de fichiers et ouvertures explicites de dossiers restent permis.
+Les règles de visibilité et de compatibilité amont continuent de s'appliquer.
 
-**PRISM-03.** Garder accessibles les réglages globaux du launcher — notamment
-Java/mémoire, Minecraft, comptes, apparence/langue, réseau et outils externes —
-et la gestion complète des instances, y compris création, copie et import/export
-selon les possibilités de Prism. Prévoir un retour simple à l'accueil Sanctuary.
+**PRISM-03.** Présenter les réglages globaux — Java, mémoire, Minecraft,
+comptes, apparence, langue, réseau et outils externes — dans cette même fenêtre,
+avec retour visible à Accueil et conservation des modifications valides.
 
-**PRISM-04.** La candidature Sanctuary ne verrouille pas les outils locaux,
-les autres instances ni leur usage normal ; elle contrôle l'accès au serveur
-Sanctuary. Les exigences de licence et les droits de chaque serveur restent
-applicables. Un état d'attente ou de refus ne supprime aucun monde ni réglage.
+**PRISM-04.** La candidature régit l'accès au serveur, sans supprimer les
+fichiers ou verrouiller les outils locaux du pack installé. Suspendre les
+écritures de ces outils pendant la synchronisation. Les mondes locaux
+restent distincts du monde du serveur.
 
-**PRISM-05.** Conserver une installation officielle suivie par Sanctuary Update,
-sans empêcher les instances personnelles. Expliquer les écarts causés par la
-modification des versions ou composants requis et proposer une copie pour les
-expérimentations incompatibles. Une synchronisation ne doit pas écraser les
-ajouts personnels, ni annoncer un profil modifié conforme sans vérification.
-Les mondes locaux de Prism restent distincts du monde du serveur Sanctuary.
+**PRISM-05.** Exposer une seule instance officielle Sanctuary Beta, mémorisée
+par son identifiant et mise à jour en place. Masquer les commandes génériques
+de création/copie/suppression d'instances dans le parcours principal. Conserver
+les données préexistantes sans import automatique de Prism personnel.
+Les ajouts et préférences personnels doivent survivre aux mises à jour ;
+un fichier requis modifié doit être signalé ou réparé avant de déclarer
+le pack conforme. Le contrôle des versions/composants modifiés reste à terminer.
 
 ## 4. Installation et protection des données
 
@@ -299,7 +307,7 @@ empêche lancement, réparation et mise à jour concurrents du même dossier.
 
 **INST-03.** Gérer une seule installation Sanctuary par profil du launcher.
 Cette règle concerne l'installation officielle suivie par Sanctuary Update ;
-elle n'interdit pas les autres instances ou copies personnelles de Prism.
+elle ne migre ni ne modifie les installations d'autres launchers.
 Préserver sauvegardes, captures, favoris et réglages personnels. Réparer
 uniquement les fichiers gérés identifiés comme incorrects, sans suppression
 globale du dossier et sans nouveau profil à chaque mise à jour.
@@ -405,11 +413,13 @@ mods et shaders ne modifie ni l'admission ni la configuration du serveur.
 
 ## 7. Actualités et données publiques
 
-**WEB-01.** Lire un petit flux public FR/EN dérivé des actualités déjà publiées
+**WEB-01.** Lire les actualités publiques FR/EN déjà publiées
 par Sanctuary Web. Éviter une seconde rédaction des notes ou une lecture de
 données privées GitHub. Les liens renvoient aux pages HTML existantes.
 
-Le contrat proposé est une route versionnée de type `/launcher/v1/home.json`.
+Le lot local lit actuellement le tableau des versions de `/actualites` en
+lecture seule, sans scripts. Un contrat structuré et un cache durable restent
+à préparer. La route versionnée proposée est `/launcher/v1/home.json`.
 **Cette route n'existe pas encore** ; son nom et ses champs seront validés
 dans le ticket du site avant le raccordement.
 
@@ -428,6 +438,12 @@ destinations HTTPS attendues. Garder le dernier flux valide avec sa date.
 Une panne du site affiche le cache ou son indisponibilité sans bloquer
 inutilement un pack prêt et une session valide. Les erreurs nécessaires au
 téléchargement ou au jeu gardent leur propre traitement.
+
+**WEB-04.** Réutiliser les rubriques du site pour l'accueil quotidien :
+Intendance correspond au flux `bulletin`, Gazette à `article`, Tableau
+à `notice`. Les routes `/communaute/flux?kind=…` demandent une session Discord.
+Le lot local affiche cet état sans publier les contenus privés et sans
+considérer un compte simulé comme authentifié. Le pont de session reste à livrer.
 
 **WEB-03.** Le contrat privé à livrer pour le launcher couvre le dossier du
 joueur, la candidature et le parrainage, la confirmation d'accès serveur,
@@ -470,7 +486,7 @@ Code de personnage/Character code et Installation/Installation. Traduire aussi l
 dynamiques de l'étape active, sans modifier sa numérotation.
 Prévoir En attente/Pending, Accès accordé/Access granted, Serveur complet/Server full,
 Afficher mon code/Show my code et Joueur historique de la bêta/Historical Beta player.
-Prévoir Tous les outils/All tools, Packs de ressources/Resource packs,
+Prévoir Accueil/Home, Actualités/News, Packs de ressources/Resource packs,
 Packs de shaders/Shader packs, Captures d'écran/Screenshots, Mondes/Worlds,
 Serveurs/Servers, Versions/Versions et Journaux/Logs.
 
@@ -506,9 +522,9 @@ du pack Sanctuary sur une plateforme.
 | Premier démarrage graphique | Shaders et Sound Physics réellement actifs sur Vulkan après contrôle de compatibilité |
 | Réglages personnels puis mise à jour | Désactivation volontaire, sauvegardes, captures et favoris conservés par empreintes |
 | Mods facultatifs et shaders personnalisés | Compatibilité contrôlée, ajouts et préférences conservés, fichiers serveur requis toujours vérifiés |
-| Tous les outils Prism | Depuis l'accueil, accès aux pages complètes de l'instance ; raccourcis Mods/Shaders/Réglages vers les mêmes outils, sans gestionnaire réduit |
-| Réglages globaux et instances | Java, mémoire, comptes, réseau, apparence et outils externes accessibles ; création/copie/import/export préservés, retour à l'accueil disponible |
-| Admission en attente et outils locaux | Gestion des fichiers et instances toujours accessible selon leurs prérequis ; aucun droit d'accès Sanctuary accordé par ces outils |
+| Outils Prism | Pages complètes de l'instance dans la fenêtre principale, navigation persistante et retour Accueil |
+| Réglages globaux | Java, mémoire, comptes, réseau, apparence et outils externes dans la même fenêtre ; retour Accueil |
+| Admission en attente et outils locaux | Gestion des fichiers de l'instance accessible selon ses prérequis ; aucun droit d'accès Sanctuary accordé par ces outils |
 | Profil officiel et personnalisation avancée | Version/composants modifiés signalés, copies personnelles distinguées du profil synchronisé, sauvegardes et données locales conservées |
 | Jeu actif | Pas de réparation, mise à jour ou deuxième jeu concurrent sur le même dossier |
 | Site absent ou flux malformé | Repli explicite ; fonctions encore disponibles utilisables |
@@ -526,14 +542,15 @@ une copie de fichiers ou une maquette.
 
 Chaque ticket aura un résultat vérifiable et une branche `codex/<sujet>`.
 Ce découpage définit les résultats visés ; les tickets ne sont pas encore des
-issues GitHub. Le premier lot couvre la base et une partie de l'accueil.
+issues GitHub. Le lot local couvre la fenêtre et une partie des parcours ;
+les liaisons authentifiées et les essais du jeu restent distincts.
 
 | Ticket prévu | Résultat |
 | --- | --- |
 | LAUNCH-01 Base Prism | Confirmer le tag, conserver les historiques, appliquer l'identité Sanctuary et inventorier les API amont |
-| LAUNCH-02 Accueil | Porter la DA blanche, le bloc unique numéroté de 1 à 5 et le titre de l'étape active en Qt, FR/EN, avec retour quotidien centré sur Jouer |
+| LAUNCH-02 Accueil | Fenêtre blanche, Accueil avant les journaux, étapes puis communauté selon préparation ; livré localement avec états simulés |
 | LAUNCH-03 Installation | Installer/réparer depuis le relais dans un dossier isolé, avec reprise et protection des données |
-| LAUNCH-04 Actualités | Définir puis livrer le flux public dans `sanctuary-web`, son cache et l'affichage launcher |
+| LAUNCH-04 Actualités | Lecture native du site livrée ; contrat structuré et cache durable à compléter |
 | LAUNCH-05 Réglages | Initialiser shaders/Sound Physics une fois ; prouver activation Vulkan et conservation des préférences |
 | LAUNCH-06 Comptes | Raccorder Microsoft et Discord au même dossier, obtenir l'accès Minecraft et tester les vrais parcours de connexion/reprise |
 | LAUNCH-07 Rejoindre | Après installation et Microsoft, valider connexion directe et erreurs serveur/admission |
@@ -542,17 +559,15 @@ issues GitHub. Le premier lot couvre la base et une partie de l'accueil.
 | LAUNCH-10 Activation | Livrer le contrat site/launcher/mod sans saisie normale du code, avec secours manuel et reprise des admissions existantes |
 | LAUNCH-11 Personnalisation | Gérer les mods client facultatifs et shaders compatibles sans écraser le pack requis ni les préférences |
 | LAUNCH-12 Historiques bêta | Définir la provenance et afficher le marqueur des anciens joueurs, sans modifier leurs personnages |
-| LAUNCH-13 Outils Prism | Raccorder Tous les outils, préserver toutes les pages d'instance et réglages globaux, vérifier personnalisation et retour à l'accueil |
+| LAUNCH-13 Outils Prism | Conteneur unique livré localement ; poursuivre la recette des opérations et du lancement réel |
 
 LAUNCH-02 à LAUNCH-05 peuvent avancer sans l'accès Microsoft. Les vrais essais
-de compte et de multijoueur de LAUNCH-06/07 dépendent de cet accès et de comptes
-autorisés. Le développement est engagé à la demande de Koka ; l'import manuel
-prérempli du premier lot ne valide pas encore LAUNCH-03. Les actualités restent
-embarquées tant que LAUNCH-04 n'a pas livré son contrat et son flux.
-
-Le premier accueil à paysage ne valide pas la nouvelle cible LAUNCH-02.
-LAUNCH-09/10/12 exigent un travail coordonné avec le site et, pour l'activation,
-le mod ; les maquettes ne prouvent aucun de ces raccordements.
+de compte et multijoueur attendent cet accès. Le lot local importe et synchronise
+réellement beta.373 depuis le site ; il ne prouve pas une session Minecraft,
+une admission ou une activation. Les actualités sont lues sur le site.
+Les rubriques privées, les admissions et le badge historique exigent encore
+leurs liaisons authentifiées et sources de vérité. Le mod conserve actuellement
+son parcours manuel à code ; l'option SGA du launcher ne le supprime pas.
 
 Avant les étapes concernées, valider les plateformes de distribution,
 mesurer le profil graphique/mémoire, choisir la reprise d'une instance Prism,

@@ -1,94 +1,83 @@
 # Sanctuary Launcher
 
-Fork natif de **Prism Launcher 11.1.1**, avec un accueil Qt dédié à Sanctuary.
-Le premier lot **0.1.0 de développement** compile localement sur macOS Apple
-Silicon. Il ne constitue pas encore une distribution pour les joueurs.
+Fork natif de **Prism Launcher 11.1.1**, avec une fenêtre Sanctuary blanche,
+les outils du jeu intégrés et une seule installation officielle Sanctuary Beta.
+La version **0.1.0 de développement** fonctionne localement sur macOS Apple Silicon.
 
-## Direction retenue
+## Interface actuelle
 
-Le [cahier des charges 0.4](docs/cahier-des-charges.md) retient la **DA blanche**,
-**un bloc de cinq étapes numérotées** et le **titre de l'étape en cours** :
-Discord, Microsoft, Accès Sanctuary, Code de personnage et Installation.
-Le code SGA de la ligne 4 reste **facultatif** ; l'installation peut être
-préparée pendant l'attente, et l'admission du serveur reste nécessaire pour
-le rejoindre. Les joueurs historiques de la bêta ont un marqueur distinct.
-Les vingt places simultanées actuelles ne plafonnent pas le nombre de membres.
+**Accueil** est le premier onglet, avant les journaux du jeu. **Actualités**
+consulte les dernières publications FR/EN du site dans un onglet séparé.
+Dans Accueil, le bloc des cinq étapes apparaît tant que le parcours n'est pas
+prêt : Discord, Microsoft, accès Sanctuary, code de personnage facultatif,
+installation. Le titre suit l'étape active, y compris l'attente d'admission.
+Lorsque les prérequis sont réunis, ce bloc disparaît au profit de **Jouer**,
+**Intendance**, **Gazette** et **Tableau d'affichage**.
 
-La [maquette actuelle](docs/design/README.md) illustre l'étape Installation,
-avec le mot-symbole Sanctuary du site en haut à gauche et **Tous les outils**.
-La recherche en trois blocs est archivée à la suite du changement de préférence
-de Koka. Cette cible n'est pas encore portée dans l'application ci-dessous.
+Les comptes et l'accès sont **simulés dans le profil local de développement**.
+Le pack téléchargé est réel. Le bouton Jouer local teste le parcours sans
+lancer Minecraft ni rejoindre un serveur. Le raccordement Microsoft/Mojang,
+Discord et des admissions reste à réaliser. Les publications communautaires
+privées demandent une session Discord du site ; aucune fausse publication
+n'est présentée pour la remplacer.
 
-**Toutes les options de Prism sont conservées** dans la cible : mods, packs
-de ressources et de shaders, captures, mondes, serveurs, versions, logs,
-réglages, gestion des instances et réglages globaux ; voir le
-[contrat des outils Prism](docs/outils-prism.md).
+Le code SGA reste facultatif et masqué. Le badge des joueurs historiques de
+la bêta est prévu ; son exemple local ne constitue pas une admission réelle.
+Les vingt places concernent les connexions simultanées, sans plafond de membres.
 
-## Premier lot disponible
+## Pack et outils natifs
 
-- Accueil FR/EN du premier lot, fondé sur la
-  [référence historique](docs/design/archive-accueil-2026-11-08.md) : paysage,
-  navigation, actualités et zone Installer/Jouer.
-- Trois actualités embarquées du site, avec leurs liens de lecture. Leur
-  récupération automatique reste à ajouter.
-- Bouton Installer ouvrant l'import Prism avec l'archive officielle Sanctuary
-  préremplie. Il reste un dialogue d'import, sans nouvel installateur automatique.
-- Réglages et outils avancés Prism conservés ; retour à l'accueil par
-  l'action Sanctuary ou `Alt+Home` dans les outils avancés.
-- Identité et dossier de données Sanctuary distincts de Prism ; aucune
-  reprise automatique des comptes et instances d'un autre launcher.
-- [Application Microsoft Sanctuary créée](docs/microsoft.md), avec son propre
-  Client ID et les flux clients publics activés. Sa demande d'accès Minecraft
-  est envoyée et attend une décision ; son raccordement au binaire reste à
-  réaliser. La connexion et le bouton Jouer restent désactivés dans ce premier lot.
+Installer télécharge l'archive officielle du site, puis vérifie le pack avec
+le canal stable existant de **Sanctuary Update**. Les mises à jour réutilisent
+la même instance. Le contrôle local du 8 novembre 2026 a installé **beta.373**,
+avec onze JAR client, puis effectué un second passage en conservant fichiers
+personnels de test et désactivation d'un mod facultatif.
 
-![Rendu Qt de l'accueil français, 1280 × 800](docs/implementation/accueil-qt-fr.png)
+Mods, ressources, shaders, captures, mondes, serveurs, versions, notes,
+réglages et journaux réutilisent les pages natives Prism dans la fenêtre
+Sanctuary. Les réglages globaux s'ouvrent également dans cette fenêtre.
+Les sous-dialogues utiles, sélecteurs de fichiers et ouvertures explicites
+du navigateur ou du gestionnaire de fichiers restent natifs.
 
-L'image ci-dessus est un rendu du widget Qt pendant les tests, et non une
-capture d'un essai complet du jeu. Le statut serveur reste explicitement
-non vérifié. Les actualités embarquées ne constituent pas un flux en direct.
+Voir le [cahier des charges 0.5](docs/cahier-des-charges.md), le
+[contrat des outils](docs/outils-prism.md) et la
+[recette du lot local](docs/implementation/launcher-local-20261108.md).
+Les [maquettes conservées](docs/design/README.md) documentent les recherches
+précédentes ; l'application native devient la référence de travail.
 
-## Développement
-
-Lire le [guide de développement et la recette](docs/developpement.md), puis
-le [cahier des charges](docs/cahier-des-charges.md). Construction locale :
+## Construire et lancer
 
 ```sh
 git submodule update --init --recursive
-./scripts/build-sanctuary-macos.sh
+./script/build_and_run.sh --verify
 ```
 
-Le script requiert les dépendances décrites dans le guide. Le bundle local
-est produit dans `build/native/sanctuary-launcher.app` ; il dépend de Homebrew,
-n'est pas signé/notarisé et cible macOS 26. Windows, Linux, macOS antérieur et
-les parcours réels d'installation/lancement ne sont pas validés par ce lot.
+Le [guide de développement](docs/developpement.md) décrit les dépendances.
+Le bouton Run de Codex utilise ce script. Les données de test restent dans
+`build/local-launcher`, distinctes de Prism personnel. Fermer l'application
+avant de reconstruire lorsqu'une mise à jour ou une édition est en cours.
+Le script relance uniquement ce profil de développement.
 
-Les **22 suites CTest** passent, dont les contrôles propres à l'accueil.
-L'application démarre avec un dossier Sanctuary neuf. Le contrôle automatique
-de la fenêtre native macOS a expiré : les interactions testées sont celles du
-widget Qt, pas une recette complète à l'écran.
+Les **24 suites CTest** passent. La navigation et l'installation ont également
+été exercées dans la fenêtre native. Le bundle `build/native/sanctuary-launcher.app`
+dépend de Homebrew, cible macOS 26 et n'est ni signé ni notarisé.
+Windows, Linux, le lancement réel du jeu, la connexion au serveur, les
+personnages et les réglages graphiques/audio restent à valider.
 
-## Étapes suivantes
-
-L'installation/réparation sans import manuel, le flux d'actualités du site,
-les réglages initiaux shaders/Sound Physics sur Vulkan, l'authentification
-Microsoft, la connexion directe au serveur et les paquets distribuables
-restent à réaliser. Microsoft peut attendre les travaux d'interface et
-d'installation ; il sera nécessaire pour les vrais essais de compte et
-d'accès au serveur. La [base existante packwiz](existing/launcher/packwiz/)
-et ses [instructions Prism](existing/docs/beta-download.md) sont conservées.
+Un push ne publie aucun binaire et ne déclenche pas Sanctuary Update.
 
 ## Origine et distribution
 
-L'historique de ce dépôt et celui de Prism sont conservés, avec les licences
+Les historiques du dépôt et de Prism restent conservés, avec les licences
 [GPL-3.0-only](LICENSE), [COPYING](COPYING.md) et le
-[README amont](docs/upstream/Prism-README.md). Le tag de référence est
-`upstream/prism/11.1.1`, commit `7d2d3c1ec6fcf8255ebacd02d9f792688575dfb4`.
-Sanctuary Launcher est un fork indépendant, sans approbation de l'équipe Prism.
+[README amont](docs/upstream/Prism-README.md). Base : `upstream/prism/11.1.1`,
+commit `7d2d3c1ec6fcf8255ebacd02d9f792688575dfb4`.
+Sanctuary Launcher est un fork indépendant. Les identifiants Microsoft,
+CurseForge et Imgur amont et les mises à jour du binaire Prism sont désactivés.
+Les métadonnées Minecraft et traductions publiques restent utilisées.
 
-Les identifiants Microsoft, CurseForge et Imgur amont et les canaux de mise à
-jour Prism sont désactivés. Les métadonnées Minecraft et traductions publiques
-Prism sont encore utilisées. Les sources correspondantes et les modalités de
-distribution seront préparées avant livraison de binaires. Les dépôts restent
-privés. Les anciens travaux Release sont conservés sous
-[`archive/release-foundation-20261108`](https://github.com/sanctuary-minecraft/sanctuary-launcher/tree/archive/release-foundation-20261108).
+L'[application Microsoft Sanctuary](docs/microsoft.md) est créée ; sa demande
+d'accès Minecraft attend une décision. Les sources correspondantes et la
+distribution autonome seront préparées avant livraison aux joueurs.
+Les dépôts restent privés. Les anciennes fondations Release restent sous
+`archive/release-foundation-20261108`.

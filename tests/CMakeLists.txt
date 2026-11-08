@@ -1,5 +1,10 @@
 project(tests)
 
+ecm_add_test(SanctuaryWorkspace_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+    TEST_NAME SanctuaryWorkspace)
+ecm_add_test(SanctuaryPack_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+    TEST_NAME SanctuaryPack)
+
 ecm_add_test(SanctuaryHome_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME SanctuaryHome)
 

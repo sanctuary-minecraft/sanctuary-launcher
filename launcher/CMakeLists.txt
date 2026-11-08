@@ -834,6 +834,12 @@ SET(LAUNCHER_SOURCES
     ui/MainWindow.cpp
     ui/SanctuaryHome.cpp
     ui/SanctuaryHome.h
+    ui/SanctuaryWorkspace.cpp
+    ui/SanctuaryWorkspace.h
+    ui/SanctuaryFeed.cpp
+    ui/SanctuaryFeed.h
+    SanctuaryPack.cpp
+    SanctuaryPack.h
     ui/InstanceWindow.h
     ui/InstanceWindow.cpp
     ui/ViewLogWindow.h

@@ -2,12 +2,23 @@
 
 Le **8 novembre 2026**, après l'exploration en trois blocs, Koka retient à
 nouveau **un seul bloc contenant les étapes 1 à 5**, dans la **DA blanche**.
-Le **titre de l'étape en cours** occupe le haut de page. Le mot-symbole du
+Le **titre de l'étape en cours** occupe le haut du bloc de préparation. Le mot-symbole du
 site, le badge historique, le code SGA facultatif et tous les outils Prism
-restent demandés. Le [cahier des charges 0.4](../cahier-des-charges.md) fixe
+restent demandés. Le [cahier des charges 0.5](../cahier-des-charges.md) fixe
 ce parcours.
 
-## Maquette actuelle — Installation
+## Application native actuelle
+
+Après validation des maquettes, Koka demande de travailler directement sur
+le launcher. Le lot local intègre les outils Prism dans une seule fenêtre,
+avec **Accueil** puis **Actualités** dans la barre latérale.
+Les cinq étapes restent dans Accueil jusqu'à préparation complète, puis
+sont masquées au profit de Jouer, Intendance, Gazette et Tableau d'affichage.
+Les contenus privés exigent leur session Discord réelle, encore à raccorder.
+La [recette du binaire](../implementation/launcher-local-20261108.md) décrit
+les essais et leurs limites. Aucune nouvelle maquette n'est générée pour ce lot.
+
+## Maquette conservée — Installation
 
 ![Bloc unique en cinq étapes — Installer Sanctuary](blanc-cinq-etapes-2026-11-08/installation-reference.png)
 
@@ -27,8 +38,8 @@ indiquent la place dans le parcours, pas cinq validations obligatoires.
 
 **Tous les outils** ouvre la [gestion complète de Prism](../outils-prism.md) :
 mods, packs de ressources et de shaders, captures, mondes, serveurs, versions,
-réglages, logs et autres pages natives. Les réglages globaux et la gestion des
-instances restent accessibles. Les raccourcis Mods/Shaders/Réglages peuvent
+réglages, logs et autres pages natives. Les réglages globaux restent accessibles. Le parcours courant expose une
+seule instance officielle et ses outils intégrés. Les raccourcis Mods/Shaders/Réglages peuvent
 être proposés pour une installation prête ; l'accueil ne limite pas les outils.
 
 Le compte `camille`, le badge, les validations et **12/20** sont fictifs. Ce
@@ -49,7 +60,7 @@ les prérequis sont remplis. Il ne reste pas figé sur un titre de bienvenue.
 
 | Fichier | Rôle |
 | --- | --- |
-| [installation-reference.png](blanc-cinq-etapes-2026-11-08/installation-reference.png) | Maquette actuelle, 1486 × 1059 pixels |
+| [installation-reference.png](blanc-cinq-etapes-2026-11-08/installation-reference.png) | Référence conservée, 1486 × 1059 pixels |
 | [provenance.json](blanc-cinq-etapes-2026-11-08/provenance.json) | Sources, contexte de la demande, dimensions, taille et SHA-256 |
 | [prompt.txt](blanc-cinq-etapes-2026-11-08/prompt.txt) | Consigne complète de génération |
 
@@ -102,8 +113,7 @@ obligatoire et l'installation n'est plus bloquée par l'attente d'admission.
 | [Prêt à jouer](blanc-2026-11-08/pret-a-jouer.png) | Ancienne vue avec exemple SGA fictif |
 
 Leur [registre de provenance](blanc-2026-11-08/provenance.json) reste conservé.
-La [première maquette à paysage](archive-accueil-2026-11-08.md) et son PNG sont
-également archivés. L'[accueil Qt déjà compilé](../implementation/accueil-qt-fr.png)
-utilise encore cette ancienne direction : cette mise à jour documentaire ne
-modifie pas l'application. Les ressources du premier lot et leur provenance
+La [première maquette à paysage](archive-accueil-2026-11-08.md), son PNG et
+l'[ancien rendu Qt](../implementation/accueil-qt-fr.png) sont conservés pour
+l'historique. L'application courante utilise la DA blanche. Les ressources du premier lot et leur provenance
 restent dans [assets.md](assets.md).

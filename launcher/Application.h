@@ -58,6 +58,7 @@ class MainWindow;
 class ViewLogWindow;
 class SetupWizard;
 class GenericPageProvider;
+class BasePage;
 class QFile;
 class HttpMetaCache;
 class SettingsObject;
@@ -148,6 +149,7 @@ class Application : public QApplication {
     void updateProxySettings(QString proxyTypeStr, QString addr, int port, QString user, QString password);
 
     QNetworkAccessManager* network();
+    QList<BasePage*> createSanctuarySettingsPages();
 
     HttpMetaCache* metacache();
 

@@ -16,4 +16,7 @@ cmake -S "$sanctuary_source_dir" -B "$sanctuary_source_dir/build/native" -G Ninj
   -DJava_JAVAC_EXECUTABLE="$sanctuary_java_prefix/bin/javac" \
   -DJava_JAR_EXECUTABLE="$sanctuary_java_prefix/bin/jar"
 cmake --build "$sanctuary_source_dir/build/native" --parallel "${SANCTUARY_BUILD_JOBS:-4}"
+sanctuary_bundle_resources="$sanctuary_source_dir/build/native/sanctuary-launcher.app/Contents/Resources"
+mkdir -p "$sanctuary_bundle_resources"
+cp "$sanctuary_source_dir/program_info/sanctuary-launcher.icns" "$sanctuary_bundle_resources/SanctuaryLauncher.icns"
 QT_QPA_PLATFORM=offscreen ctest --test-dir "$sanctuary_source_dir/build/native" --output-on-failure
