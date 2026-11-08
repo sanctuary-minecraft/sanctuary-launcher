@@ -24,7 +24,7 @@ Discord ni secret dans le binaire.
 ## Session et données
 
 La session du launcher dure sept jours et autorise uniquement la lecture du
-profil et des flux communautaires. Les secrets sont aléatoires (256 bits) ;
+profil, des flux communautaires et de leurs photos privées. Les secrets sont aléatoires (256 bits) ;
 le site ne conserve que leurs empreintes comme clés du cache existant, avec
 expiration. Aucune migration SQL ni modification de la whitelist n'est requise.
 Le profil est relu au démarrage, sur demande et chaque minute. Un échec de
@@ -46,6 +46,7 @@ côté serveur ; la suppression locale et l'expiration bornent sa durée.
 | POST `/api/launcher/v1/token` | Secret device en corps JSON ; pending, slow_down, refus, expiration ou session |
 | GET `/api/launcher/v1/profile` | Nom d'affichage, pseudo Minecraft du dossier et état d'accès ; aucun e-mail ou code secret |
 | GET `/api/launcher/v1/feed?kind=…` | article, bulletin ou notice ; trois entrées récentes, une pour Intendance ; serveur configuré et publications visibles uniquement |
+| GET `/api/launcher/v1/posts/{id}/photo` | Photo JPEG d’un article visible du serveur configuré, session requise, aucun cache disque |
 | POST `/api/launcher/v1/revoke` | Révocation de cette session |
 
 Les réponses privées portent `Cache-Control: private, no-store`. Les flux
@@ -56,7 +57,7 @@ Qt traitent les textes comme du texte simple, sans exécuter de HTML ou script.
 Le statut d'accès provient du dossier et de la whitelist du site : absence,
 attente, acceptation en synchronisation, accès confirmé, refus, retrait ou
 condition Discord manquante. La communauté est affichée pour un accès confirmé,
-avec **Microsoft en attente** dans le header et Jouer désactivé. Aucune licence
+avec **Microsoft en attente** dans Bien démarrer et Jouer désactivé. Aucune licence
 Minecraft, création de personnage ou liaison Microsoft n'est déduite de Discord.
 Le marqueur historique réel reste à rattacher à une source confirmée ; le badge
 et le code SGA de démonstration ne sont pas utilisés pour ce parcours.
@@ -86,3 +87,15 @@ jeton ou contenu privé n'est conservé dans cette recette.
 La reprise après redémarrage et l'expiration réelle de sept jours ne sont pas
 validées par ce seul retour. Microsoft, le lancement Minecraft et le personnage
 restent en attente. Aucun jeu, monde, serveur Minecraft ou canal packwiz modifié.
+
+
+## Lecture dépliable — complément LAUNCH-17
+
+Les résumés montrent le titre et le visage du skin de chaque auteur. Le clic
+ouvre le contenu dans le flux, avec défilement et footer fixe. `has_photo`
+annonce une photo de Gazette ; le client construit le chemin fixe de l’API
+et la demande au dépliage. Aucun URL d’image fourni par un post n’est suivi.
+Les photos restent privées, bornées, en mémoire ; les visages publics utilisent
+le même fournisseur que le site, sans jeton Sanctuary. Bien démarrer reste
+le premier onglet et conserve les cinq étapes après Discord.
+Voir la [recette complémentaire](implementation/accueil-minimal-20261108.md).

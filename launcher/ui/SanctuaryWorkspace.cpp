@@ -87,7 +87,7 @@ SanctuaryWorkspace::~SanctuaryWorkspace()
 QString SanctuaryWorkspace::name(BasePage* page) const
 {
     const QHash<QString, QPair<QString, QString>> names{
-        {"home", {"Accueil", "Home"}}, {"news", {"Actualités", "News"}},
+        {"home", {"Accueil", "Home"}}, {"setup", {"Bien démarrer", "Getting started"}}, {"news", {"Actualités", "News"}},
         {"console", {"Journaux du jeu", "Game logs"}}, {"version", {"Versions", "Versions"}},
         {"mods", {"Mods", "Mods"}}, {"resourcepacks", {"Packs de ressources", "Resource packs"}},
         {"shaderpacks", {"Packs de shaders", "Shader packs"}}, {"screenshots", {"Captures d'écran", "Screenshots"}},
@@ -169,8 +169,8 @@ bool SanctuaryWorkspace::selectPage(QString id)
     m_stack->setCurrentWidget(dynamic_cast<QWidget*>(next));
     for (auto it = m_navigation.begin(); it != m_navigation.end(); ++it) it.value()->setChecked(it.key() == id);
     m_title->setText(name(next));
-    m_title->setVisible(id != "home"); // Home owns the current-step header.
-    m_toolbar->setVisible(id != "home");
+    m_title->setVisible(id != "home" && id != "setup"); // Home owns the current-step header.
+    m_toolbar->setVisible(id != "home" && id != "setup");
     m_save->setVisible(id != "home" && id != "news");
     m_feedback->clear();
     m_feedback->hide();
@@ -216,7 +216,7 @@ void SanctuaryWorkspace::setGameBusy(bool busy)
 {
     m_save->setEnabled(!busy);
     for (auto* page : m_pages) {
-        if (page->id() != "home" && page->id() != "news") {
+        if (page->id() != "home" && page->id() != "news" && page->id() != "setup") {
             dynamic_cast<QWidget*>(page)->setEnabled(!busy);
             m_navigation.value(page->id())->setEnabled(!busy);
         }

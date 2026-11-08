@@ -14,7 +14,8 @@ class QUrl;
 class SanctuaryHome : public QWidget, public BasePage {
     Q_OBJECT
 public:
-    explicit SanctuaryHome(QWidget* parent = nullptr);
+    enum class View { Adaptive, Dashboard, Setup };
+    explicit SanctuaryHome(QWidget* parent = nullptr, View view = View::Adaptive);
     ~SanctuaryHome() override;
     void setState(bool instanceReady, bool microsoftAvailable, bool french);
     void setLocalMode(bool enabled, const QJsonObject& savedState = {});
@@ -25,8 +26,8 @@ public:
     void setPackState(bool verified, bool busy, const QString& version, const QString& message, int progress = -1);
     void showFeedback(const QString& message);
     void setEmbedded(bool embedded);
-    QString id() const override { return "home"; }
-    QString displayName() const override { return m_french ? "Accueil" : "Home"; }
+    QString id() const override { return m_view == View::Setup ? "setup" : "home"; }
+    QString displayName() const override { return m_view == View::Setup ? (m_french ? "Bien démarrer" : "Getting started") : (m_french ? "Accueil" : "Home"); }
     QIcon icon() const override { return QIcon(":/sanctuary/icon.png"); }
     void openedImpl() override;
     bool communityUnlocked() const;
@@ -70,6 +71,7 @@ private:
     QString m_packVersion, m_packMessage;
     bool m_communityVisible = false;
     bool m_embedded = false;
+    View m_view;
     bool m_onlineSession = false, m_discordConnected = false, m_discordBusy = false;
     QJsonObject m_discordProfile;
     QString m_discordMessage;

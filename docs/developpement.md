@@ -6,7 +6,7 @@ Base Prism **11.1.1**, commit `7d2d3c1ec6fcf8255ebacd02d9f792688575dfb4`.
 Le sous-module `libraries/libnbtplusplus` reste épinglé à
 `3538933614059f0f44388a2b16f3db25ce42285b`.
 Le lot `codex/launcher-local-onboarding` porte le
-[cahier des charges 0.8](cahier-des-charges.md) : fenêtre unique, Accueil et
+[cahier des charges 0.9](cahier-des-charges.md) : fenêtre unique, Accueil et
 Actualités dans la navigation, cinq étapes avant préparation puis rubriques
 communautaires. La [recette](implementation/launcher-local-20261108.md)
 conserve la recette initiale. Le [raccordement Discord](discord-connexion.md)
@@ -44,13 +44,21 @@ Les autres plateformes restent à compiler et à tester.
 ## Structure de l'interface
 
 - `SanctuaryWorkspace` héberge les `BasePage` natives dans un `QStackedWidget`,
-  avec une colonne logo/navigation à gauche et la colonne de contenu alignée
-  sur le logo en haut. Aucun nom de pack n'est accolé au PNG. Accueil et
-  Actualités précèdent les pages du jeu.
+  avec Bien démarrer/Accueil/Actualités, une colonne logo/navigation à gauche et la colonne de contenu alignée
+  sur le logo en haut. Aucun nom de pack n'est accolé au PNG. Bien démarrer,
+  Accueil et Actualités précèdent les pages du jeu.
 - `SanctuaryHome` utilise un header d'étape, un body flexible et un footer
   fixe avec Jouer en bas à droite. Aucun `QScrollArea` ne contient l'accueil.
-  Le body passe des cinq étapes aux trois panneaux communautaires ; leurs
-  aperçus sont bornés, sans défilement. Le code SGA reste facultatif.
+  Deux vues partagent les mêmes contrôleurs : Dashboard affiche les flux
+  minimaux et Setup conserve les cinq étapes après Discord. Adaptive reste
+  le composant de référence pour les tests historiques. Le footer reste fixe ;
+  les publications ouvertes peuvent défiler dans les flux. Le code SGA reste facultatif.
+- `SanctuaryFeed` présente chaque publication avec son auteur et un visage
+  32 × 32 chargé depuis le même service public que le site, sans Authorization.
+  Les visages PNG/WebP sont bornés et conservés seulement en mémoire. Les titres
+  déplient une publication par flux ; les photos JPEG privées de la Gazette sont
+  chargées à la demande via SanctuarySession, avec limites 49 152 octets et
+  960 × 540 avant décodage. Les textes restent simples, sans HTML exécuté.
 - `SanctuarySession` gère l'association dans le navigateur, la session de
   lecture et sa conservation dans le Trousseau macOS. Aucun secret Discord
   n'est dans le client. Le cache local de simulation ne vaut jamais admission.

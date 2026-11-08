@@ -92,6 +92,7 @@ class MainWindow : public QMainWindow {
     void showSanctuaryHome();
     void refreshSanctuaryHome();
     SanctuaryHome* m_sanctuaryHome = nullptr;
+    SanctuaryHome* m_sanctuarySetup = nullptr;
     QStackedWidget* m_sanctuaryStack = nullptr;
     SanctuaryPack* m_sanctuaryPack = nullptr;
     SanctuaryWorkspace* m_sanctuaryWorkspace = nullptr;

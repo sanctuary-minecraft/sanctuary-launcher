@@ -6,19 +6,23 @@ La version **0.1.0 de développement** fonctionne localement sur macOS Apple Sil
 
 ## Interface actuelle
 
-**Accueil** est le premier onglet, avant les journaux du jeu. **Actualités**
-consulte les dernières publications FR/EN du site dans un onglet séparé.
-Dans Accueil, le bloc des cinq étapes apparaît tant que le parcours n'est pas
-prêt : Discord, Microsoft, accès Sanctuary, code de personnage facultatif,
-installation. L'accueil tient sans défilement dans la fenêtre : le header
-nomme l'étape active, le body contient les étapes et le footer garde Jouer
-en bas à droite, même pendant l'attente d'admission.
-Lorsque les prérequis sont réunis, ce bloc disparaît au profit de **Jouer**,
-**Intendance**, **Gazette** et **Tableau d'affichage**. Ces rubriques occupent
-des panneaux fixes avec un aperçu et un lien de lecture complète ; le footer
-reste à sa place. L'Intendance est en haut sur toute la largeur du body ;
-la Gazette et le Tableau sont côte à côte en dessous. Le logo occupe seul
-le haut de la barre latérale, avec le header de l'étape à sa droite.
+**Accueil** présente les publications réelles sans cadre, sans titre de
+rubrique et sans barre d'actions par flux. L'Intendance reste en haut sur toute
+la largeur, la Gazette à gauche et le Tableau à droite en dessous. Chaque
+publication montre le visage du skin Minecraft de son auteur et son titre.
+Un clic déplie le texte complet et les photos de la Gazette, comme sur le site.
+Chaque flux peut défiler dans le body ; Jouer reste fixé en bas à droite.
+
+**Bien démarrer** est le premier onglet, permanent dans la même fenêtre. Elle conserve
+les cinq étapes : Discord, Microsoft, accès Sanctuary, code SGA facultatif et
+installation. Elle reste accessible après la connexion Discord, avec l'étape
+Microsoft visible et explicitement en attente d'autorisation. Une première
+arrivée sans session Discord ou sans pack vérifié ouvre cette page. Un joueur
+ayant une session et le pack retrouve l'accueil, avec un lien vers le tutoriel.
+Les deux pages partagent la même session et la même installation.
+
+**Actualités** consulte l'historique des publications du site dans un onglet
+séparé. Le logo original occupe seul le haut de la barre latérale.
 
 **Discord est raccordé au site Sanctuary** : Connecter Discord ouvre le
 navigateur, puis une confirmation lie ce launcher au compte déjà présent.
@@ -30,8 +34,7 @@ la connexion réelle et leur affichage le 8 novembre 2026.
 Microsoft/Mojang reste à raccorder : **Jouer reste désactivé**, même si Discord
 retrouve un accès accordé. Les comptes Microsoft simulés des tests ne valent
 pas une connexion réelle. Les contenus communautaires peuvent être lus sans
-attendre Microsoft ; le header indique cette attente. Les états de candidature
-en attente/refus/retrait restent affichés dans les étapes.
+attendre Microsoft ; les étapes et leur état restent dans Bien démarrer.
 
 La session du launcher est limitée à la lecture et expire après sept jours.
 Sur macOS, le jeton est conservé dans le Trousseau, séparément pour chaque
@@ -44,6 +47,8 @@ la bêta est prévu ; son exemple local ne constitue pas une admission réelle.
 Les vingt places concernent les connexions simultanées, sans plafond de membres.
 
 Voir le [contrat Discord et la recette](docs/discord-connexion.md).
+
+Voir aussi la [recette de l’accueil minimal et du tutoriel](docs/implementation/accueil-minimal-20261108.md).
 
 ## Pack et outils natifs
 
@@ -59,7 +64,7 @@ Sanctuary. Les réglages globaux s'ouvrent également dans cette fenêtre.
 Les sous-dialogues utiles, sélecteurs de fichiers et ouvertures explicites
 du navigateur ou du gestionnaire de fichiers restent natifs.
 
-Voir le [cahier des charges 0.8](docs/cahier-des-charges.md), le
+Voir le [cahier des charges 0.9](docs/cahier-des-charges.md), le
 [contrat des outils](docs/outils-prism.md) et la
 [recette du lot local](docs/implementation/launcher-local-20261108.md), complétée
 par les recettes de l'[accueil fixe](docs/implementation/accueil-fixe-20261108.md)

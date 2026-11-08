@@ -10,6 +10,9 @@
 #include <QFrame>
 #include <QMainWindow>
 #include "ui/SanctuaryWorkspace.h"
+#include "ui/SanctuaryFeed.h"
+#include <QJsonArray>
+#include <QRegularExpression>
 #include <QSignalSpy>
 #include <QTest>
 #include <QUrl>
@@ -207,7 +210,7 @@ private slots:
             QMainWindow window;
             auto* workspace = new SanctuaryWorkspace(&window);
             window.setCentralWidget(workspace);
-            auto* home = new SanctuaryHome;
+            auto* home = new SanctuaryHome(nullptr, SanctuaryHome::View::Setup);
             home->setEmbedded(true);
             home->setLocalMode(true);
             home->setState(false, false, french);
@@ -276,6 +279,63 @@ private slots:
                 }
             }
         }
+    }
+    void setupRemainsAvailableAfterDiscordWhileHomeOnlyShowsPosts()
+    {
+        QMainWindow window;
+        auto* workspace = new SanctuaryWorkspace(&window);
+        window.setCentralWidget(workspace);
+        auto* home = new SanctuaryHome(nullptr,SanctuaryHome::View::Dashboard);
+        auto* setup = new SanctuaryHome(nullptr,SanctuaryHome::View::Setup);
+        workspace->setPages({setup,home});
+        QVERIFY(workspace->selectPage("home"));
+        const QJsonObject profile{{"version",1},{"user",QJsonObject{{"display_name","Example player"}}},{"access",QJsonObject{{"status","granted"}}}};
+        for (auto* page : {home,setup}) {
+            page->setEmbedded(true);
+            page->setPackState(true,false,"beta.373","Pack vérifié");
+            page->setDiscordState(true,false,profile,"Discord connecté");
+        }
+        window.resize(1000,680);
+        window.show();
+        QApplication::processEvents();
+        QVERIFY(workspace->findChild<QPushButton*>("nav-setup")->mapTo(workspace,QPoint()).y()
+            < workspace->findChild<QPushButton*>("nav-home")->mapTo(workspace,QPoint()).y());
+        QVERIFY(home->communityUnlocked());
+        QVERIFY(!home->findChild<QWidget*>("homeHeader")->isVisible());
+        QVERIFY(home->findChild<QWidget*>("inlineAccounts")->isHidden());
+        QVERIFY(home->findChildren<QLabel*>(QRegularExpression("communityTitle-.*")).isEmpty());
+        QVERIFY(workspace->selectPage("setup"));
+        QApplication::processEvents();
+        QVERIFY(setup->findChild<QWidget*>("inlineAccounts")->isVisible());
+        QVERIFY(setup->findChild<QWidget*>("communityHome")->isHidden());
+        QCOMPARE(setup->activeStep(),2);
+        QVERIFY(!action(*setup,"microsoft")->isEnabled());
+        QVERIFY(!action(*setup,"play")->isEnabled());
+        QVERIFY(workspace->selectPage("home"));
+        QSignalSpy navigation(home,&SanctuaryHome::instanceToolRequested);
+        QTest::mouseClick(home->findChild<QPushButton*>("setupToggle"),Qt::LeftButton);
+        QCOMPARE(navigation.count(),1);
+        QCOMPARE(navigation[0][0].toString(),QString("setup"));
+        const QJsonObject post{{"id","11111111-1111-4111-8111-111111111111"},{"author_name","Notch"},
+            {"title","Publication de test"},{"body","Texte de test du rendu Qt, sans données privées. Les titres déplient la publication dans le launcher."}};
+        for (auto* feed : home->findChildren<SanctuaryFeed*>()) {
+            feed->setEntries({post});
+            QMetaObject::invokeMethod(feed->findChild<QLabel*>("postTitle"),"linkActivated",Q_ARG(QString,"toggle"));
+        }
+        for (const QSize size : {QSize(1000,680),QSize(1120,760),QSize(1280,800)}) {
+            window.resize(size);
+            QApplication::processEvents();
+            QCOMPARE(window.size(),size);
+            auto* footer = home->findChild<QWidget*>("footer");
+            QVERIFY(home->rect().contains(footer->mapTo(home,footer->rect().bottomRight())));
+            const auto capture=qEnvironmentVariable("SANCTUARY_CAPTURE_DIR");
+            if (!capture.isEmpty() && size==QSize(1120,760)) QVERIFY(window.grab().save(capture+"/minimal-home-fr.png"));
+        }
+        QVERIFY(workspace->selectPage("setup"));
+        window.resize(1120,760);
+        QApplication::processEvents();
+        const auto capture=qEnvironmentVariable("SANCTUARY_CAPTURE_DIR");
+        if (!capture.isEmpty()) QVERIFY(window.grab().save(capture+"/getting-started-fr.png"));
     }
     void realDiscordAccessCannotBeReplacedByLocalScenarios()
     {

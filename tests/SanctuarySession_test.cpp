@@ -65,8 +65,15 @@ private slots:
         auto* feed=session.feed("article",true);
         connect(feed,&QNetworkReply::finished,feed,&QObject::deleteLater);
         QCOMPARE(website.requests.last().url().host(),QString("sanctuary-minecraft.net"));
+        auto* photo=session.photo("11111111-1111-4111-8111-111111111111");
+        QVERIFY(photo);
+        connect(photo,&QNetworkReply::finished,photo,&QObject::deleteLater);
+        QCOMPARE(website.requests.last().url(),QUrl("https://sanctuary-minecraft.net/api/launcher/v1/posts/11111111-1111-4111-8111-111111111111/photo"));
+        QCOMPARE(website.requests.last().rawHeader("Authorization"),QByteArray("Bearer ")+QByteArray(64,'b'));
+        QVERIFY(!session.photo("../../outside?token=test"));
         session.disconnectAccount();
         QVERIFY(!session.connected());
+        QVERIFY(!session.photo("11111111-1111-4111-8111-111111111111"));
         QVERIFY(session.profile().isEmpty());
         QVERIFY(!session.busy());
         QVERIFY(website.requests.last().url().path().endsWith("/revoke"));

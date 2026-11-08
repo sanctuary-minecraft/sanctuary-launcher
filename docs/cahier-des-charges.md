@@ -1,16 +1,15 @@
 # Cahier des charges de Sanctuary Launcher
 
-Version documentaire **0.8**, actualisée le **8 novembre 2026**. Sanctuary
+Version documentaire **0.9**, actualisée le **8 novembre 2026**. Sanctuary
 Launcher est un fork natif de Prism avec une fenêtre principale blanche,
 une seule instance officielle Sanctuary Beta et ses outils intégrés.
 
-La nouvelle décision de Koka conserve les cinq étapes dans **Accueil**,
-premier onglet avant les journaux, et ajoute **Actualités** séparément.
-Avant préparation, Accueil présente le bloc des étapes avec le titre actif.
-Quand comptes, admission et pack sont prêts, les étapes sont masquées et
-l'accueil affiche Jouer, Intendance, Gazette et Tableau d'affichage.
-Le code SGA reste facultatif. Cette organisation remplace la page
-d'onboarding dédiée et la navigation multi-instance exposée précédemment.
+La décision courante distingue **Accueil** et **Bien démarrer** dans une
+seule fenêtre. L'accueil quotidien affiche les trois flux sans bordures ni
+titres de rubrique, avec le visage Minecraft et le contenu des auteurs.
+Le tutoriel permanent conserve les cinq étapes, même après Discord : la
+connexion Microsoft doit rester accessible et son indisponibilité temporaire
+expliquée. Le code SGA reste facultatif. Actualités conserve son onglet séparé.
 
 Le lot natif porte cette interface, l'installation du pack et la connexion
 Discord réelle au site. Le dossier d'accès et les contenus privés sont lus
@@ -116,11 +115,11 @@ Le ciel, le paysage, les textures pierre/terre et les boutons Minecraft en
 relief restent des références historiques. Le SGA est réservé au code ; les
 consignes et commandes restent lisibles en français ou en anglais.
 
-**FLOW-03.** Garder les cinq lignes dans un même bloc, numérotées de 1 à 5 :
+**FLOW-03.** Dans **Bien démarrer**, garder les cinq lignes dans un même bloc, numérotées de 1 à 5 :
 **Discord**, **Microsoft**, **Accès Sanctuary**, **Code de personnage** et
 **Installation**. La ligne active est mise en évidence et le titre principal
 nomme son action ou son état, plutôt que d'afficher « Bienvenue sur Sanctuary ».
-Les étapes déjà accomplies restent visibles et mémorisées tant que le bloc est nécessaire. Dès que les prérequis obligatoires sont réunis, masquer le bloc complet. La ligne 4 porte
+Les étapes restent visibles et mémorisées dans Bien démarrer, y compris après la connexion Discord. L’accueil quotidien est une page distincte qui ne contient pas ce bloc. La ligne 4 porte
 **Facultatif**, sans case ou validation requise pour débloquer l'installation
 ou Jouer. Ne pas présenter « 5/5 validées » comme condition de lancement.
 
@@ -236,35 +235,31 @@ lancements et mises à jour suivants, sans réexécuter l'assistant complet.
 information absente ou périmée donne un état inconnu. Les mentions de version,
 de disponibilité et de compte de la maquette ne sont jamais des textes fixes.
 
-**UI-03.** **Accueil** est le premier onglet, au-dessus des journaux du jeu.
-Un onglet **Actualités** distinct présente les dernières versions, dates,
-titres et résumés publiés sur le site. Ne pas recopier une rédaction statique.
+**UI-03.** **Bien démarrer** est le premier onglet, puis **Accueil** et
+**Actualités**, avant les journaux du jeu. Le tutoriel et l'accueil restent
+dans la même fenêtre et utilisent la même session et le même pack. La première
+arrivée sans session Discord ou sans pack vérifié ouvre Bien démarrer.
+La connexion Discord ne ferme pas automatiquement ce tutoriel ; un lien
+Voir l'accueil laisse consulter les publications. Le retour au tutoriel
+reste disponible dans la barre latérale et dans le footer.
 
-Avant préparation, Accueil affiche les cinq lignes et masque Intendance,
-Gazette et Tableau d'affichage. Dans le parcours complet, quand les comptes sont valides, l'admission
-est confirmée et le pack vérifié, masquer les étapes et montrer **Jouer**,
-**Intendance**, **Gazette** et **Tableau d'affichage**. Le code SGA n'est pas
-une condition de cette transition ; il reste consultable à la demande.
-Une session à renouveler ou un accès retiré remet les étapes nécessaires
-sans effacer les préférences. Les rubriques communautaires gardent les
-permissions du site et ne deviennent pas publiques par leur intégration.
+**FLOW-04.** L'accueil affiche les vrais contenus quand le site confirme
+l'accès Sanctuary. Il ne présente ni compte simulé ni code fictif. Sans accès
+confirmé, il propose Bien démarrer. Le tutoriel continue d'afficher Microsoft
+et les autres étapes ; Jouer reste désactivé tant que le raccordement
+Microsoft/Mojang n'est pas terminé. La lecture des publications ne vaut pas
+possession de Minecraft ou autorisation de lancement.
 
-**FLOW-04.** Le raccordement Discord réel peut déjà afficher la communauté
-quand le site confirme l'accès, même si Microsoft n'est pas encore raccordé.
-Le header indique **Connexion Microsoft en attente** et Jouer reste désactivé.
-Un dossier en attente, refusé, retiré ou non vérifié garde les étapes. Aucune
-valeur de simulation locale ne remplace le dossier reçu du site. Les codes
-fictifs et le badge historique de démonstration sont masqués dans ce parcours.
-Le dossier du site conserve l'accès au code manuel existant.
-
-**UI-04.** L'accueil est une page fixe **sans défilement**, à partir de
+**UI-04.** L'accueil garde une fenêtre fixe et un footer toujours visible.
+Le body autorise le défilement interne des publications dépliées, à partir de
 1000 × 680, avec vérification à 1120 × 760 et 1280 × 800 en FR/EN. Conserver
 une navigation clavier, un focus visible et les textes lisibles.
 
-- **Header** : titre de l'étape en cours et indication de la prochaine action,
-  notamment l'attente d'accès. Une fois prêt, titre communautaire.
-- **Body** : les cinq étapes visibles ensemble avant préparation, puis les
-  panneaux Gazette, Intendance et Tableau d'affichage à leur place.
+- **Header du tutoriel** : titre de l'étape en cours et prochaine action,
+  notamment l'attente d'accès. L'accueil quotidien utilise directement cet
+  espace pour les publications, sans titre générique supplémentaire.
+- **Body** : les cinq étapes restent ensemble dans Bien démarrer ; les trois
+  flux restent dans Accueil, sans cadre ni titre de rubrique.
 - **Footer** : version/état du pack, installation/mise à jour et **Jouer ancré
   tout en bas à droite**. Sa position ne dépend pas de la longueur du body.
 
@@ -273,11 +268,21 @@ est à gauche et le Tableau d'affichage à droite. Le logo PNG reste seul en
 haut de la colonne latérale : aucun libellé « Sanctuary Beta » à sa droite.
 La colonne de contenu commence à la même hauteur que ce logo, avec le header
 de l'étape active dans cet espace ; aucune bande supérieure vide au-dessus
-du header et du body. Les aperçus sont bornés et se terminent par une ellipse si nécessaire,
-avec accès explicite à la lecture complète sur le site. Aucun défilement
-imbriqué dans ces panneaux. L'onglet Actualités reste distinct et peut faire
-défiler son historique. Le code facultatif ne doit pas agrandir la fenêtre
-ou pousser le footer hors écran lorsqu'on le consulte.
+du header et du body. Au repos, chaque publication montre seulement le visage
+du skin Minecraft de son auteur et son titre. Un clic sur le titre déplie le
+texte complet et les images de la Gazette dans le launcher, comme sur le site.
+Une publication par flux peut rester ouverte ; un lien discret permet aussi
+de lire la discussion sur le site. Le contenu ouvert peut défiler dans chaque
+flux, sans déplacer la navigation ni le footer. Une actualisation périodique
+conserve la publication ouverte si elle existe encore.
+
+Réutiliser le fournisseur de visages du site pour tous les auteurs, y compris
+le joueur connecté. Aucun jeton Sanctuary n’est envoyé à ce service public.
+Une initiale sert de repli si le visage n’est pas disponible. Les photos privées
+passent seulement par l’API authentifiée Sanctuary, au dépliage, et restent en
+mémoire. La déconnexion efface les contenus et invalide les réponses anciennes.
+L’onglet Actualités reste distinct. Le code facultatif ne doit pas agrandir la
+fenêtre ou pousser le footer hors écran lorsqu’on le consulte.
 
 | État | Comportement principal attendu |
 | --- | --- |

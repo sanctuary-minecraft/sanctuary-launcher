@@ -445,7 +445,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Keep Prism's implementation, but expose one Sanctuary instance in one window.
     auto* legacy = takeCentralWidget();
     m_sanctuaryStack = new QStackedWidget(this);
-    m_sanctuaryHome = new SanctuaryHome(m_sanctuaryStack);
+    m_sanctuaryHome = new SanctuaryHome(m_sanctuaryStack, SanctuaryHome::View::Dashboard);
+    m_sanctuarySetup = new SanctuaryHome(m_sanctuaryStack, SanctuaryHome::View::Setup);
+    m_sanctuarySetup->setEmbedded(true);
     m_sanctuaryHome->setLocalMode(APPLICATION->settings()->get("SanctuaryLocalMode").toBool(),
         QJsonDocument::fromJson(APPLICATION->settings()->get("SanctuaryLocalState").toString().toUtf8()).object());
     m_sanctuaryPack = new SanctuaryPack(this);
@@ -460,7 +462,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_sanctuaryHome->setEmbedded(true);
     m_sanctuaryWorkspace = new SanctuaryWorkspace(m_sanctuaryStack);
     m_sanctuaryNews = new SanctuaryNewsPage;
-    m_sanctuaryWorkspace->setPages({m_sanctuaryHome, m_sanctuaryNews});
+    m_sanctuaryWorkspace->setPages({m_sanctuarySetup, m_sanctuaryHome, m_sanctuaryNews});
     connect(m_sanctuaryWorkspace, &SanctuaryWorkspace::homeRequested, this, &MainWindow::showSanctuaryHome);
     connect(m_sanctuaryNews, &SanctuaryNewsPage::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
     m_sanctuaryStack->addWidget(m_sanctuaryWorkspace);
@@ -469,20 +471,22 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     setMinimumSize(1000, 680);
     resize(1120, 760);
     setWindowTitle("Sanctuary Launcher — Sanctuary Beta");
-    connect(m_sanctuaryHome, &SanctuaryHome::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
-    connect(m_sanctuaryHome, &SanctuaryHome::settingsRequested, this, [this] { showSanctuarySettings(); });
-    connect(m_sanctuaryHome, &SanctuaryHome::accountsRequested, this, [this] { showSanctuarySettings("accounts"); });
-    connect(m_sanctuaryHome, &SanctuaryHome::advancedRequested, this, [this] { showSanctuaryTools("mods"); });
-    connect(m_sanctuaryHome, &SanctuaryHome::instanceToolRequested, this, &MainWindow::showSanctuaryTools);
-    connect(m_sanctuaryHome, &SanctuaryHome::installRequested, this, [this] {
-        if (m_sanctuaryPack->busy()) m_sanctuaryPack->cancel();
-        else m_sanctuaryPack->installOrUpdate();
-    });
     auto* discord = new SanctuarySession(APPLICATION->network(), this);
-    m_sanctuaryHome->setDiscordSession(discord);
-    connect(m_sanctuaryHome, &SanctuaryHome::discordRequested, discord, &SanctuarySession::start);
-    connect(m_sanctuaryHome, &SanctuaryHome::discordDisconnectRequested, discord, &SanctuarySession::disconnectAccount);
-    connect(m_sanctuaryHome, &SanctuaryHome::discordRefreshRequested, discord, &SanctuarySession::refresh);
+    for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
+        connect(page, &SanctuaryHome::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
+        connect(page, &SanctuaryHome::settingsRequested, this, [this] { showSanctuarySettings(); });
+        connect(page, &SanctuaryHome::accountsRequested, this, [this] { showSanctuarySettings("accounts"); });
+        connect(page, &SanctuaryHome::advancedRequested, this, [this] { showSanctuaryTools("mods"); });
+        connect(page, &SanctuaryHome::instanceToolRequested, this, &MainWindow::showSanctuaryTools);
+        connect(page, &SanctuaryHome::installRequested, this, [this] {
+            if (m_sanctuaryPack->busy()) m_sanctuaryPack->cancel();
+            else m_sanctuaryPack->installOrUpdate();
+        });
+        page->setDiscordSession(discord);
+        connect(page, &SanctuaryHome::discordRequested, discord, &SanctuarySession::start);
+        connect(page, &SanctuaryHome::discordDisconnectRequested, discord, &SanctuarySession::disconnectAccount);
+        connect(page, &SanctuaryHome::discordRefreshRequested, discord, &SanctuarySession::refresh);
+    }
     connect(discord, &SanctuarySession::browserRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
     discord->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
     QTimer::singleShot(0, discord, [discord] { discord->restore(APPLICATION->dataRoot()); });
@@ -498,17 +502,22 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
                             "actionChangeInstGroup", "actionLaunchInstance", "actionLaunchInstanceOffline"}) {
         if (auto* action = findChild<QAction*>(name)) { action->setVisible(false); action->setEnabled(false); }
     }
-    QTimer::singleShot(0, this, &MainWindow::showSanctuaryHome);
+    QTimer::singleShot(0, this, [this,discord] {
+        showSanctuaryHome();
+        if (!discord->connected() || !m_sanctuaryPack->verified()) showSanctuaryTools("setup");
+    });
 }
 
 void MainWindow::refreshSanctuaryHome()
 {
     if (!m_sanctuaryHome || !m_sanctuaryPack) return;
-    m_sanctuaryHome->setState(m_sanctuaryPack->instance() != nullptr,
-                            APPLICATION->capabilities() & Application::SupportsMSA,
-                            APPLICATION->settings()->get("Language").toString().startsWith("fr"));
-    m_sanctuaryHome->setPackState(m_sanctuaryPack->verified(), m_sanctuaryPack->busy(),
-                                m_sanctuaryPack->version(), m_sanctuaryPack->message(), m_sanctuaryPack->progress());
+    for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
+        page->setState(m_sanctuaryPack->instance() != nullptr,
+            APPLICATION->capabilities() & Application::SupportsMSA,
+            APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+        page->setPackState(m_sanctuaryPack->verified(), m_sanctuaryPack->busy(),
+            m_sanctuaryPack->version(), m_sanctuaryPack->message(), m_sanctuaryPack->progress());
+    }
     ensureSanctuaryPages();
     if (m_sanctuaryWorkspace) {
         m_sanctuaryWorkspace->setGameBusy(m_sanctuaryPack->busy());
@@ -533,7 +542,7 @@ void MainWindow::showSanctuaryHome()
 void MainWindow::showSanctuaryTools(const QString& page)
 {
     const bool fr = APPLICATION->settings()->get("Language").toString().startsWith("fr");
-    if (page == "home" || page == "news") {
+    if (page == "home" || page == "news" || page == "setup") {
         m_sanctuaryWorkspace->selectPage(page);
         m_sanctuaryStack->setCurrentWidget(m_sanctuaryWorkspace);
         return;

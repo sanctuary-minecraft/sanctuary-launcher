@@ -4,25 +4,24 @@ Le **8 novembre 2026**, après l'exploration en trois blocs, Koka retient à
 nouveau **un seul bloc contenant les étapes 1 à 5**, dans la **DA blanche**.
 Le **titre de l'étape en cours** occupe le haut du bloc de préparation. Le mot-symbole du
 site, le badge historique, le code SGA facultatif et tous les outils Prism
-restent demandés. Le [cahier des charges 0.8](../cahier-des-charges.md) fixe
+restent demandés. Le [cahier des charges 0.9](../cahier-des-charges.md) fixe
 ce parcours.
 
 ## Application native actuelle
 
-Après validation des maquettes, Koka demande de travailler directement sur
-le launcher. Le lot local intègre les outils Prism dans une seule fenêtre,
-avec **Accueil** puis **Actualités** dans la barre latérale.
-Les cinq étapes restent dans Accueil jusqu'à préparation complète, puis
-sont masquées au profit de Jouer, Intendance, Gazette et Tableau d'affichage.
-Les contenus privés utilisent désormais la [session Discord réelle](../discord-connexion.md). Microsoft reste en attente et Jouer demeure désactivé.
-L'accueil courant tient sur une page sans défilement : étape dans le header,
-étapes ou communauté dans le body, Jouer dans le footer en bas à droite.
-Le header remonte à droite du logo PNG, sans libellé de pack accolé.
-Intendance est en haut, Gazette à gauche et Tableau à droite en dessous ;
-voir la [recette du header intégré](../implementation/accueil-header-20261108.md).
-La [recette de cette disposition](../implementation/accueil-fixe-20261108.md)
-conserve des rendus de la fenêtre Qt. La [recette du binaire](../implementation/launcher-local-20261108.md) décrit
-les essais et leurs limites. Aucune nouvelle maquette n'est générée pour ce lot.
+Koka demande de travailler sur l'application native, sans nouvelles maquettes.
+L'accueil quotidien montre les publications **sans cadre ni titre de rubrique** :
+Intendance en haut, Gazette à gauche et Tableau à droite. Les auteurs ont leur
+visage de skin Minecraft près du titre. Un clic déplie le texte et les images
+de la Gazette dans le launcher ; le flux peut défiler. Le body commence au
+niveau du logo et Jouer reste dans le footer fixe.
+
+Le premier onglet **Bien démarrer** conserve les cinq étapes, même après
+Discord, et garde Microsoft visible en attente de l'autorisation nécessaire.
+Cette page et l'accueil partagent la même session et le même pack. Les outils
+Prism et Actualités restent dans la navigation de la même fenêtre.
+Voir la [recette actuelle](../implementation/accueil-minimal-20261108.md).
+Les images suivantes restent des références de recherche historiques.
 
 ## Maquette conservée — Installation
 

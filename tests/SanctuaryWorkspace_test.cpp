@@ -1,8 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include <QMainWindow>
+#include <QLabel>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QPushButton>
 #include <QSignalSpy>
 #include <QTest>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QBuffer>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QTimer>
 #include "ui/SanctuaryWorkspace.h"
 #include "ui/SanctuaryFeed.h"
 #include "ui/pages/BasePage.h"
@@ -21,6 +30,42 @@ public:
     int saves = 0, opens = 0, closes = 0;
 private:
     QString m_id;
+};
+
+class FaceReply : public QNetworkReply {
+public:
+    FaceReply(const QNetworkRequest& request,const QByteArray& image,QObject* parent) : QNetworkReply(parent), m_image(image)
+    {
+        setRequest(request);
+        setUrl(request.url());
+        setAttribute(QNetworkRequest::HttpStatusCodeAttribute,200);
+        open(QIODevice::ReadOnly);
+        QTimer::singleShot(0,this,[this] { setFinished(true); emit readyRead(); emit finished(); });
+    }
+    void abort() override {}
+protected:
+    qint64 readData(char* target,qint64 maximum) override
+    {
+        const auto size=qMin(maximum,qint64(m_image.size()-m_position));
+        if (size<=0) return -1;
+        memcpy(target,m_image.constData()+m_position,size);
+        m_position+=size;
+        return size;
+    }
+private:
+    QByteArray m_image;
+    qint64 m_position=0;
+};
+class FaceProvider : public QNetworkAccessManager {
+public:
+    QByteArray image;
+    QList<QNetworkRequest> requests;
+protected:
+    QNetworkReply* createRequest(Operation,const QNetworkRequest& request,QIODevice*) override
+    {
+        requests.append(request);
+        return new FaceReply(request,image,this);
+    }
 };
 
 class SanctuaryWorkspaceTest : public QObject {
@@ -104,6 +149,81 @@ private slots:
         QVERIFY(table.contains("Published summary"));
         QVERIFY(!table.contains("downloads"));
         QVERIFY(!table.contains("login"));
+    }
+    void communityPostsKeepTextSafeAndUsePublicMinecraftFaces()
+    {
+        SanctuaryFeed feed("article");
+        feed.resize(360,240);
+        feed.show();
+        const QJsonObject post{{"id","11111111-1111-4111-8111-111111111111"},
+            {"author_name","Notch"},{"title","<script>title</script>"},{"body","Body <b>as plain text</b>"}};
+        feed.setEntries({post});
+        QApplication::processEvents();
+        auto* title=feed.findChild<QLabel*>("postTitle");
+        auto* details=feed.findChild<QWidget*>("postDetails");
+        QVERIFY(details->isHidden());
+        QSignalSpy external(&feed,&SanctuaryFeed::linkRequested);
+        QVERIFY(QMetaObject::invokeMethod(title,"linkActivated",Q_ARG(QString,"toggle")));
+        QVERIFY(details->isVisible());
+        QCOMPARE(external.count(),0);
+        QCOMPARE(feed.findChild<QLabel*>("postAuthor")->text(),QString("Notch"));
+        QVERIFY(feed.findChild<QLabel*>("postTitle")->text().contains("&lt;script&gt;"));
+        QCOMPARE(feed.findChild<QLabel*>("postBody")->textFormat(),Qt::PlainText);
+        QCOMPARE(feed.findChild<QLabel*>("playerFace")->size(),QSize(32,32));
+        QCOMPARE(SanctuaryFeed::playerFaceUrl("Notch"),QUrl("https://mc-api.io/render/FACE/Notch/JAVA?size=64"));
+        QVERIFY(SanctuaryFeed::playerFaceUrl("../unsafe?token=test").isEmpty());
+        QVERIFY(SanctuaryFeed::playerFaceUrl("A display name").isEmpty());
+        feed.setEntries({post}); // A periodic refresh must not close the current post.
+        QVERIFY(details->isVisible());
+        QVERIFY(QMetaObject::invokeMethod(title,"linkActivated",Q_ARG(QString,"toggle")));
+        QVERIFY(details->isHidden());
+        auto second=post;
+        second.insert("id","22222222-2222-4222-8222-222222222222");
+        second.insert("body",QString("Long text for scrolling. ").repeated(400));
+        feed.setEntries({post,second});
+        QCoreApplication::sendPostedEvents(nullptr,QEvent::DeferredDelete);
+        const auto titles=feed.findChildren<QLabel*>("postTitle");
+        const auto panels=feed.findChildren<QWidget*>("postDetails");
+        QVERIFY(QMetaObject::invokeMethod(titles[0],"linkActivated",Q_ARG(QString,"toggle")));
+        QVERIFY(QMetaObject::invokeMethod(titles[1],"linkActivated",Q_ARG(QString,"toggle")));
+        QApplication::processEvents();
+        QVERIFY(panels[0]->isHidden());
+        QVERIFY(panels[1]->isVisible());
+        QTRY_VERIFY(feed.findChild<QScrollArea*>("postScroll")->verticalScrollBar()->maximum()>0);
+        feed.setEntries({});
+        for (auto* entry : feed.findChildren<QWidget*>("communityPost")) QVERIFY(!entry->isVisible());
+    }
+    void playerFacesRenderFromThePublicProviderAndStayCachedInMemory()
+    {
+        FaceProvider provider;
+        QImage skinFace(64,64,QImage::Format_RGB32);
+        skinFace.fill(Qt::green);
+        QBuffer buffer(&provider.image);
+        QVERIFY(buffer.open(QIODevice::WriteOnly));
+        QVERIFY(skinFace.save(&buffer,"PNG"));
+        SanctuaryFeed feed("article",nullptr,&provider);
+        const QJsonObject first{{"id","11111111-1111-4111-8111-111111111111"},{"author_name","PlayerOne"},{"title","First"}};
+        auto second=first;
+        second.insert("id","22222222-2222-4222-8222-222222222222");
+        second.insert("author_name","PlayerTwo");
+        feed.setEntries({first,second});
+        const auto faces=feed.findChildren<QLabel*>("playerFace");
+        QCOMPARE(faces.size(),2);
+        QTRY_VERIFY(!faces[0]->pixmap().isNull());
+        QTRY_VERIFY(!faces[1]->pixmap().isNull());
+        QCOMPARE(faces[0]->pixmap().size(),QSize(32,32));
+        QCOMPARE(provider.requests.size(),2);
+        for (const auto& request : provider.requests) {
+            QCOMPARE(request.url().host(),QString("mc-api.io"));
+            QVERIFY(request.rawHeader("Authorization").isEmpty());
+            QVERIFY(request.rawHeader("Cookie").isEmpty());
+        }
+        auto updated=first;
+        updated.insert("title","Updated title");
+        feed.setEntries({updated});
+        QCOMPARE(provider.requests.size(),2);
+        QCoreApplication::sendPostedEvents(nullptr,QEvent::DeferredDelete);
+        QVERIFY(!feed.findChild<QLabel*>("playerFace")->pixmap().isNull());
     }
     void unopenedSettingsDoNotOverwritePreferences()
     {

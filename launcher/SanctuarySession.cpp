@@ -82,6 +82,8 @@ QNetworkReply* SanctuarySession::request(const QString& path, const QJsonObject&
     QNetworkRequest request(QUrl(origin + "/api/launcher/v1/" + path));
     request.setRawHeader("Accept", "application/json");
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
+    request.setAttribute(QNetworkRequest::CacheSaveControlAttribute, false);
+    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
     request.setTransferTimeout(20000);
     if (connected() && path != "device" && path != "token") request.setRawHeader("Authorization", "Bearer " + m_token.toLatin1());
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -170,4 +172,10 @@ void SanctuarySession::disconnectAccount()
 QNetworkReply* SanctuarySession::feed(const QString& kind, bool french)
 {
     return request("feed?kind=" + kind + "&lang=" + (french ? "fr" : "en"));
+}
+
+QNetworkReply* SanctuarySession::photo(const QString& id)
+{
+    if (!connected() || !QRegularExpression("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$").match(id).hasMatch()) return nullptr;
+    return request("posts/" + id + "/photo");
 }

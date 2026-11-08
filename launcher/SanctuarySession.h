@@ -24,6 +24,7 @@ public:
     QString message() const { return m_message; }
     QJsonObject profile() const { return m_profile; }
     QNetworkReply* feed(const QString& kind, bool french);
+    QNetworkReply* photo(const QString& id);
     static bool validProfile(const QJsonObject& value);
 signals:
     void changed();

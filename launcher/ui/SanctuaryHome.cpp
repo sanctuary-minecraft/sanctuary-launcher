@@ -50,7 +50,10 @@ struct SanctuaryHome::Ui {
     struct Row { QFrame* frame; QLabel *number, *title, *detail, *status; QPushButton* action; };
     std::array<Row, 5> rows;
     QLabel *eyebrow, *heading, *subtitle, *server, *notice, *historical, *help, *footer, *code, *codeHelp;
-    QWidget *previewControls, *codePanel, *setupPanel, *community, *readyCodePanel, *toolsPanel;
+    QWidget *previewControls, *codePanel, *setupPanel, *community, *readyCodePanel, *toolsPanel, *dashboardEmpty;
+    QFrame* pageHeader;
+    QLabel* dashboardMessage;
+    QPushButton* startSetup;
     QFrame *chromeHeader, *chromeFooter;
     QList<SanctuaryFeed*> feeds;
     QLabel* readyCode;
@@ -64,7 +67,7 @@ struct SanctuaryHome::Ui {
     QProgressBar* progress;
 };
 
-SanctuaryHome::SanctuaryHome(QWidget* parent) : QWidget(parent), m_ui(std::make_unique<Ui>())
+SanctuaryHome::SanctuaryHome(QWidget* parent, View view) : QWidget(parent), m_ui(std::make_unique<Ui>()), m_view(view)
 {
     initializeSanctuaryResources();
     setObjectName("sanctuaryHome");
@@ -99,7 +102,7 @@ SanctuaryHome::SanctuaryHome(QWidget* parent) : QWidget(parent), m_ui(std::make_
         #sanctuaryHome QPushButton:disabled { background: #eaeef2; color: #6e7781; border-color: #eaeef2; }
         #sanctuaryHome QPushButton[link="true"] { color: #0969da; background: transparent; border: none; padding: 3px; font-weight: 400; text-align: left; }
         #sanctuaryHome QPushButton[link="true"]:focus { border: 1px solid #0969da; }
-        #sanctuaryHome QFrame[communityCard="true"] { border: 1px solid #d0d7de; border-radius: 5px; }
+
         #sanctuaryHome QComboBox { background: white; color: #24292f; border: 1px solid #d0d7de; border-radius: 4px; padding: 5px 10px; min-height: 22px; }
         #sanctuaryHome QProgressBar { border: 1px solid #d0d7de; border-radius: 3px; background: white; color: #24292f; text-align: center; }
         #sanctuaryHome QProgressBar::chunk { background: #dafbe1; }
@@ -167,7 +170,9 @@ void SanctuaryHome::setDiscordSession(SanctuarySession* session)
 
 bool SanctuaryHome::communityUnlocked() const
 {
+    if (m_view == View::Setup) return false;
     if (m_onlineSession) return m_discordConnected && m_discordProfile.value("access").toObject().value("status") == "granted";
+    if (m_view == View::Dashboard) return false;
     const bool installed = m_realPack ? m_packVerified : m_local.installed;
     return m_localMode && m_local.discord && m_local.microsoft && m_local.access == Access::Granted && installed && !m_packBusy;
 }
@@ -239,6 +244,7 @@ void SanctuaryHome::buildUi()
     connect(u.reset, &QPushButton::clicked, this, [this] { setLocalScenario("start"); });
 
     auto* header = new QFrame(column);
+    u.pageHeader = header;
     header->setObjectName("homeHeader");
     auto* heading = new QVBoxLayout(header);
     heading->setContentsMargins(0, 0, 0, 4);
@@ -346,17 +352,11 @@ void SanctuaryHome::buildUi()
     const FeedSection sections[] = {{"bulletin","Intendance","Stewardship",0,0,2},
         {"article","Gazette","Gazette",1,0,1}, {"notice","Tableau d'affichage","Notice board",1,1,1}};
     for (const auto& section : sections) {
-        auto* card = new QFrame(u.community);
+        auto* card = new QWidget(u.community);
         card->setObjectName("communityCard-" + QString(section.kind));
-        card->setProperty("communityCard", true);
         auto* cardLayout = new QVBoxLayout(card);
-        cardLayout->setContentsMargins(10, 8, 10, 8);
+        cardLayout->setContentsMargins(0, 0, 0, 0);
         cardLayout->setSpacing(5);
-        auto* title = label(card, "communityTitle-" + QString(section.kind));
-        title->setProperty("labelFr", section.fr);
-        title->setProperty("labelEn", section.en);
-        title->setStyleSheet("font-size: 16px; font-weight: 600;");
-        cardLayout->addWidget(title);
         auto* feed = new SanctuaryFeed(section.kind, card);
         u.feeds.append(feed);
         cardLayout->addWidget(feed, 1);
@@ -368,6 +368,17 @@ void SanctuaryHome::buildUi()
     community->setRowStretch(0, 1);
     community->setRowStretch(1, 2);
     body->addWidget(u.community);
+
+    u.dashboardEmpty = new QWidget(body);
+    auto* empty = new QVBoxLayout(u.dashboardEmpty);
+    empty->setContentsMargins(0,0,0,0);
+    u.dashboardMessage = label(u.dashboardEmpty,"dashboardMessage");
+    empty->addWidget(u.dashboardMessage);
+    u.startSetup = button(u.dashboardEmpty,"startSetup");
+    empty->addWidget(u.startSetup,0,Qt::AlignLeft);
+    empty->addStretch();
+    body->addWidget(u.dashboardEmpty);
+    connect(u.startSetup,&QPushButton::clicked,this,[this] { emit instanceToolRequested("setup"); });
 
     // Standalone widget tools are hidden when the persistent native sidebar is present.
     u.toolsPanel = new QWidget(column);
@@ -444,7 +455,11 @@ void SanctuaryHome::buildUi()
     readyCodeLayout->addWidget(u.readyCodeCopy);
     readyCodeLayout->addStretch();
     page->insertWidget(page->count() - 1, u.readyCodePanel);
-    connect(u.setupToggle, &QPushButton::clicked, this, &SanctuaryHome::accountsRequested);
+    connect(u.setupToggle, &QPushButton::clicked, this, [this] {
+        if (m_view == View::Dashboard) emit instanceToolRequested("setup");
+        else if (m_view == View::Setup) emit instanceToolRequested("home");
+        else emit accountsRequested();
+    });
     connect(u.readyCodeToggle, &QPushButton::clicked, this, [this] {
         if (m_onlineSession) emit linkRequested(QUrl("https://sanctuary-minecraft.net/candidature"));
         else { m_codeVisible = !m_codeVisible; refresh(); }
@@ -573,7 +588,8 @@ void SanctuaryHome::refresh()
     const bool installing = m_realPack ? m_packBusy : m_installTimer && m_installTimer->isActive();
     const int active = activeStep();
     const bool waiting = (m_onlineSession || m_localMode) && (access == Access::Pending || access == Access::Synchronizing);
-    u.previewControls->setVisible(m_localMode || m_onlineSession);
+    u.previewControls->setVisible(m_view != View::Dashboard && (m_localMode || m_onlineSession));
+    u.pageHeader->setVisible(m_view != View::Dashboard);
     u.scenarios->setVisible(m_localMode && !m_onlineSession);
     u.reset->setVisible(m_localMode && !m_onlineSession);
     u.discordConnect->setVisible(m_onlineSession);
@@ -657,6 +673,10 @@ void SanctuaryHome::refresh()
     if (!microsoft) {
         action(1, text("Connecter Microsoft", "Connect Microsoft"), active == 2);
         m.action->setEnabled(!m_onlineSession && (m_localMode || m_microsoftAvailable));
+        if (m_onlineSession) {
+            m.detail->setText(text("Connexion en attente d’autorisation Microsoft/Mojang.", "Sign-in awaits Microsoft/Mojang approval."));
+            m.action->setToolTip(m.detail->text());
+        }
     }
     auto& a = u.rows[2];
     a.detail->setText(text("Candidature ou parrainage", "Application or sponsorship"));
@@ -721,18 +741,17 @@ void SanctuaryHome::refresh()
     u.packSummary->setText(m_realPack ? m_packMessage : text("Installation locale de développement", "Local development installation"));
     u.packSummary->setToolTip(u.packSummary->text());
     const bool ready = communityUnlocked();
-    u.body->setCurrentWidget(ready ? u.community : u.setupPanel);
-    u.setupToggle->setVisible(ready);
-    u.setupToggle->setText(text("Mes comptes", "My accounts"));
-    u.readyCodeToggle->setVisible(ready);
+    u.body->setCurrentWidget(ready ? u.community : m_view == View::Dashboard ? u.dashboardEmpty : u.setupPanel);
+    u.dashboardMessage->setText(text("Retrouvez votre accès et les publications de Sanctuary dans Bien démarrer.", "Find your Sanctuary access and posts in Getting started."));
+    u.startSetup->setText(text("Bien démarrer", "Getting started"));
+    u.setupToggle->setVisible(ready || m_view != View::Adaptive);
+    u.setupToggle->setText(m_view == View::Dashboard ? text("Bien démarrer", "Getting started") : m_view == View::Setup ? text("Voir l’accueil", "View home") : text("Mes comptes", "My accounts"));
+    u.readyCodeToggle->setVisible(ready && m_view == View::Adaptive);
     u.readyCodeToggle->setText(m_codeVisible ? text("Masquer le code SGA", "Hide SGA code") : text("Code SGA · facultatif", "SGA code · optional"));
     if (m_onlineSession) u.readyCodeToggle->setText(text("Mon dossier Sanctuary", "My Sanctuary profile"));
     u.readyCodePanel->setVisible(!m_onlineSession && ready && m_codeVisible);
     u.readyCode->setText("SANCTUARYDEMO");
     u.readyCodeCopy->setText(text("Copier le code fictif", "Copy fictional code"));
-    for (auto* title : u.community->findChildren<QLabel*>()) {
-        if (title->property("labelFr").isValid()) title->setText(title->property(m_french ? "labelFr" : "labelEn").toString());
-    }
     for (auto* feed : u.feeds) feed->setFrench(m_french);
     if (ready && !m_communityVisible) for (auto* feed : u.feeds) feed->reload();
     m_communityVisible = ready;
