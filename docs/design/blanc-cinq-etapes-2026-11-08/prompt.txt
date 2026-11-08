@@ -1,0 +1,26 @@
+Use case: ui-mockup. Generate ONE updated Sanctuary Launcher desktop UI concept, based closely on the FIRST attached white preparation screenshot. The user now prefers that single grouped five-step layout over the later three-section layout. The SECOND attached image is the official Sanctuary website wordmark PNG.
+Current date anchor: November 8, 2026. All UI data are fictional.
+TARGET DIMENSIONS: 1487x1058, same natural desktop aspect ratio as the first reference, crisp front-facing app content only, no device or browser frame. White opaque background, centered content column with the same generous margins, clean GitHub-like sans serif, dark text, thin light-grey separators, compact buttons, green success. No landscape, texture, gradients or decorative illustration.
+
+KEY USER REQUEST: ONE grouped outlined block containing FIVE numbered rows, clearly 1 through 5. Do NOT create sections called "Mes comptes", "Mon accès" or "Mon jeu". Do NOT use a welcome title. The large page title is the CURRENT STEP title. Preserve all full Prism functionality through one "Tous les outils" entry point.
+
+SCREEN STATE: Discord and Microsoft connected; admission to Sanctuary confirmed; player has the informative historical beta badge; code not opened and optional; installation is the current step, not yet begun. The current page title should read exactly "Installer Sanctuary". Small eyebrow above title: "Étape 5 · Installation". Muted subtitle: "Vos comptes et votre accès sont prêts. Préparez votre jeu."
+
+HEADER:
+Top left, replace the plain text Sanctuary in reference 1 with the official grey beveled SANCTUARY wordmark in reference 2, proportionally scaled, transparent on white. Complete wordmark, correct shape and proportions, about 245px wide, no retyped logo or black background. Add small simple grey "Launcher" text to its right. Top right tiny green dot and "Serveur en ligne · 12/20". This is simultaneous occupancy, not a community membership cap. A thin line separates header from page.
+
+THE SINGLE FIVE-ROW BLOCK:
+One neat rounded rectangular outline with only fine horizontal dividers inside, not nested cards. Each row has an aligned numbered circle on the left, text in the middle, a relevant status/action on the right. Numbers 1, 2, 3, 4, 5 must all remain visible; use green outlines for completed required steps, neutral for optional code, solid dark-green circle for current step 5.
+ROW 1: numbered circle "1"; title "Discord"; subtitle "camille"; small green status "Connecté" on the right.
+ROW 2: circle "2"; title "Microsoft"; subtitle "Minecraft Java vérifié"; green "Connecté" on the right.
+ROW 3: circle "3"; title "Accès Sanctuary"; subtitle "Votre accès au serveur est confirmé."; a subtle neutral outlined badge "Joueur historique de la bêta" near the subtitle or title, small enough to feel informative, not a paid tier or additional task; green "Validé" on the right.
+ROW 4: circle "4"; title "Code de personnage" with small neutral "Facultatif" label alongside; subtitle "Aucun code à saisir pour jouer."; quiet outlined button "Afficher mon code SGA" on the right. Code remains hidden until requested. No check mark implying the optional code is required, no code input, no glyph string, no need to complete this row before row 5.
+ROW 5: circle "5", current step subtly emphasized with a very light neutral background only in this row; title "Installation"; subtitle "Java et pack Sanctuary"; prominent filled green button "Installer Sanctuary" on the right. This is the ONE primary action on the screen.
+
+BELOW BLOCK:
+Short muted line "Votre progression est enregistrée automatiquement."
+A disabled grey "Jouer" button with short text "Disponible après l’installation." and a separate enabled neutral outlined "Tous les outils" button aligned neatly in the same lower area, with small right chevron if useful. This opens full native Prism management; do not list every tool on this home. Do not disable all tools because of installation or admission.
+Footer with thin divider, links "Actualités", "Site Sanctuary", "Aide"; far right small muted "Maquette · données fictives".
+
+CONSTRAINTS:
+The code SGA stays optional, not a prerequisite for admission or playing. Historical badge remains informative. No "5 sur 5 étapes validées", no message that all five are mandatory. Installation current step rather than an invented in-progress download. The account/access statuses and 12/20 are fictional examples. Keep French accents perfect, no clipped buttons or text. Keep generous spacing but fit all five numbered rows and footer naturally in the target viewport. This is one image of one screen, not a collage.

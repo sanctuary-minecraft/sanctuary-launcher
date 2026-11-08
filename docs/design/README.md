@@ -1,52 +1,109 @@
 # Direction visuelle de Sanctuary Launcher
 
-La **DA blanche, sobre et centrée, inspirée de GitHub**, est retenue par Koka
-le **8 novembre 2026**. Le parcours de référence est désormais **Mes comptes →
-Mon accès → Mon jeu**, avec un code de personnage SGA facultatif. Le
-[cahier des charges 0.3](../cahier-des-charges.md) définit le comportement cible.
+Le **8 novembre 2026**, après l'exploration en trois blocs, Koka retient à
+nouveau **un seul bloc contenant les étapes 1 à 5**, dans la **DA blanche**.
+Le **titre de l'étape en cours** occupe le haut de page. Le mot-symbole du
+site, le badge historique, le code SGA facultatif et tous les outils Prism
+restent demandés. Le [cahier des charges 0.4](../cahier-des-charges.md) fixe
+ce parcours.
+
+## Maquette actuelle — Installation
+
+![Bloc unique en cinq étapes — Installer Sanctuary](blanc-cinq-etapes-2026-11-08/installation-reference.png)
+
+Cette image actualise la direction demandée : la ligne 5 est active et le
+titre principal est **Installer Sanctuary**, accompagné de **Étape 5 ·
+Installation**. Les autres étapes restent visibles dans le même bloc :
+
+1. **Discord** — compte connecté.
+2. **Microsoft** — Minecraft Java vérifié.
+3. **Accès Sanctuary** — admission confirmée et badge **Joueur historique de la bêta**.
+4. **Code de personnage** — mention **Facultatif**, code masqué sous Afficher mon code SGA.
+5. **Installation** — action principale Installer Sanctuary.
+
+La ligne 4 ne doit pas devenir une obligation : le joueur peut préparer
+son jeu et jouer normalement sans afficher ni recopier son code. Les numéros
+indiquent la place dans le parcours, pas cinq validations obligatoires.
+
+**Tous les outils** ouvre la [gestion complète de Prism](../outils-prism.md) :
+mods, packs de ressources et de shaders, captures, mondes, serveurs, versions,
+réglages, logs et autres pages natives. Les réglages globaux et la gestion des
+instances restent accessibles. Les raccourcis Mods/Shaders/Réglages peuvent
+être proposés pour une installation prête ; l'accueil ne limite pas les outils.
+
+Le compte `camille`, le badge, les validations et **12/20** sont fictifs. Ce
+compteur représente les connexions simultanées, sans plafond de vingt membres
+admis. Aucun téléchargement n'est en cours sur l'image : Installer est une
+action à lancer. Jouer reste indisponible tant que le jeu n'est pas prêt.
+Cette maquette ne prouve aucune connexion, licence, admission ou installation.
+
+L'image illustre la dernière préférence exprimée ; elle n'a pas encore reçu
+une validation distincte après sa génération. Les états d'attente et d'erreur
+restent à décliner. Le contrat prévoit déjà l'installation pendant l'attente,
+le contrôle serveur de l'admission et la reprise des sessions et préférences.
+Le titre suit l'action active : Connecter Discord, Connecter Microsoft, Accès
+Sanctuary — En attente, Installer Sanctuary, puis Jouer à Sanctuary lorsque
+les prérequis sont remplis. Il ne reste pas figé sur un titre de bienvenue.
+
+## Fichiers et identité
+
+| Fichier | Rôle |
+| --- | --- |
+| [installation-reference.png](blanc-cinq-etapes-2026-11-08/installation-reference.png) | Maquette actuelle, 1486 × 1059 pixels |
+| [provenance.json](blanc-cinq-etapes-2026-11-08/provenance.json) | Sources, contexte de la demande, dimensions, taille et SHA-256 |
+| [prompt.txt](blanc-cinq-etapes-2026-11-08/prompt.txt) | Consigne complète de génération |
+
+Génération par **Imagegen intégré**, le 8 novembre 2026, à partir de la première
+maquette blanche de préparation et du mot-symbole original du site. Le PNG
+produit est conservé sans retouche de pixels ni redimensionnement. Le format
+visé était 1487 × 1058 ; les dimensions ci-dessus sont celles du fichier obtenu.
+
+Le site utilise `public/images/minecraft.png` dans son en-tête de navigation.
+Ce fichier original a été fourni à la génération et existe déjà dans le fork
+sous [wordmark.png](../../launcher/resources/sanctuary/wordmark.png). Pour
+l'application, utiliser ce PNG original de **1024 × 172 pixels**, avec sa
+transparence et ses proportions, plutôt que retaper le nom ou découper sa
+reproduction dans la maquette. La maquette fixe la composition, pas les pixels
+du fichier source.
 
 ## Principes retenus
 
-- Fond blanc uni, sans paysage ni textures ; colonne de contenu centrée.
-- Texte sombre lisible sans empattement, espaces réguliers et traits gris fins.
-- Commandes compactes ; vert pour les validations, ambre pour l'attente, liens
-  identifiables et statuts compréhensibles sans dépendre uniquement de la couleur.
-- Connexions Discord et Microsoft dans Mes comptes ; candidature, parrainage et
-  marqueur historique bêta dans Mon accès ; installation, Jouer, mods et shaders
-  dans Mon jeu.
-- Code SGA disponible sous Afficher mon code, avec Copier, après admission :
-  aucune case obligatoire à cocher ni copie à effectuer pour jouer normalement.
-- Retour quotidien centré sur Jouer, avec reprise des comptes et du dossier.
+- Fond blanc uni sans paysage ni textures ; colonne centrée et espace régulier.
+- Un bloc commun avec séparateurs fins, cinq numéros et une seule action principale.
+- Titre et ligne active cohérents, étapes accomplies conservées et reconnexion ciblée.
+- Mot-symbole du site dans l'en-tête ; consignes et commandes en texte sans empattement lisible.
+- Vert pour les validations, ambre pour l'attente ; statuts lisibles sans la couleur seule.
+- Code SGA facultatif et masqué par défaut, sans prérequis de copie pour Jouer.
+- Accès complet aux outils de Prism et retour à l'accueil Sanctuary.
 
-## Maquettes de direction conservées
+## Versions précédentes conservées
 
-Ces trois images sont les états d'une même exploration blanche, pas des
-captures du launcher implémenté. **Elles précèdent la réflexion finale** : les
-cinq lignes de validation et l'installation bloquée pendant l'attente qui y
-figurent ne sont plus le contrat du parcours. La révision 0.3 retient trois
-blocs, une installation possible pendant l'attente et le code en second plan.
-Une nouvelle composition en trois blocs reste à dessiner avant son intégration.
+La recherche en trois blocs a été validée avant le retour au bloc unique.
+Ses étapes visuelles sont conservées pour l'historique, sans définir la cible
+actuelle :
 
-| Image | Usage |
+| Image | Contexte |
 | --- | --- |
-| [Préparation](blanc-2026-11-08/preparation.png) | Direction claire, centrage, alignements et commandes |
-| [Candidature en attente](blanc-2026-11-08/candidature-en-attente.png) | Statuts lisibles, attente distincte d'une erreur de compte |
-| [Prêt à jouer](blanc-2026-11-08/pret-a-jouer.png) | État validé, exemple SGA fictif, accès Jouer/Mods/Shaders/Réglages |
+| [Trois blocs avec logo et Tous les outils](blanc-trois-blocs-2026-11-08/accueil-reference.png) | Dernière variante avant retour aux cinq étapes |
+| [Trois blocs avec logo](blanc-trois-blocs-2026-11-08/accueil-logo.png) | Remplacement du titre par le mot-symbole du site |
+| [Trois blocs avant logo](blanc-trois-blocs-2026-11-08/accueil-avant-logo.png) | Composition initialement validée |
 
-![Direction blanche — état de préparation avant révision en trois blocs](blanc-2026-11-08/preparation.png)
+Le [registre](blanc-trois-blocs-2026-11-08/provenance.json) et les
+[consignes](blanc-trois-blocs-2026-11-08/prompts.json) restent conservés.
 
-Les fichiers sont copiés sans retouche ni redimensionnement. Dimensions,
-tailles et SHA-256 sont consignés dans
-[le registre de provenance](blanc-2026-11-08/provenance.json). Génération Imagegen
-le 8 novembre 2026, avec les composants GitHub/Primer pour leur sobriété et
-une planche SGA pour les glyphes. Le nom Sanctuary est rendu en texte simple
-pour cette exploration. Aucun code personnel réel ni statut de compte réel
-n'est représenté.
+Les premières images blanches constituent la référence de forme du bloc
+unique. Leurs comportements sont partiellement dépassés : le code n'est plus
+obligatoire et l'installation n'est plus bloquée par l'attente d'admission.
 
-## Archive et application existante
+| Image | Contexte |
+| --- | --- |
+| [Préparation](blanc-2026-11-08/preparation.png) | Première composition en cinq lignes, reprise pour la nouvelle maquette |
+| [Candidature en attente](blanc-2026-11-08/candidature-en-attente.png) | Recherche initiale de présentation des statuts |
+| [Prêt à jouer](blanc-2026-11-08/pret-a-jouer.png) | Ancienne vue avec exemple SGA fictif |
 
-La [première maquette à paysage](archive-accueil-2026-11-08.md) et son PNG
-original restent conservés avec leur empreinte. Cette direction historique
-ne définit plus la cible visuelle. L'[accueil Qt déjà compilé](../implementation/accueil-qt-fr.png)
-l'utilise encore ; cette révision documentaire ne modifie pas l'application.
-Les ressources d'origine et leur provenance restent dans [assets.md](assets.md).
+Leur [registre de provenance](blanc-2026-11-08/provenance.json) reste conservé.
+La [première maquette à paysage](archive-accueil-2026-11-08.md) et son PNG sont
+également archivés. L'[accueil Qt déjà compilé](../implementation/accueil-qt-fr.png)
+utilise encore cette ancienne direction : cette mise à jour documentaire ne
+modifie pas l'application. Les ressources du premier lot et leur provenance
+restent dans [assets.md](assets.md).

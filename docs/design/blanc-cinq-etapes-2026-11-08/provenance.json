@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-08",
+  "method": "Built-in Imagegen, using the first white five-row preparation mockup and the actual website wordmark as input. Generated file copied without pixel changes or resizing.",
+  "approval_scope": "Koka requests a return to one grouped block numbered 1–5, with the active step as page title, while retaining the website wordmark, optional SGA code, historical beta badge and full Prism tools. This image illustrates that requested direction; the exact new frame has not received a separate subsequent approval.",
+  "previous_composition": "../blanc-trois-blocs-2026-11-08/provenance.json",
+  "input_layout": "../blanc-2026-11-08/preparation.png",
+  "wordmark": {
+    "source_repository": "sanctuary-minecraft/sanctuary-web",
+    "source_ref": "b931e0db10db77fc2bd930f270bcbba2fabc89cd",
+    "source_path": "public/images/minecraft.png",
+    "local_asset": "../../../launcher/resources/sanctuary/wordmark.png",
+    "width": 1024,
+    "height": 172,
+    "bytes": 44483,
+    "sha256": "c173f73517f872fd0696de04674d0a125ff0ddf6b13ddfce160e27051a06a120",
+    "implementation_rule": "Use the original transparent PNG in the application. Do not extract the logo from the generated screenshot."
+  },
+  "mock_state": "Required account and admission prerequisites are complete, historical marker is illustrative, optional code is not opened, and installation is the current unfinished step. No download is running. All account and server occupancy data are fictional.",
+  "files": [
+    {
+      "file": "installation-reference.png",
+      "width": 1486,
+      "height": 1059,
+      "bytes": 1218647,
+      "sha256": "9d31a9dd0a5c97cbf031744b7a5db2df1438e1f96dd33602801d0f85a02801ed"
+    }
+  ],
+  "prompts": "prompt.txt"
+}

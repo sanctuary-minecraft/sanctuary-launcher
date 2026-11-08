@@ -6,16 +6,23 @@ Silicon. Il ne constitue pas encore une distribution pour les joueurs.
 
 ## Direction retenue
 
-Le [cahier des charges 0.3](docs/cahier-des-charges.md) retient les trois blocs
-**Mes comptes, Mon accès et Mon jeu**, la **DA blanche** et le code SGA
-facultatif dans le parcours normal. L'installation pourra être préparée
-pendant l'attente ; l'admission du serveur reste nécessaire pour le rejoindre.
-Les joueurs historiques de la bêta auront un marqueur distinct. Les vingt
-places simultanées actuelles ne plafonnent pas le nombre de membres.
+Le [cahier des charges 0.4](docs/cahier-des-charges.md) retient la **DA blanche**,
+**un bloc de cinq étapes numérotées** et le **titre de l'étape en cours** :
+Discord, Microsoft, Accès Sanctuary, Code de personnage et Installation.
+Le code SGA de la ligne 4 reste **facultatif** ; l'installation peut être
+préparée pendant l'attente, et l'admission du serveur reste nécessaire pour
+le rejoindre. Les joueurs historiques de la bêta ont un marqueur distinct.
+Les vingt places simultanées actuelles ne plafonnent pas le nombre de membres.
 
-Les [maquettes blanches](docs/design/README.md) servent de références de DA ;
-leur ancien découpage en cinq validations est remplacé par ces trois blocs.
-Cette cible n'est pas encore portée dans l'application compilée ci-dessous.
+La [maquette actuelle](docs/design/README.md) illustre l'étape Installation,
+avec le mot-symbole Sanctuary du site en haut à gauche et **Tous les outils**.
+La recherche en trois blocs est archivée à la suite du changement de préférence
+de Koka. Cette cible n'est pas encore portée dans l'application ci-dessous.
+
+**Toutes les options de Prism sont conservées** dans la cible : mods, packs
+de ressources et de shaders, captures, mondes, serveurs, versions, logs,
+réglages, gestion des instances et réglages globaux ; voir le
+[contrat des outils Prism](docs/outils-prism.md).
 
 ## Premier lot disponible
 

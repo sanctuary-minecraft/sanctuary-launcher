@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-08",
+  "method": "Built-in Imagegen; three-block generation, targeted header edit using the website wordmark, then addition of the full Prism-tools entry point requested by Koka. Generated PNG files copied without pixel changes.",
+  "approval_scope": "Historical exploration: Koka approved the three-block composition and requested the site wordmark and all Prism tools, then preferred the single five-step block with a current-step title. Preserved as an archive, no longer the target layout.",
+  "wordmark": {
+    "source_repository": "sanctuary-minecraft/sanctuary-web",
+    "source_ref": "b931e0db10db77fc2bd930f270bcbba2fabc89cd",
+    "source_path": "public/images/minecraft.png",
+    "usage_path": "resources/views/layouts/sidebar.blade.php",
+    "local_asset": "../../../launcher/resources/sanctuary/wordmark.png",
+    "width": 1024,
+    "height": 172,
+    "bytes": 44483,
+    "sha256": "c173f73517f872fd0696de04674d0a125ff0ddf6b13ddfce160e27051a06a120",
+    "implementation_rule": "Use the original PNG with its transparency and proportions in the application. The generated composition is not a pixel-exact source logo asset."
+  },
+  "mock_data": "camille, account/admission/installation states and 12/20 server occupancy are fictitious. Historical badge is illustrative. Twenty is simultaneous capacity, not an admission limit.",
+  "files": [
+    {
+      "file": "accueil-reference.png",
+      "role": "Archive de la recherche en trois blocs : logo du site et accès Tous les outils de Prism.",
+      "width": 1511,
+      "height": 1041,
+      "bytes": 1162923,
+      "sha256": "2dbb1bb87ae071db82bcc2ba48912a8137f0d04acdba1dc40fe205a8fd0542e5"
+    },
+    {
+      "file": "accueil-logo.png",
+      "role": "Archive de la recherche en trois blocs : Étape intermédiaire : ajout du logo du site à la composition validée.",
+      "width": 1511,
+      "height": 1041,
+      "bytes": 1166592,
+      "sha256": "ddc003e077cad203ad15deba8878d5fc2867f3a45022c2d84bf8fc04ebe43589"
+    },
+    {
+      "file": "accueil-avant-logo.png",
+      "role": "Archive de la recherche en trois blocs : Composition en trois blocs validée avant les ajustements du logo et des outils.",
+      "width": 1487,
+      "height": 1058,
+      "bytes": 1145344,
+      "sha256": "e90c1d25865234842665747971db750a95f33130e425468e6ce759c7dec90b75"
+    }
+  ],
+  "prompts": "prompts.json"
+}

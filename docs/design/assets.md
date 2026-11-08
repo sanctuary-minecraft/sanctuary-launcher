@@ -1,9 +1,13 @@
 # Origine des images du premier lot
 
 Ces ressources décrivent le premier lot à paysage, conservé pour l'historique.
-La [direction blanche désormais retenue](README.md) possède son
-[registre de provenance](blanc-2026-11-08/provenance.json) distinct ; aucune
-ressource du binaire n'est remplacée par la révision documentaire 0.3.
+La [maquette blanche en cinq étapes désormais retenue](README.md) possède son
+[registre de provenance](blanc-cinq-etapes-2026-11-08/provenance.json) distinct ;
+aucune ressource du binaire n'est remplacée par la révision documentaire 0.4.
+Elle reprend le mot-symbole du site à partir du PNG original fourni à Imagegen.
+Lors de l'intégration, utiliser directement `wordmark.png`, et non un extrait
+de sa reproduction dans la maquette. Les premières explorations blanches
+conservent leur [propre registre](blanc-2026-11-08/provenance.json).
 
 La maquette validée `accueil-sanctuary-reference-2026-11-08.png` reste
 inchangée, avec l'empreinte conservée dans le
