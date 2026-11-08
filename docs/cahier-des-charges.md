@@ -127,7 +127,8 @@ Les parcours actuels sont documentés dans
 **AUTH-01.** Utiliser une application **Sanctuary Launcher** et son propre
 Client ID autorisé pour Minecraft. L'[enregistrement Entra](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
 est réalisé : voir les [identifiants et paramètres enregistrés](microsoft.md).
-La [demande AppID Minecraft](https://aka.ms/mce-reviewappid) reste à envoyer.
+La [demande AppID Minecraft](https://aka.ms/mce-reviewappid) est envoyée le
+8 novembre 2026 ; sa réception est confirmée et la décision reste en attente.
 Le compte d'administration est rattaché à son nouvel annuaire Azure ;
 la création d'un compte dédié n'est pas un préalable imposé.
 
