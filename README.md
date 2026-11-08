@@ -24,7 +24,8 @@ le haut de la barre latérale, avec le header de l'étape à sa droite.
 navigateur, puis une confirmation lie ce launcher au compte déjà présent.
 Le dossier et l'état de whitelist sont relus sur le site, sans candidature
 ou admission créée automatiquement. Les trois panneaux utilisent les vraies
-publications privées, après récupération d'un accès confirmé.
+publications privées, après récupération d'un accès confirmé. Koka confirme
+la connexion réelle et leur affichage le 8 novembre 2026.
 
 Microsoft/Mojang reste à raccorder : **Jouer reste désactivé**, même si Discord
 retrouve un accès accordé. Les comptes Microsoft simulés des tests ne valent

@@ -14,3 +14,7 @@ Recette : [contrat et vérifications](../discord-connexion.md). Les tests PHP
 couvrent consentement, expiration/rejeu, révocation et limites des droits ; les
 tests Qt couvrent le navigateur de confiance, les requêtes authentifiées et
 la séparation entre données réelles et simulation.
+
+Validation utilisateur le **8 novembre 2026** : Koka confirme la connexion
+avec son vrai compte Discord et l'apparition des publications dans le launcher.
+Le résultat demandé est validé ; Microsoft et le jeu restent hors de cette recette.

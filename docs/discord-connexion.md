@@ -77,5 +77,12 @@ et le code SGA de démonstration ne sont pas utilisés pour ce parcours.
   sur profil/flux, retour vers Discord ; téléchargement et actualités beta.373
   conservés. Le launcher local est reconstruit et relancé.
 
-La confirmation sur le vrai compte du joueur reste à observer séparément de
-ces tests. Aucun jeu, monde, serveur Minecraft ou canal packwiz modifié.
+Le **8 novembre 2026**, Koka confirme : « Connexion validée, les publications
+apparaissent ». Ce retour valide le parcours avec son vrai compte Discord et
+l'affichage des vrais contenus dans le launcher. Il s'agit d'une validation
+utilisateur, distincte des tests automatiques ci-dessus ; aucun identifiant,
+jeton ou contenu privé n'est conservé dans cette recette.
+
+La reprise après redémarrage et l'expiration réelle de sept jours ne sont pas
+validées par ce seul retour. Microsoft, le lancement Minecraft et le personnage
+restent en attente. Aucun jeu, monde, serveur Minecraft ou canal packwiz modifié.
