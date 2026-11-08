@@ -10,12 +10,17 @@ ce parcours.
 ## Application native actuelle
 
 Koka demande de travailler sur l'application native, sans nouvelles maquettes.
-L'accueil quotidien montre les publications **sans cadre ni titre de rubrique** :
-La date et l’heure locales servent de titre en haut, avec mise à jour automatique.
+Le titre **Accueil** reprend les autres pages natives (23 px, graisse 600).
+La date et l’heure locales sont placées en dessous, en sous-titre discret,
+avec mise à jour automatique. Les trois flux retrouvent des cadres fins et
+le fond gris très léger des tableaux natifs (#f6f8fa).
+
 Intendance en haut sans visage, Gazette à gauche et Tableau à droite avec le
-visage du skin Minecraft de chaque auteur près du titre. Un clic déplie le texte et les images
-de la Gazette dans le launcher ; le flux peut défiler. Le header commence au
-niveau du logo et Jouer reste dans le footer fixe.
+visage du skin Minecraft de chaque auteur près du titre. L’intérieur conserve
+la présentation Sanctuary : résumés, visages et publications dépliables, sans
+nouveau titre de rubrique. Un clic déplie le texte et les images de la Gazette ;
+le flux peut défiler. Le header commence au niveau du logo et Jouer reste dans
+le footer fixe.
 
 Le premier onglet **Bien démarrer** conserve les cinq étapes, même après
 Discord, et garde Microsoft visible en attente de l'autorisation nécessaire.

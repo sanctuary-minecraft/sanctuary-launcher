@@ -6,10 +6,12 @@ La version **0.1.0 de développement** fonctionne localement sur macOS Apple Sil
 
 ## Interface actuelle
 
-**Accueil** présente les publications réelles sans cadre, sans titre de
-rubrique et sans barre d'actions par flux. L'Intendance reste en haut sur toute
-la largeur, la Gazette à gauche et le Tableau à droite en dessous. La date
-et l’heure locales occupent le titre en haut et s’actualisent automatiquement.
+**Accueil** reprend le titre et la typographie des autres pages. La date et
+l’heure locales apparaissent juste en dessous et s’actualisent automatiquement.
+Les trois flux sont encadrés sur un fond gris très léger, identique au gris
+des tableaux natifs. L’Intendance reste en haut sur toute la largeur, la Gazette
+à gauche et le Tableau à droite en dessous. L’intérieur conserve les résumés
+dépliables, sans titre de rubrique ni barre d’actions supplémentaire.
 Les publications de Gazette et du Tableau montrent le visage du skin Minecraft
 de leur auteur près du titre ; l’Intendance reste sans visage.
 Un clic déplie le texte complet et les photos de la Gazette, comme sur le site.

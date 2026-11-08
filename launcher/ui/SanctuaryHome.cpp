@@ -77,11 +77,14 @@ SanctuaryHome::SanctuaryHome(QWidget* parent, View view) : QWidget(parent), m_ui
         #sanctuaryHome { font-family: "SF Pro Text", "Segoe UI", sans-serif; font-size: 14px; }
         #sanctuaryHome QLabel { color: #1f2328; border: none; background: transparent; }
         #sanctuaryHome QLabel#heading { font-size: 21px; font-weight: 700; }
+        #sanctuaryHome QLabel#heading[dashboard="true"] { font-size: 23px; font-weight: 600; }
         #sanctuaryHome QLabel#eyebrow { font-size: 14px; font-weight: 600; color: #57606a; }
         #sanctuaryHome QLabel#subtitle { font-size: 13px; color: #57606a; }
         #sanctuaryHome QLabel[muted="true"] { color: #57606a; font-size: 12px; }
         #sanctuaryHome QFrame#header { border: none; border-bottom: 1px solid #d0d7de; }
         #sanctuaryHome QFrame#footer { border: none; border-top: 1px solid #d0d7de; }
+        #sanctuaryHome QFrame[communityCard="true"] { border: 1px solid #d0d7de; border-radius: 4px; background: #f6f8fa; }
+        #sanctuaryHome QFrame[communityCard="true"] QWidget { background: transparent; }
         #sanctuaryHome QFrame#steps { border: 1px solid #d0d7de; border-radius: 6px; background: white; }
         #sanctuaryHome QFrame[stepRow="true"] { border: none; border-bottom: 1px solid #d8dee4; background: transparent; }
         #sanctuaryHome QFrame[active="true"] { background: #f6f8fa; }
@@ -197,7 +200,7 @@ void SanctuaryHome::refreshClock()
                          m_french ? QLocale::France : QLocale::UnitedKingdom);
     auto title = locale.toString(QDateTime::currentDateTime(), "dddd d MMMM yyyy · HH:mm");
     if (!title.isEmpty()) title[0] = title[0].toUpper();
-    m_ui->heading->setText(title);
+    m_ui->subtitle->setText(title);
 }
 
 void SanctuaryHome::buildUi()
@@ -268,6 +271,7 @@ void SanctuaryHome::buildUi()
     heading->setSpacing(2);
     u.eyebrow = label(header, "eyebrow");
     u.heading = label(header, "heading");
+    u.heading->setProperty("dashboard", m_view == View::Dashboard);
     u.subtitle = label(header, "subtitle");
     heading->addWidget(u.eyebrow);
     heading->addWidget(u.heading);
@@ -369,10 +373,11 @@ void SanctuaryHome::buildUi()
     const FeedSection sections[] = {{"bulletin","Intendance","Stewardship",0,0,2},
         {"article","Gazette","Gazette",1,0,1}, {"notice","Tableau d'affichage","Notice board",1,1,1}};
     for (const auto& section : sections) {
-        auto* card = new QWidget(u.community);
+        auto* card = new QFrame(u.community);
         card->setObjectName("communityCard-" + QString(section.kind));
+        card->setProperty("communityCard", true);
         auto* cardLayout = new QVBoxLayout(card);
-        cardLayout->setContentsMargins(0, 0, 0, 0);
+        cardLayout->setContentsMargins(12, 12, 12, 12);
         cardLayout->setSpacing(5);
         auto* feed = new SanctuaryFeed(section.kind, card);
         u.feeds.append(feed);
@@ -657,9 +662,9 @@ void SanctuaryHome::refresh()
     if (m_onlineSession && discord && m_discordProfile.isEmpty()) heading = text("Vérifier votre accès Sanctuary", "Verify your Sanctuary access");
     if (m_onlineSession && remoteStatus == "guild_required") heading = text("Rejoindre le Discord Sanctuary", "Join the Sanctuary Discord");
     u.heading->setText(communityUnlocked() ? (m_onlineSession ? text("Connexion Microsoft en attente", "Microsoft sign-in pending") : text("Sanctuary", "Sanctuary")) : heading);
+    if (m_view == View::Dashboard) u.heading->setText(text("Accueil", "Home"));
     u.subtitle->setText(m_onlineSession && communityUnlocked() ? text("Accès Sanctuary confirmé. Vos publications sont disponibles ; le jeu attend Microsoft.", "Sanctuary access confirmed. Your posts are available; the game awaits Microsoft.") : communityUnlocked() ? text("Les nouvelles de votre communauté.", "The latest from your community.") : subtitle);
     u.eyebrow->setVisible(m_view != View::Dashboard && !communityUnlocked());
-    u.subtitle->setVisible(m_view != View::Dashboard);
     refreshClock();
     const std::array<bool, 5> complete{discord, microsoft, admitted, false, installed};
     for (int i = 0; i < 5; ++i) {

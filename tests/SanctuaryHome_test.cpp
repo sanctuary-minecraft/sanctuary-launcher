@@ -302,9 +302,10 @@ private slots:
             < workspace->findChild<QPushButton*>("nav-home")->mapTo(workspace,QPoint()).y());
         QVERIFY(home->communityUnlocked());
         QVERIFY(home->findChild<QWidget*>("homeHeader")->isVisible());
-        QVERIFY(QRegularExpression("[0-9]{4} · [0-9]{2}:[0-9]{2}$").match(home->findChild<QLabel*>("heading")->text()).hasMatch());
+        QCOMPARE(home->findChild<QLabel*>("heading")->text(),QString("Accueil"));
+        QVERIFY(QRegularExpression("[0-9]{4} · [0-9]{2}:[0-9]{2}$").match(home->findChild<QLabel*>("subtitle")->text()).hasMatch());
         QVERIFY(home->findChild<QLabel*>("eyebrow")->isHidden());
-        QVERIFY(home->findChild<QLabel*>("subtitle")->isHidden());
+        QVERIFY(home->findChild<QLabel*>("subtitle")->isVisible());
         QVERIFY(home->findChild<QWidget*>("inlineAccounts")->isHidden());
         QVERIFY(home->findChildren<QLabel*>(QRegularExpression("communityTitle-.*")).isEmpty());
         QVERIFY(workspace->selectPage("setup"));

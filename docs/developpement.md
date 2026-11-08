@@ -49,12 +49,14 @@ Les autres plateformes restent à compiler et à tester.
   Accueil et Actualités précèdent les pages du jeu.
 - `SanctuaryHome` utilise un header d'étape, un body flexible et un footer
   fixe avec Jouer en bas à droite. Aucun `QScrollArea` ne contient l'accueil.
-  Deux vues partagent les mêmes contrôleurs : Dashboard affiche les flux
-  minimaux et Setup conserve les cinq étapes après Discord. Adaptive reste
+  Deux vues partagent les mêmes contrôleurs : Dashboard affiche Accueil,
+  la date/heure en sous-titre et les trois flux encadrés sur fond #f6f8fa ;
+  Setup conserve les cinq étapes après Discord. Adaptive reste
   le composant de référence pour les tests historiques. Le footer reste fixe ;
   les publications ouvertes peuvent défiler dans les flux. Le code SGA reste facultatif.
-- `SanctuaryFeed` présente chaque publication avec son auteur et un visage
-  32 × 32 chargé depuis le même service public que le site, sans Authorization.
+- `SanctuaryFeed` présente les publications de Gazette et du Tableau avec leur
+  auteur et un visage 32 × 32 chargé depuis le même service public que le site,
+  sans Authorization. L’Intendance reste sans visage ni requête de skin.
   Les visages PNG/WebP sont bornés et conservés seulement en mémoire. Les titres
   déplient une publication par flux ; les photos JPEG privées de la Gazette sont
   chargées à la demande via SanctuarySession, avec limites 49 152 octets et

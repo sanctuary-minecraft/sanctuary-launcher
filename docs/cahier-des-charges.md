@@ -256,11 +256,16 @@ Le body autorise le défilement interne des publications dépliées, à partir d
 une navigation clavier, un focus visible et les textes lisibles.
 
 - **Header du tutoriel** : titre de l'étape en cours et prochaine action,
-  notamment l'attente d'accès. Dans l’accueil quotidien, le titre affiche
-  la date et l’heure locales, actualisées automatiquement, avec date longue
-  FR/EN et heure sur 24 heures à la minute.
+  notamment l'attente d'accès. Dans l’accueil quotidien, le titre est Accueil
+  (Home), avec la même taille et graisse que les titres des autres pages
+  natives (23 px, graisse 600). La date et l’heure locales sont en dessous,
+  dans le sous-titre discret (13 px), avec date longue FR/EN et heure sur
+  24 heures à la minute, actualisées automatiquement.
 - **Body** : les cinq étapes restent ensemble dans Bien démarrer ; les trois
-  flux restent dans Accueil, sans cadre ni titre de rubrique.
+  flux restent dans Accueil, chacun encadré d’une bordure fine #d0d7de,
+  sur le fond gris très léger #f6f8fa des tableaux natifs. Les contenus
+  dépliables gardent leur présentation Sanctuary, sans titre de rubrique
+  supplémentaire à l’intérieur.
 - **Footer** : version/état du pack, installation/mise à jour et **Jouer ancré
   tout en bas à droite**. Sa position ne dépend pas de la longueur du body.
 

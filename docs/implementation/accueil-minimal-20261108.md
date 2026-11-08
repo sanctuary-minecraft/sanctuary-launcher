@@ -84,3 +84,23 @@ aux trois tailles prévues, capture à 1120 × 760 dans
 `build/native/captures-clock/minimal-home-fr.png` : titre date/heure, trois flux
 et footer visible. Ces publications sont des données de test ; aucune nouvelle
 lecture de contenu privé, modification Web, de pack ou essai Minecraft.
+
+## Ajustement LAUNCH-19 — titre Accueil et cadres gris clair
+
+Branche `codex/launcher-home-panels`. Le titre Accueil (Home) reprend les
+23 px et la graisse 600 du titre des autres pages natives. La date et l’heure
+passent en sous-titre discret, avec leur actualisation automatique.
+
+Les trois flux retrouvent un cadre fin #d0d7de, des coins de 4 px et le fond
+gris très léger #f6f8fa des tableaux natifs. Les widgets internes restent
+transparents sur ce fond. La présentation Sanctuary reste à l’intérieur :
+titres dépliables, texte et photos, visages dans Gazette et Tableau seulement,
+sans titre de rubrique ou nouvelle barre d’actions.
+
+Script Run `--verify` réussi : 25 suites CTest passent et profil local isolé
+relancé. Test existant adapté pour Accueil/date en deux lignes. Rendu Qt
+contrôlé aux trois tailles prévues ; capture 1120 × 760 dans
+`build/native/captures-panels/minimal-home-fr.png` : titre, date, cadres,
+positions des flux et footer visible. Publications de test, pas de nouvelle
+validation de photos privées ni d’essai Minecraft. Aucun changement Web,
+pack, monde, serveur ou instance Prism personnelle.
