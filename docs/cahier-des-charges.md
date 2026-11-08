@@ -1,6 +1,6 @@
 # Cahier des charges de Sanctuary Launcher
 
-Version documentaire **0.7**, actualisée le **8 novembre 2026**. Sanctuary
+Version documentaire **0.8**, actualisée le **8 novembre 2026**. Sanctuary
 Launcher est un fork natif de Prism avec une fenêtre principale blanche,
 une seule instance officielle Sanctuary Beta et ses outils intégrés.
 
@@ -12,11 +12,14 @@ l'accueil affiche Jouer, Intendance, Gazette et Tableau d'affichage.
 Le code SGA reste facultatif. Cette organisation remplace la page
 d'onboarding dédiée et la navigation multi-instance exposée précédemment.
 
-Le lot natif local porte cette interface et l'installation réelle du pack.
-Les comptes/admissions sont simulés pour les essais sans Microsoft ; les
-liaisons authentifiées, le jeu et l'activation automatique restent à livrer.
-Voir la [recette réelle](implementation/launcher-local-20261108.md).
-Les [maquettes](design/README.md) restent des références historiques.
+Le lot natif porte cette interface, l'installation du pack et la connexion
+Discord réelle au site. Le dossier d'accès et les contenus privés sont lus
+avec une session propre au launcher. Aucun droit d'écriture ou d'administration
+n'est accordé par cette session. Microsoft et le jeu restent en attente :
+Discord ne remplace ni la possession de Minecraft ni la session de jeu.
+Voir le [contrat Discord](discord-connexion.md) et la
+[recette du lot local](implementation/launcher-local-20261108.md), conservée
+pour son périmètre initial. Les maquettes restent historiques.
 
 ## 1. Objectif et périmètre
 
@@ -238,13 +241,21 @@ Un onglet **Actualités** distinct présente les dernières versions, dates,
 titres et résumés publiés sur le site. Ne pas recopier une rédaction statique.
 
 Avant préparation, Accueil affiche les cinq lignes et masque Intendance,
-Gazette et Tableau d'affichage. Quand les comptes sont valides, l'admission
+Gazette et Tableau d'affichage. Dans le parcours complet, quand les comptes sont valides, l'admission
 est confirmée et le pack vérifié, masquer les étapes et montrer **Jouer**,
 **Intendance**, **Gazette** et **Tableau d'affichage**. Le code SGA n'est pas
 une condition de cette transition ; il reste consultable à la demande.
 Une session à renouveler ou un accès retiré remet les étapes nécessaires
 sans effacer les préférences. Les rubriques communautaires gardent les
 permissions du site et ne deviennent pas publiques par leur intégration.
+
+**FLOW-04.** Le raccordement Discord réel peut déjà afficher la communauté
+quand le site confirme l'accès, même si Microsoft n'est pas encore raccordé.
+Le header indique **Connexion Microsoft en attente** et Jouer reste désactivé.
+Un dossier en attente, refusé, retiré ou non vérifié garde les étapes. Aucune
+valeur de simulation locale ne remplace le dossier reçu du site. Les codes
+fictifs et le badge historique de démonstration sont masqués dans ce parcours.
+Le dossier du site conserve l'accès au code manuel existant.
 
 **UI-04.** L'accueil est une page fixe **sans défilement**, à partir de
 1000 × 680, avec vérification à 1120 × 760 et 1280 × 800 en FR/EN. Conserver
@@ -461,7 +472,7 @@ téléchargement ou au jeu gardent leur propre traitement.
 Intendance correspond au flux `bulletin`, Gazette à `article`, Tableau
 à `notice`. Les routes `/communaute/flux?kind=…` demandent une session Discord.
 Le lot local affiche cet état sans publier les contenus privés et sans
-considérer un compte simulé comme authentifié. Le pont de session reste à livrer.
+considérer un compte simulé comme authentifié. Le pont de session est livré via une autorisation à confirmer dans le navigateur et une API de lecture dédiée ; voir le contrat Discord.
 
 **WEB-03.** Le contrat privé à livrer pour le launcher couvre le dossier du
 joueur, la candidature et le parrainage, la confirmation d'accès serveur,

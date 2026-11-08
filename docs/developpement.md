@@ -6,10 +6,11 @@ Base Prism **11.1.1**, commit `7d2d3c1ec6fcf8255ebacd02d9f792688575dfb4`.
 Le sous-module `libraries/libnbtplusplus` reste épinglé à
 `3538933614059f0f44388a2b16f3db25ce42285b`.
 Le lot `codex/launcher-local-onboarding` porte le
-[cahier des charges 0.7](cahier-des-charges.md) : fenêtre unique, Accueil et
+[cahier des charges 0.8](cahier-des-charges.md) : fenêtre unique, Accueil et
 Actualités dans la navigation, cinq étapes avant préparation puis rubriques
 communautaires. La [recette](implementation/launcher-local-20261108.md)
-distingue l'installation réelle et les comptes simulés.
+conserve la recette initiale. Le [raccordement Discord](discord-connexion.md)
+utilise désormais le vrai compte et le dossier du site ; Microsoft reste différé.
 
 ## Construire et lancer sur macOS
 
@@ -50,9 +51,12 @@ Les autres plateformes restent à compiler et à tester.
   fixe avec Jouer en bas à droite. Aucun `QScrollArea` ne contient l'accueil.
   Le body passe des cinq étapes aux trois panneaux communautaires ; leurs
   aperçus sont bornés, sans défilement. Le code SGA reste facultatif.
-- `SanctuaryFeed` lit les actualités publiques existantes et les routes privées
-  communautaires du site, en lecture seule. Une réponse privée 401/403 reste
-  une demande de session, sans redirection silencieuse vers Discord.
+- `SanctuarySession` gère l'association dans le navigateur, la session de
+  lecture et sa conservation dans le Trousseau macOS. Aucun secret Discord
+  n'est dans le client. Le cache local de simulation ne vaut jamais admission.
+- `SanctuaryFeed` lit les actualités publiques et les flux privés authentifiés
+  via l'API launcher du site. Une déconnexion efface les aperçus et invalide
+  les réponses anciennes ; une réponse 401 demande une reconnexion.
 - `SanctuaryPack` importe le ZIP officiel sans assistant séparé, résout le canal
   stable vers son manifeste immuable, contrôle les outils et les fichiers gérés,
   puis conserve le même `SanctuaryInstanceId`.
@@ -73,6 +77,10 @@ ignoré `build/local-launcher`. Aucun compte, jeton ou profil personnel Prism
 n'est importé. `SanctuaryLocalState` est un état de démonstration séparé ;
 `SanctuaryPackVersion` et `SanctuaryPackHash` décrivent le pack vérifié.
 Les simulations ne permettent aucun lancement de Minecraft ou accès serveur.
+Le parcours runtime utilise Discord réel, même quand SanctuaryLocalMode est
+activé pour le développement. Le Client ID Microsoft reste absent ; les
+publications sont accessibles après confirmation du dossier Sanctuary, sans
+prétendre que le compte Minecraft est déjà vérifié.
 
 Le Client ID Microsoft du binaire reste vide jusqu'au raccordement prévu.
 Les clés CurseForge/Imgur et les mises à jour automatiques du binaire Prism
@@ -87,7 +95,7 @@ SANCTUARY_CAPTURE_DIR="$PWD/build/native/captures-local" QT_QPA_PLATFORM=offscre
   ctest --test-dir build/native --output-on-failure
 ```
 
-Les **24 suites** passent. Les tests propres à Sanctuary contrôlent les
+Les **25 suites** passent. Les tests propres à Sanctuary contrôlent les
 états du parcours, la séparation simulation/pack réel, le code facultatif,
 la navigation dans une seule fenêtre, les formulaires invalides, le lecteur
 d'actualités et les empreintes du pack. Les PNG produits sont des rendus de

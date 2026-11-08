@@ -277,6 +277,44 @@ private slots:
             }
         }
     }
+    void realDiscordAccessCannotBeReplacedByLocalScenarios()
+    {
+        SanctuaryHome home;
+        home.setEmbedded(true);
+        home.setLocalMode(true);
+        home.setLocalScenario("ready");
+        home.setPackState(true, false, "beta.373", "Pack vérifié");
+        home.setDiscordState(false, false, {}, "Connecter Discord");
+        home.show();
+        QSignalSpy login(&home, &SanctuaryHome::discordRequested);
+        QSignalSpy previewPlay(&home, &SanctuaryHome::localPlayRequested);
+        QSignalSpy links(&home, &SanctuaryHome::linkRequested);
+        QTest::mouseClick(action(home,"discord"), Qt::LeftButton);
+        QCOMPARE(login.count(), 1);
+        QVERIFY(!home.communityUnlocked());
+        QVERIFY(!action(home,"play")->isEnabled());
+        QJsonObject profile{{"version",1},{"user",QJsonObject{{"display_name","Real Discord profile"}}},{"access",QJsonObject{{"status","granted"}}}};
+        home.setDiscordState(true, false, profile, "Discord connecté");
+        QVERIFY(home.communityUnlocked());
+        QVERIFY(home.findChild<QWidget*>("communityHome")->isVisible());
+        QVERIFY(!action(home,"play")->isEnabled());
+        QVERIFY(!action(home,"microsoft")->isEnabled());
+        QTest::mouseClick(action(home,"readyCodeToggle"), Qt::LeftButton);
+        QCOMPARE(links.count(),1);
+        QCOMPARE(links[0][0].toUrl(),QUrl("https://sanctuary-minecraft.net/candidature"));
+        QVERIFY(!label(home,"readyCodeValue")->isVisible());
+        home.setLocalScenario("ready");
+        QVERIFY(!action(home,"play")->isEnabled());
+        QCOMPARE(previewPlay.count(),0);
+        profile["access"] = QJsonObject{{"status","revoked"}};
+        home.setDiscordState(true,false,profile,"Accès retiré");
+        QVERIFY(!home.communityUnlocked());
+        home.setDiscordState(true,false,{},"Lecture impossible");
+        QVERIFY(!home.communityUnlocked());
+        home.setDiscordState(false,false,{},"Déconnecté");
+        QCOMPARE(home.activeStep(),1);
+        QVERIFY(home.findChild<QWidget*>("communityHome")->isHidden());
+    }
     void homeSwitchesFromStepsToCommunityWithoutRequiringTheCode()
     {
         SanctuaryHome home;

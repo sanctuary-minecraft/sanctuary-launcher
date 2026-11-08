@@ -1,6 +1,6 @@
 # Les outils Prism dans Sanctuary Launcher
 
-Contrat du [cahier des charges 0.7](cahier-des-charges.md), actualisé le
+Contrat du [cahier des charges 0.8](cahier-des-charges.md), actualisé le
 8 novembre 2026. Le choix d'une **seule instance officielle** et d'une
 **fenêtre principale unique** remplace la navigation multi-instance exposée
 par les premières propositions. Les données préexistantes ne sont pas supprimées.
@@ -55,7 +55,8 @@ instances d'un utilisateur n'est réalisée. Prism personnel reste distinct.
 Les pages et leur navigation ont été exercées dans la fenêtre native, et les
 tests couvrent leur conteneur commun. Cela ne valide pas chaque opération
 interne de Prism ni tous les services tiers. Les clés CurseForge/Imgur amont
-restent absentes. La connexion Microsoft Sanctuary, Discord, le lancement
-réel et l'accès serveur restent à raccorder/tester. La console du futur
+restent absentes. Discord et le dossier du site sont raccordés par une session de lecture ;
+Microsoft Sanctuary, le lancement réel et la connexion au serveur restent
+à raccorder/tester. La console du futur
 lancement doit également rester intégrée au parcours de la fenêtre unique.
 Les mondes locaux ne donnent aucun accès d'administration au monde serveur.

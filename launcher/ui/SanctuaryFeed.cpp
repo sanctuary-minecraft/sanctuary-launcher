@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "SanctuaryFeed.h"
 #include "Application.h"
+#include "SanctuarySession.h"
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLabel>
@@ -145,10 +147,33 @@ QString SanctuaryFeed::publicNewsArticles(const QString& html)
     return result;
 }
 
+void SanctuaryFeed::setSession(SanctuarySession* session)
+{
+    m_session = session;
+    connect(session, &SanctuarySession::credentialsChanged, this, [this] {
+        ++m_generation;
+        if (m_reply) m_reply->abort();
+        setContent({});
+        m_status->setText(m_french ? "Connectez Discord pour lire les publications." : "Connect Discord to read posts.");
+    });
+    connect(session, &SanctuarySession::changed, this, [this] {
+        if (!m_session || m_session->profile().value("access").toObject().value("status") != "granted") {
+            ++m_generation;
+            if (m_reply) m_reply->abort();
+            setContent({});
+        } else if (isVisible() && !m_session->busy()) reload();
+    });
+}
+
 void SanctuaryFeed::reload()
 {
     auto* app = qobject_cast<Application*>(QCoreApplication::instance());
     if (!app || m_reply) return;
+    if (m_session && (!m_session->connected() || m_session->profile().value("access").toObject().value("status") != "granted")) {
+        setContent({});
+        m_status->setText(m_french ? "Connectez Discord pour lire les publications." : "Connect Discord to read posts.");
+        return;
+    }
     QUrl url("https://sanctuary-minecraft.net" + QString(m_kind == "news" ? "/actualites" : "/communaute/flux"));
     QUrlQuery query;
     if (m_kind != "news") query.addQueryItem("kind", m_kind);
@@ -159,15 +184,23 @@ void SanctuaryFeed::reload()
     request.setTransferTimeout(20000);
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
     m_status->setText(m_french ? "Chargement…" : "Loading…");
-    auto* reply = app->network()->get(request);
+    const int generation = m_generation;
+    auto* reply = m_session ? m_session->feed(m_kind, m_french) : app->network()->get(request);
     m_reply = reply;
-    connect(reply, &QNetworkReply::finished, this, [this, reply] {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, generation] {
         const auto bytes = reply->readAll();
         const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         const auto error = reply->error();
         reply->deleteLater();
-        m_reply = nullptr;
+        if (m_reply == reply) m_reply = nullptr;
+        if (generation != m_generation) return;
         if (m_kind != "news" && (status == 401 || status == 403 || (status >= 300 && status < 400))) {
+            if (m_session) {
+                setContent({});
+                m_status->setText(m_french ? "Reconnectez Discord." : "Reconnect Discord.");
+                m_session->refresh();
+                return;
+            }
             m_status->setText(m_french ? "Session Discord du site nécessaire" : "Website Discord session required");
             setContent(m_french
                 ? "Les publications communautaires restent privées. En mode local, les comptes sont simulés : aucun contenu privé n'est affiché."
@@ -176,6 +209,21 @@ void SanctuaryFeed::reload()
         }
         if (error != QNetworkReply::NoError || status != 200 || bytes.size() > 2 * 1024 * 1024) {
             m_status->setText(m_french ? "Contenu indisponible — Réessayez" : "Content unavailable — Retry");
+            return;
+        }
+        if (m_session) {
+            const auto document = QJsonDocument::fromJson(bytes).object();
+            if (document.value("version").toInt() != 1 || !document.value("entries").isArray()) {
+                setContent({}); m_status->setText(m_french ? "Contenu indisponible" : "Content unavailable"); return;
+            }
+            QStringList posts;
+            for (const auto& entry : document.value("entries").toArray()) {
+                const auto post = entry.toObject();
+                posts.append(post.value("title").toString() + " — " + post.value("body").toString());
+            }
+            setContent(posts.join(" · "));
+            m_status->setText(posts.isEmpty() ? (m_french ? "Aucune publication" : "No posts")
+                                             : (m_french ? "Publications du site Sanctuary" : "Sanctuary website posts"));
             return;
         }
         QString content = m_kind == "news" ? publicNewsArticles(QString::fromUtf8(bytes))

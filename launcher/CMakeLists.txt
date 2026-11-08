@@ -838,6 +838,8 @@ SET(LAUNCHER_SOURCES
     ui/SanctuaryWorkspace.h
     ui/SanctuaryFeed.cpp
     ui/SanctuaryFeed.h
+    SanctuarySession.cpp
+    SanctuarySession.h
     SanctuaryPack.cpp
     SanctuaryPack.h
     ui/InstanceWindow.h
@@ -1408,6 +1410,7 @@ if(APPLE)
     endif()
 
     target_link_libraries(Launcher_logic
+        "-framework Security"
         "-framework AppKit"
         "-framework Carbon"
         "-framework Foundation"

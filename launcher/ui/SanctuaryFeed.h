@@ -9,6 +9,7 @@ class QPushButton;
 class QTextBrowser;
 class QNetworkReply;
 class SanctuaryExcerpt;
+class SanctuarySession;
 
 /** Read-only view of existing site routes. Private community feeds keep their Discord session requirement. */
 class SanctuaryFeed : public QWidget {
@@ -17,6 +18,7 @@ public:
     explicit SanctuaryFeed(const QString& kind, QWidget* parent = nullptr);
     void setFrench(bool french);
     void reload();
+    void setSession(SanctuarySession* session);
     static QString publicNewsArticles(const QString& html);
 signals:
     void linkRequested(const QUrl& url);
@@ -30,6 +32,8 @@ private:
     QPushButton* m_read = nullptr;
     void setContent(const QString& content, bool html = false);
     QPointer<QNetworkReply> m_reply;
+    QPointer<SanctuarySession> m_session;
+    int m_generation = 0;
 };
 
 class SanctuaryNewsPage : public QWidget, public BasePage {

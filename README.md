@@ -20,16 +20,29 @@ reste à sa place. L'Intendance est en haut sur toute la largeur du body ;
 la Gazette et le Tableau sont côte à côte en dessous. Le logo occupe seul
 le haut de la barre latérale, avec le header de l'étape à sa droite.
 
-Les comptes et l'accès sont **simulés dans le profil local de développement**.
-Le pack téléchargé est réel. Le bouton Jouer local teste le parcours sans
-lancer Minecraft ni rejoindre un serveur. Le raccordement Microsoft/Mojang,
-Discord et des admissions reste à réaliser. Les publications communautaires
-privées demandent une session Discord du site ; aucune fausse publication
-n'est présentée pour la remplacer.
+**Discord est raccordé au site Sanctuary** : Connecter Discord ouvre le
+navigateur, puis une confirmation lie ce launcher au compte déjà présent.
+Le dossier et l'état de whitelist sont relus sur le site, sans candidature
+ou admission créée automatiquement. Les trois panneaux utilisent les vraies
+publications privées, après récupération d'un accès confirmé.
+
+Microsoft/Mojang reste à raccorder : **Jouer reste désactivé**, même si Discord
+retrouve un accès accordé. Les comptes Microsoft simulés des tests ne valent
+pas une connexion réelle. Les contenus communautaires peuvent être lus sans
+attendre Microsoft ; le header indique cette attente. Les états de candidature
+en attente/refus/retrait restent affichés dans les étapes.
+
+La session du launcher est limitée à la lecture et expire après sept jours.
+Sur macOS, le jeton est conservé dans le Trousseau, séparément pour chaque
+profil du launcher ; aucun jeton Discord ou mot de passe n'est embarqué.
+La déconnexion révoque la session et vide les contenus affichés. Les autres
+plateformes gardent la session en mémoire pour ce lot.
 
 Le code SGA reste facultatif et masqué. Le badge des joueurs historiques de
 la bêta est prévu ; son exemple local ne constitue pas une admission réelle.
 Les vingt places concernent les connexions simultanées, sans plafond de membres.
+
+Voir le [contrat Discord et la recette](docs/discord-connexion.md).
 
 ## Pack et outils natifs
 
@@ -45,7 +58,7 @@ Sanctuary. Les réglages globaux s'ouvrent également dans cette fenêtre.
 Les sous-dialogues utiles, sélecteurs de fichiers et ouvertures explicites
 du navigateur ou du gestionnaire de fichiers restent natifs.
 
-Voir le [cahier des charges 0.7](docs/cahier-des-charges.md), le
+Voir le [cahier des charges 0.8](docs/cahier-des-charges.md), le
 [contrat des outils](docs/outils-prism.md) et la
 [recette du lot local](docs/implementation/launcher-local-20261108.md), complétée
 par les recettes de l'[accueil fixe](docs/implementation/accueil-fixe-20261108.md)
@@ -66,7 +79,7 @@ Le bouton Run de Codex utilise ce script. Les données de test restent dans
 avant de reconstruire lorsqu'une mise à jour ou une édition est en cours.
 Le script relance uniquement ce profil de développement.
 
-Les **24 suites CTest** passent. La navigation et l'installation ont également
+Les **25 suites CTest** passent. La navigation et l'installation ont également
 été exercées dans la fenêtre native. Le bundle `build/native/sanctuary-launcher.app`
 dépend de Homebrew, cible macOS 26 et n'est ni signé ni notarisé.
 Windows, Linux, le lancement réel du jeu, la connexion au serveur, les

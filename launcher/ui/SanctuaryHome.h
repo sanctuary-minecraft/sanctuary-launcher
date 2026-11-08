@@ -7,9 +7,10 @@
 #include "ui/pages/BasePage.h"
 
 class QTimer;
+class SanctuarySession;
 class QUrl;
 
-/** Sanctuary's dedicated entry point; account secrets and game launching stay in Prism. */
+/** Sanctuary's UI; website authorization and Minecraft launching live outside this widget. */
 class SanctuaryHome : public QWidget, public BasePage {
     Q_OBJECT
 public:
@@ -29,6 +30,8 @@ public:
     QIcon icon() const override { return QIcon(":/sanctuary/icon.png"); }
     void openedImpl() override;
     bool communityUnlocked() const;
+    void setDiscordSession(SanctuarySession* session);
+    void setDiscordState(bool connected, bool busy, const QJsonObject& profile, const QString& message);
 
 signals:
     void installRequested();
@@ -40,6 +43,9 @@ signals:
     void linkRequested(const QUrl& url);
     void localStateChanged(const QJsonObject& state);
     void localPlayRequested();
+    void discordRequested();
+    void discordDisconnectRequested();
+    void discordRefreshRequested();
 
 private:
     enum class Access { None, Pending, Synchronizing, Granted, Rejected, Revoked };
@@ -64,6 +70,9 @@ private:
     QString m_packVersion, m_packMessage;
     bool m_communityVisible = false;
     bool m_embedded = false;
+    bool m_onlineSession = false, m_discordConnected = false, m_discordBusy = false;
+    QJsonObject m_discordProfile;
+    QString m_discordMessage;
     void buildUi();
     void refresh();
     void commitLocalChange();

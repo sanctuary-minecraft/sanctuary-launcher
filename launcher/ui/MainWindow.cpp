@@ -130,6 +130,7 @@
 #include "SanctuaryWorkspace.h"
 #include "SanctuaryFeed.h"
 #include "SanctuaryPack.h"
+#include "SanctuarySession.h"
 #include "InstancePageProvider.h"
 #include <QJsonDocument>
 #include <QStackedWidget>
@@ -477,6 +478,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         if (m_sanctuaryPack->busy()) m_sanctuaryPack->cancel();
         else m_sanctuaryPack->installOrUpdate();
     });
+    auto* discord = new SanctuarySession(APPLICATION->network(), this);
+    m_sanctuaryHome->setDiscordSession(discord);
+    connect(m_sanctuaryHome, &SanctuaryHome::discordRequested, discord, &SanctuarySession::start);
+    connect(m_sanctuaryHome, &SanctuaryHome::discordDisconnectRequested, discord, &SanctuarySession::disconnectAccount);
+    connect(m_sanctuaryHome, &SanctuaryHome::discordRefreshRequested, discord, &SanctuarySession::refresh);
+    connect(discord, &SanctuarySession::browserRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
+    discord->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+    QTimer::singleShot(0, discord, [discord] { discord->restore(APPLICATION->dataRoot()); });
     connect(m_sanctuaryPack, &SanctuaryPack::changed, this, &MainWindow::refreshSanctuaryHome);
     connect(m_sanctuaryPack, &SanctuaryPack::instanceReady, this, &MainWindow::refreshSanctuaryHome);
     connect(APPLICATION->instances(), &InstanceList::dataIsInvalid, this, &MainWindow::refreshSanctuaryHome);
