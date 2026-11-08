@@ -119,3 +119,19 @@ Rendu Qt contrôlé aux trois tailles prévues ; capture 1120 × 760 dans
 `build/native/captures-headings/minimal-home-fr.png`, publications de test.
 Les cadres, leurs titres, les contenus ouverts et le footer restent lisibles.
 Aucun changement Web, pack, serveur, monde ou essai Minecraft.
+
+## Ajustement LAUNCH-21 — alignement sur les pages natives
+
+Branche `codex/launcher-native-alignment`. Les pages intégrées Accueil et
+Bien démarrer n’ajoutent plus le retrait latéral de 12 px ni la colonne
+centrée plafonnée à 960 px. Le header, les cadres et le footer suivent
+maintenant les bords du workspace, comme les pages natives. Le composant
+autonome de référence garde son centrage ; les contenus des pages ne changent pas.
+
+Script Run `--verify` réussi : 25 suites CTest passent et profil local isolé
+relancé. Le test de géométrie compare directement les bords gauche/droit des
+deux pages et leur origine de header à la page Actualités, à 1000 × 680,
+1120 × 760, 1280 × 800 et 1600 × 900. Rendus Qt de l’accueil et du tutoriel
+contrôlés dans `build/native/captures-alignment/`, avec publications et profil
+de test. Les cadres et Jouer restent visibles. Aucun changement Web, pack,
+serveur, monde ou essai Minecraft.

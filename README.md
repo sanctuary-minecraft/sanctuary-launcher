@@ -8,6 +8,8 @@ La version **0.1.0 de développement** fonctionne localement sur macOS Apple Sil
 
 **Accueil** reprend le titre et la typographie des autres pages. La date et
 l’heure locales apparaissent juste en dessous et s’actualisent automatiquement.
+Accueil et Bien démarrer utilisent les mêmes bords de contenu que les pages
+natives, sans marge latérale ou largeur maximale supplémentaire dans la fenêtre.
 Les trois flux sont encadrés sur un fond gris très léger, identique au gris
 des tableaux natifs. L’Intendance reste en haut sur toute la largeur, la Gazette
 à gauche et le Tableau à droite en dessous. Chaque cadre affiche son titre :

@@ -49,6 +49,9 @@ Les autres plateformes restent à compiler et à tester.
   Accueil et Actualités précèdent les pages du jeu.
 - `SanctuaryHome` utilise un header d'étape, un body flexible et un footer
   fixe avec Jouer en bas à droite. Aucun `QScrollArea` ne contient l'accueil.
+  `setEmbedded(true)` retire les marges du conteneur interne et sa limite de
+  largeur pour suivre exactement les bords du workspace natif. Le centrage
+  à 960 px reste réservé au composant autonome de référence.
   Deux vues partagent les mêmes contrôleurs : Dashboard affiche Accueil,
   la date/heure en sous-titre et les trois flux encadrés sur fond #f6f8fa,
   avec titres FR/EN fixes au-dessus de chaque flux défilant ;

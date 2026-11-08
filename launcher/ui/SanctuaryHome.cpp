@@ -53,6 +53,8 @@ struct SanctuaryHome::Ui {
     std::array<Row, 5> rows;
     QLabel *eyebrow, *heading, *subtitle, *server, *notice, *historical, *help, *footer, *code, *codeHelp;
     QWidget *previewControls, *codePanel, *setupPanel, *community, *readyCodePanel, *toolsPanel, *dashboardEmpty;
+    QHBoxLayout* contentLayout;
+    QWidget* contentColumn;
     QLabel* dashboardMessage;
     QPushButton* startSetup;
     QFrame *chromeHeader, *chromeFooter;
@@ -157,6 +159,9 @@ void SanctuaryHome::showFeedback(const QString& message)
 void SanctuaryHome::setEmbedded(bool embedded)
 {
     m_embedded = embedded;
+    m_ui->contentLayout->setContentsMargins(embedded ? 0 : 12, 0, embedded ? 0 : 12, 0);
+    m_ui->contentLayout->setSpacing(embedded ? 0 : -1);
+    m_ui->contentColumn->setMaximumWidth(embedded ? QWIDGETSIZE_MAX : 960);
     m_ui->chromeHeader->setVisible(!embedded);
     m_ui->chromeFooter->setVisible(true);
     refresh();
@@ -213,9 +218,11 @@ void SanctuaryHome::buildUi()
     auto* surface = new QWidget(this);
     surface->setObjectName("surface");
     auto* horizontal = new QHBoxLayout(surface);
+    u.contentLayout = horizontal;
     horizontal->setContentsMargins(12, 0, 12, 0);
     horizontal->addStretch();
     auto* column = new QWidget(surface);
+    u.contentColumn = column;
     column->setMaximumWidth(960);
     auto* page = new QVBoxLayout(column);
     page->setContentsMargins(0, 0, 0, 0);

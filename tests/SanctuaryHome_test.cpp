@@ -287,7 +287,8 @@ private slots:
         window.setCentralWidget(workspace);
         auto* home = new SanctuaryHome(nullptr,SanctuaryHome::View::Dashboard);
         auto* setup = new SanctuaryHome(nullptr,SanctuaryHome::View::Setup);
-        workspace->setPages({setup,home});
+        auto* news = new SanctuaryNewsPage;
+        workspace->setPages({setup,home,news});
         QVERIFY(workspace->selectPage("home"));
         const QJsonObject profile{{"version",1},{"user",QJsonObject{{"display_name","Example player"}}},{"access",QJsonObject{{"status","granted"}}}};
         for (auto* page : {home,setup}) {
@@ -330,9 +331,22 @@ private slots:
             feed->setEntries({post});
             QMetaObject::invokeMethod(feed->findChild<QLabel*>("postTitle"),"linkActivated",Q_ARG(QString,"toggle"));
         }
-        for (const QSize size : {QSize(1000,680),QSize(1120,760),QSize(1280,800)}) {
+        for (const QSize size : {QSize(1000,680),QSize(1120,760),QSize(1280,800),QSize(1600,900)}) {
             window.resize(size);
+            QVERIFY(workspace->selectPage("news"));
             QApplication::processEvents();
+            const auto nativeTitle = workspace->findChild<QLabel*>("workspaceTitle")->mapTo(workspace,QPoint());
+            const auto nativeRight = news->mapTo(workspace,news->rect().topRight()).x();
+            for (auto* page : {setup,home}) {
+                QVERIFY(workspace->selectPage(page->id()));
+                QApplication::processEvents();
+                auto* header = page->findChild<QWidget*>("homeHeader");
+                auto* footer = page->findChild<QWidget*>("footer");
+                QCOMPARE(header->mapTo(workspace,QPoint()),nativeTitle);
+                QCOMPARE(header->mapTo(workspace,header->rect().topRight()).x(),nativeRight);
+                QCOMPARE(footer->mapTo(workspace,QPoint()).x(),nativeTitle.x());
+                QCOMPARE(footer->mapTo(workspace,footer->rect().topRight()).x(),nativeRight);
+            }
             QCOMPARE(window.size(),size);
             auto* footer = home->findChild<QWidget*>("footer");
             QVERIFY(home->rect().contains(footer->mapTo(home,footer->rect().bottomRight())));

@@ -253,7 +253,10 @@ possession de Minecraft ou autorisation de lancement.
 **UI-04.** L'accueil garde une fenêtre fixe et un footer toujours visible.
 Le body autorise le défilement interne des publications dépliées, à partir de
 1000 × 680, avec vérification à 1120 × 760 et 1280 × 800 en FR/EN. Conserver
-une navigation clavier, un focus visible et les textes lisibles.
+une navigation clavier, un focus visible et les textes lisibles. Dans la fenêtre
+principale, Accueil et Bien démarrer alignent leur header, leur body et leur
+footer sur les bords de contenu des pages natives, sans retrait latéral ajouté
+ni colonne centrée de largeur plafonnée. Vérifier aussi une fenêtre de 1600 × 900.
 
 - **Header du tutoriel** : titre de l'étape en cours et prochaine action,
   notamment l'attente d'accès. Dans l’accueil quotidien, le titre est Accueil
