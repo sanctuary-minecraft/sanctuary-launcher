@@ -164,7 +164,7 @@ void SanctuaryHome::buildUi()
     auto* surface = new QWidget(this);
     surface->setObjectName("surface");
     auto* horizontal = new QHBoxLayout(surface);
-    horizontal->setContentsMargins(12, 4, 12, 0);
+    horizontal->setContentsMargins(12, 0, 12, 0);
     horizontal->addStretch();
     auto* column = new QWidget(surface);
     column->setMaximumWidth(960);
@@ -207,7 +207,6 @@ void SanctuaryHome::buildUi()
     u.reset = button(u.previewControls, "resetPreview");
     preview->addWidget(u.reset);
     connect(u.reset, &QPushButton::clicked, this, [this] { setLocalScenario("start"); });
-    page->addWidget(u.previewControls);
 
     auto* header = new QFrame(column);
     header->setObjectName("homeHeader");
@@ -226,6 +225,7 @@ void SanctuaryHome::buildUi()
     u.feedback->hide();
     heading->addWidget(u.feedback);
     page->addWidget(header);
+    page->addWidget(u.previewControls);
 
     auto* body = new QStackedWidget(column);
     u.body = body;
@@ -312,9 +312,9 @@ void SanctuaryHome::buildUi()
     auto* community = new QGridLayout(u.community);
     community->setContentsMargins(0, 0, 0, 0);
     community->setSpacing(10);
-    struct FeedSection { const char* kind; const char* fr; const char* en; int row; int column; int span; };
-    const FeedSection sections[] = {{"article","Gazette","Gazette",0,0,2},
-        {"bulletin","Intendance","Stewardship",0,1,1}, {"notice","Tableau d'affichage","Notice board",1,1,1}};
+    struct FeedSection { const char* kind; const char* fr; const char* en; int row; int column; int columns; };
+    const FeedSection sections[] = {{"bulletin","Intendance","Stewardship",0,0,2},
+        {"article","Gazette","Gazette",1,0,1}, {"notice","Tableau d'affichage","Notice board",1,1,1}};
     for (const auto& section : sections) {
         auto* card = new QFrame(u.community);
         card->setObjectName("communityCard-" + QString(section.kind));
@@ -330,13 +330,13 @@ void SanctuaryHome::buildUi()
         auto* feed = new SanctuaryFeed(section.kind, card);
         u.feeds.append(feed);
         cardLayout->addWidget(feed, 1);
-        community->addWidget(card, section.row, section.column, section.span, 1);
+        community->addWidget(card, section.row, section.column, 1, section.columns);
         connect(feed, &SanctuaryFeed::linkRequested, this, &SanctuaryHome::linkRequested);
     }
     community->setColumnStretch(0, 1);
     community->setColumnStretch(1, 1);
     community->setRowStretch(0, 1);
-    community->setRowStretch(1, 1);
+    community->setRowStretch(1, 2);
     body->addWidget(u.community);
 
     // Standalone widget tools are hidden when the persistent native sidebar is present.

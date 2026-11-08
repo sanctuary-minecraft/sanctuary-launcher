@@ -39,7 +39,8 @@ private:
     BasePage* m_current = nullptr;
     QStackedWidget* m_stack;
     QVBoxLayout* m_navLayout;
-    QLabel *m_title, *m_identity, *m_feedback;
+    QLabel *m_title, *m_feedback;
+    QWidget* m_toolbar;
     QPushButton *m_home, *m_save;
     bool m_french = true;
     bool m_global = false;

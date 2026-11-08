@@ -33,24 +33,14 @@ SanctuaryWorkspace::SanctuaryWorkspace(QWidget* parent) : QWidget(parent)
         #sanctuaryWorkspace QGroupBox { border: 1px solid #d0d7de; border-radius: 4px; margin-top: 12px; padding-top: 12px; }
         #sanctuaryWorkspace QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
     )");
-    auto* body = new QVBoxLayout(this);
+    auto* body = new QHBoxLayout(this);
     body->setContentsMargins(22, 18, 22, 18);
-    auto* header = new QHBoxLayout;
+    auto* sidebar = new QVBoxLayout;
     auto* wordmark = new QLabel(this);
+    wordmark->setObjectName("workspaceWordmark");
     wordmark->setPixmap(QPixmap(":/sanctuary/wordmark.png").scaledToWidth(180, Qt::SmoothTransformation));
     wordmark->setAccessibleName("Sanctuary");
-    header->addWidget(wordmark);
-    m_identity = new QLabel("Sanctuary Beta", this);
-    header->addWidget(m_identity);
-    header->addStretch();
-    m_home = new QPushButton(this);
-    m_home->setObjectName("workspaceHome");
-    header->addWidget(m_home);
-    m_save = new QPushButton(this);
-    m_save->setObjectName("workspaceSave");
-    header->addWidget(m_save);
-    body->addLayout(header);
-    auto* content = new QHBoxLayout;
+    sidebar->addWidget(wordmark, 0, Qt::AlignLeft | Qt::AlignTop);
     auto* navScroll = new QScrollArea(this);
     navScroll->setWidgetResizable(true);
     navScroll->setFixedWidth(210);
@@ -60,19 +50,30 @@ SanctuaryWorkspace::SanctuaryWorkspace(QWidget* parent) : QWidget(parent)
     m_navLayout->setSpacing(2);
     m_navLayout->addStretch();
     navScroll->setWidget(nav);
-    content->addWidget(navScroll);
+    sidebar->addWidget(navScroll, 1);
+    body->addLayout(sidebar);
     auto* right = new QVBoxLayout;
-    m_title = new QLabel(this);
+    m_toolbar = new QWidget(this);
+    auto* header = new QHBoxLayout(m_toolbar);
+    header->setContentsMargins(0, 0, 0, 0);
+    m_title = new QLabel(m_toolbar);
     m_title->setObjectName("workspaceTitle");
-    right->addWidget(m_title);
+    header->addWidget(m_title, 1);
+    m_home = new QPushButton(m_toolbar);
+    m_home->setObjectName("workspaceHome");
+    header->addWidget(m_home);
+    m_save = new QPushButton(m_toolbar);
+    m_save->setObjectName("workspaceSave");
+    header->addWidget(m_save);
+    right->addWidget(m_toolbar);
     m_feedback = new QLabel(this);
     m_feedback->setObjectName("workspaceFeedback");
     m_feedback->setWordWrap(true);
+    m_feedback->hide();
     right->addWidget(m_feedback);
     m_stack = new QStackedWidget(this);
     right->addWidget(m_stack, 1);
-    content->addLayout(right, 1);
-    body->addLayout(content, 1);
+    body->addLayout(right, 1);
     connect(m_home, &QPushButton::clicked, this, [this] { requestClose(); });
     connect(m_save, &QPushButton::clicked, this, [this] { if (saveAll()) emit settingsApplied(); });
     setFrench(true);
@@ -139,7 +140,6 @@ void SanctuaryWorkspace::setFrench(bool french)
     m_french = french;
     m_home->setText(french ? "Accueil" : "Home");
     m_save->setText(french ? "Enregistrer" : "Save");
-    m_identity->setText(m_global ? (french ? "Réglages du launcher" : "Launcher settings") : "Sanctuary Beta");
     m_home->setVisible(m_global || !getPage("home"));
     for (auto* page : m_pages) m_navigation.value(page->id())->setText(name(page));
     if (m_current) m_title->setText(name(m_current));
@@ -170,8 +170,10 @@ bool SanctuaryWorkspace::selectPage(QString id)
     for (auto it = m_navigation.begin(); it != m_navigation.end(); ++it) it.value()->setChecked(it.key() == id);
     m_title->setText(name(next));
     m_title->setVisible(id != "home"); // Home owns the current-step header.
+    m_toolbar->setVisible(id != "home");
     m_save->setVisible(id != "home" && id != "news");
     m_feedback->clear();
+    m_feedback->hide();
     next->opened();
     return true;
 }
@@ -194,9 +196,11 @@ bool SanctuaryWorkspace::saveAll()
     for (auto* page : m_pages) if (m_visited.contains(page) && !page->apply()) {
         selectPage(page->id());
         m_feedback->setText(m_french ? "Vérifiez les réglages de cette page." : "Check the settings on this page.");
+        m_feedback->show();
         return false;
     }
     m_feedback->clear();
+    m_feedback->hide();
     return true;
 }
 

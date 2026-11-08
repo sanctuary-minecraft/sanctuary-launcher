@@ -232,6 +232,10 @@ private slots:
                     auto* body = home->findChild<QWidget*>("homeBody");
                     auto* footer = home->findChild<QWidget*>("footer");
                     auto* play = action(*home,"play");
+                    auto* wordmark = workspace->findChild<QLabel*>("workspaceWordmark");
+                    QVERIFY(wordmark);
+                    QCOMPARE(header->mapTo(workspace, QPoint()).y(), wordmark->mapTo(workspace, QPoint()).y());
+                    QVERIFY(header->mapTo(workspace, QPoint()).x() > wordmark->geometry().right());
                     QVERIFY(header->geometry().bottom() < body->geometry().top());
                     QVERIFY(body->geometry().bottom() < footer->geometry().top());
                     QCOMPARE(play->parentWidget(), footer);
@@ -244,6 +248,15 @@ private slots:
                     if (home->findChild<QWidget*>("inlineAccounts")->isVisible()) {
                         auto* steps = home->findChild<QWidget*>("steps");
                         QVERIFY(body->rect().contains(steps->mapTo(body, steps->rect().bottomRight())));
+                    } else {
+                        const auto intendance = home->findChild<QWidget*>("communityCard-bulletin")->geometry();
+                        const auto gazette = home->findChild<QWidget*>("communityCard-article")->geometry();
+                        const auto board = home->findChild<QWidget*>("communityCard-notice")->geometry();
+                        QVERIFY(intendance.bottom() < gazette.top());
+                        QCOMPARE(gazette.top(), board.top());
+                        QVERIFY(gazette.right() < board.left());
+                        QCOMPARE(intendance.left(), gazette.left());
+                        QCOMPARE(intendance.right(), board.right());
                     }
                     auto* toggle = home->communityUnlocked() ? action(*home,"readyCodeToggle") : action(*home,"codeToggle");
                     if (toggle->isVisible()) {

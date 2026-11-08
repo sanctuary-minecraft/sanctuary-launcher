@@ -1,6 +1,6 @@
 # Cahier des charges de Sanctuary Launcher
 
-Version documentaire **0.6**, actualisée le **8 novembre 2026**. Sanctuary
+Version documentaire **0.7**, actualisée le **8 novembre 2026**. Sanctuary
 Launcher est un fork natif de Prism avec une fenêtre principale blanche,
 une seule instance officielle Sanctuary Beta et ses outils intégrés.
 
@@ -257,8 +257,12 @@ une navigation clavier, un focus visible et les textes lisibles.
 - **Footer** : version/état du pack, installation/mise à jour et **Jouer ancré
   tout en bas à droite**. Sa position ne dépend pas de la longueur du body.
 
-La Gazette occupe le panneau de gauche ; Intendance et Tableau sont empilés
-à droite. Les aperçus sont bornés et se terminent par une ellipse si nécessaire,
+L'Intendance occupe toute la largeur en haut du body. En dessous, la Gazette
+est à gauche et le Tableau d'affichage à droite. Le logo PNG reste seul en
+haut de la colonne latérale : aucun libellé « Sanctuary Beta » à sa droite.
+La colonne de contenu commence à la même hauteur que ce logo, avec le header
+de l'étape active dans cet espace ; aucune bande supérieure vide au-dessus
+du header et du body. Les aperçus sont bornés et se terminent par une ellipse si nécessaire,
 avec accès explicite à la lecture complète sur le site. Aucun défilement
 imbriqué dans ces panneaux. L'onglet Actualités reste distinct et peut faire
 défiler son historique. Le code facultatif ne doit pas agrandir la fenêtre

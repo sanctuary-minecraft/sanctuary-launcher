@@ -6,7 +6,7 @@ Base Prism **11.1.1**, commit `7d2d3c1ec6fcf8255ebacd02d9f792688575dfb4`.
 Le sous-module `libraries/libnbtplusplus` reste épinglé à
 `3538933614059f0f44388a2b16f3db25ce42285b`.
 Le lot `codex/launcher-local-onboarding` porte le
-[cahier des charges 0.6](cahier-des-charges.md) : fenêtre unique, Accueil et
+[cahier des charges 0.7](cahier-des-charges.md) : fenêtre unique, Accueil et
 Actualités dans la navigation, cinq étapes avant préparation puis rubriques
 communautaires. La [recette](implementation/launcher-local-20261108.md)
 distingue l'installation réelle et les comptes simulés.
@@ -43,7 +43,9 @@ Les autres plateformes restent à compiler et à tester.
 ## Structure de l'interface
 
 - `SanctuaryWorkspace` héberge les `BasePage` natives dans un `QStackedWidget`,
-  avec navigation persistante. Accueil et Actualités précèdent les pages du jeu.
+  avec une colonne logo/navigation à gauche et la colonne de contenu alignée
+  sur le logo en haut. Aucun nom de pack n'est accolé au PNG. Accueil et
+  Actualités précèdent les pages du jeu.
 - `SanctuaryHome` utilise un header d'étape, un body flexible et un footer
   fixe avec Jouer en bas à droite. Aucun `QScrollArea` ne contient l'accueil.
   Le body passe des cinq étapes aux trois panneaux communautaires ; leurs

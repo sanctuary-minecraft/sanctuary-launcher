@@ -16,7 +16,9 @@ en bas à droite, même pendant l'attente d'admission.
 Lorsque les prérequis sont réunis, ce bloc disparaît au profit de **Jouer**,
 **Intendance**, **Gazette** et **Tableau d'affichage**. Ces rubriques occupent
 des panneaux fixes avec un aperçu et un lien de lecture complète ; le footer
-reste à sa place.
+reste à sa place. L'Intendance est en haut sur toute la largeur du body ;
+la Gazette et le Tableau sont côte à côte en dessous. Le logo occupe seul
+le haut de la barre latérale, avec le header de l'étape à sa droite.
 
 Les comptes et l'accès sont **simulés dans le profil local de développement**.
 Le pack téléchargé est réel. Le bouton Jouer local teste le parcours sans
@@ -43,10 +45,11 @@ Sanctuary. Les réglages globaux s'ouvrent également dans cette fenêtre.
 Les sous-dialogues utiles, sélecteurs de fichiers et ouvertures explicites
 du navigateur ou du gestionnaire de fichiers restent natifs.
 
-Voir le [cahier des charges 0.6](docs/cahier-des-charges.md), le
+Voir le [cahier des charges 0.7](docs/cahier-des-charges.md), le
 [contrat des outils](docs/outils-prism.md) et la
 [recette du lot local](docs/implementation/launcher-local-20261108.md), complétée
-par la [recette de l'accueil fixe](docs/implementation/accueil-fixe-20261108.md).
+par les recettes de l'[accueil fixe](docs/implementation/accueil-fixe-20261108.md)
+et du [header intégré](docs/implementation/accueil-header-20261108.md).
 Les [maquettes conservées](docs/design/README.md) documentent les recherches
 précédentes ; l'application native devient la référence de travail.
 

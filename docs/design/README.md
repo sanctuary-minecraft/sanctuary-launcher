@@ -4,7 +4,7 @@ Le **8 novembre 2026**, après l'exploration en trois blocs, Koka retient à
 nouveau **un seul bloc contenant les étapes 1 à 5**, dans la **DA blanche**.
 Le **titre de l'étape en cours** occupe le haut du bloc de préparation. Le mot-symbole du
 site, le badge historique, le code SGA facultatif et tous les outils Prism
-restent demandés. Le [cahier des charges 0.6](../cahier-des-charges.md) fixe
+restent demandés. Le [cahier des charges 0.7](../cahier-des-charges.md) fixe
 ce parcours.
 
 ## Application native actuelle
@@ -17,6 +17,9 @@ sont masquées au profit de Jouer, Intendance, Gazette et Tableau d'affichage.
 Les contenus privés exigent leur session Discord réelle, encore à raccorder.
 L'accueil courant tient sur une page sans défilement : étape dans le header,
 étapes ou communauté dans le body, Jouer dans le footer en bas à droite.
+Le header remonte à droite du logo PNG, sans libellé de pack accolé.
+Intendance est en haut, Gazette à gauche et Tableau à droite en dessous ;
+voir la [recette du header intégré](../implementation/accueil-header-20261108.md).
 La [recette de cette disposition](../implementation/accueil-fixe-20261108.md)
 conserve des rendus de la fenêtre Qt. La [recette du binaire](../implementation/launcher-local-20261108.md) décrit
 les essais et leurs limites. Aucune nouvelle maquette n'est générée pour ce lot.
