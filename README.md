@@ -8,14 +8,16 @@ La version **0.1.0 de développement** fonctionne localement sur macOS Apple Sil
 
 **Accueil** présente les publications réelles sans cadre, sans titre de
 rubrique et sans barre d'actions par flux. L'Intendance reste en haut sur toute
-la largeur, la Gazette à gauche et le Tableau à droite en dessous. Chaque
-publication montre le visage du skin Minecraft de son auteur et son titre.
+la largeur, la Gazette à gauche et le Tableau à droite en dessous. La date
+et l’heure locales occupent le titre en haut et s’actualisent automatiquement.
+Les publications de Gazette et du Tableau montrent le visage du skin Minecraft
+de leur auteur près du titre ; l’Intendance reste sans visage.
 Un clic déplie le texte complet et les photos de la Gazette, comme sur le site.
 Chaque flux peut défiler dans le body ; Jouer reste fixé en bas à droite.
 
-**Bien démarrer** est le premier onglet, permanent dans la même fenêtre. Elle conserve
+**Bien démarrer** est le premier onglet, permanent dans la même fenêtre. Il conserve
 les cinq étapes : Discord, Microsoft, accès Sanctuary, code SGA facultatif et
-installation. Elle reste accessible après la connexion Discord, avec l'étape
+installation. Il reste accessible après la connexion Discord, avec l'étape
 Microsoft visible et explicitement en attente d'autorisation. Une première
 arrivée sans session Discord ou sans pack vérifié ouvre cette page. Un joueur
 ayant une session et le pack retrouve l'accueil, avec un lien vers le tutoriel.

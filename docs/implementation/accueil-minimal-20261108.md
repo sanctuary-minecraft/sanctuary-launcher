@@ -65,3 +65,22 @@ avant ce lot. Les nouveaux visages et photos privés restent à confirmer avec
 sa session reconnectée. Microsoft, Minecraft, le personnage et la connexion
 au serveur restent en attente. Aucun monde, serveur de jeu, pack, canal ou
 installation Prism personnelle modifié.
+
+## Ajustement LAUNCH-18 — date et heure, Intendance sans visage
+
+Branche `codex/launcher-home-clock`. L’accueil quotidien affiche désormais
+la date longue et l’heure locales en titre (FR/EN, format 24 heures à la
+minute). L’affichage se rafraîchit automatiquement et à l’ouverture de l’onglet ;
+Bien démarrer conserve son titre d’étape.
+
+L’Intendance ne crée ni visage, ni initiale, ni espace réservé à un avatar et
+n’appelle plus le fournisseur de skins. Son contenu déplié est aligné à gauche.
+Les visages de Gazette et du Tableau sont conservés.
+
+Vérification : script Run `--verify`, 25 suites CTest réussies, profil isolé
+relancé. Tests adaptés pour le header visible, l’absence de visage/requête
+Intendance et le rendu d’un visage dans le Tableau. Rendu ciblé Qt contrôlé
+aux trois tailles prévues, capture à 1120 × 760 dans
+`build/native/captures-clock/minimal-home-fr.png` : titre date/heure, trois flux
+et footer visible. Ces publications sont des données de test ; aucune nouvelle
+lecture de contenu privé, modification Web, de pack ou essai Minecraft.

@@ -77,6 +77,7 @@ private:
     QString m_discordMessage;
     void buildUi();
     void refresh();
+    void refreshClock();
     void commitLocalChange();
     void install();
     QString text(const char* french, const char* english) const;

@@ -11,9 +11,10 @@ ce parcours.
 
 Koka demande de travailler sur l'application native, sans nouvelles maquettes.
 L'accueil quotidien montre les publications **sans cadre ni titre de rubrique** :
-Intendance en haut, Gazette à gauche et Tableau à droite. Les auteurs ont leur
-visage de skin Minecraft près du titre. Un clic déplie le texte et les images
-de la Gazette dans le launcher ; le flux peut défiler. Le body commence au
+La date et l’heure locales servent de titre en haut, avec mise à jour automatique.
+Intendance en haut sans visage, Gazette à gauche et Tableau à droite avec le
+visage du skin Minecraft de chaque auteur près du titre. Un clic déplie le texte et les images
+de la Gazette dans le launcher ; le flux peut défiler. Le header commence au
 niveau du logo et Jouer reste dans le footer fixe.
 
 Le premier onglet **Bien démarrer** conserve les cinq étapes, même après

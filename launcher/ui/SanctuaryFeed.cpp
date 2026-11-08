@@ -233,15 +233,18 @@ void SanctuaryFeed::setEntries(const QJsonArray& entries)
         auto* row = new QHBoxLayout;
         row->setSpacing(10);
         const auto author = entry.value("author_name").toString();
-        auto* face = new QLabel(post);
-        face->setObjectName("playerFace");
-        face->setFixedSize(32,32);
-        face->setAlignment(Qt::AlignCenter);
-        face->setTextFormat(Qt::PlainText);
-        face->setText(author.left(1).toUpper());
-        face->setToolTip(author);
-        face->setAccessibleName((m_french ? "Visage de " : "Face of ") + author);
-        row->addWidget(face,0,Qt::AlignTop);
+        if (m_kind != "bulletin") {
+            auto* face = new QLabel(post);
+            face->setObjectName("playerFace");
+            face->setFixedSize(32,32);
+            face->setAlignment(Qt::AlignCenter);
+            face->setTextFormat(Qt::PlainText);
+            face->setText(author.left(1).toUpper());
+            face->setToolTip(author);
+            face->setAccessibleName((m_french ? "Visage de " : "Face of ") + author);
+            row->addWidget(face,0,Qt::AlignTop);
+            loadFace(author,face);
+        }
         auto* title = new QLabel(post);
         title->setObjectName("postTitle");
         title->setWordWrap(true);
@@ -260,7 +263,7 @@ void SanctuaryFeed::setEntries(const QJsonArray& entries)
         auto* details = new QWidget(post);
         details->setObjectName("postDetails");
         auto* content = new QVBoxLayout(details);
-        content->setContentsMargins(42,0,0,0);
+        content->setContentsMargins(m_kind == "bulletin" ? 0 : 42,0,0,0);
         content->setSpacing(10);
         auto* byline = new QLabel(author,details);
         byline->setObjectName("postAuthor");
@@ -306,7 +309,6 @@ void SanctuaryFeed::setEntries(const QJsonArray& entries)
             }
         });
         m_posts->addWidget(post);
-        loadFace(author,face);
         if (previousOpen == id) emit title->linkActivated("toggle");
     }
     status(entries.isEmpty() ? (m_french ? "Aucune publication" : "No posts") : QString());

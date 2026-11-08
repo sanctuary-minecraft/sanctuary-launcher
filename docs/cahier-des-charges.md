@@ -256,8 +256,9 @@ Le body autorise le défilement interne des publications dépliées, à partir d
 une navigation clavier, un focus visible et les textes lisibles.
 
 - **Header du tutoriel** : titre de l'étape en cours et prochaine action,
-  notamment l'attente d'accès. L'accueil quotidien utilise directement cet
-  espace pour les publications, sans titre générique supplémentaire.
+  notamment l'attente d'accès. Dans l’accueil quotidien, le titre affiche
+  la date et l’heure locales, actualisées automatiquement, avec date longue
+  FR/EN et heure sur 24 heures à la minute.
 - **Body** : les cinq étapes restent ensemble dans Bien démarrer ; les trois
   flux restent dans Accueil, sans cadre ni titre de rubrique.
 - **Footer** : version/état du pack, installation/mise à jour et **Jouer ancré
@@ -268,16 +269,18 @@ est à gauche et le Tableau d'affichage à droite. Le logo PNG reste seul en
 haut de la colonne latérale : aucun libellé « Sanctuary Beta » à sa droite.
 La colonne de contenu commence à la même hauteur que ce logo, avec le header
 de l'étape active dans cet espace ; aucune bande supérieure vide au-dessus
-du header et du body. Au repos, chaque publication montre seulement le visage
-du skin Minecraft de son auteur et son titre. Un clic sur le titre déplie le
+du header et du body. Au repos, les publications de Gazette et du Tableau
+montrent le visage du skin Minecraft de leur auteur et leur titre.
+L’Intendance montre son titre sans visage et sans espace réservé à un avatar. Un clic sur le titre déplie le
 texte complet et les images de la Gazette dans le launcher, comme sur le site.
 Une publication par flux peut rester ouverte ; un lien discret permet aussi
 de lire la discussion sur le site. Le contenu ouvert peut défiler dans chaque
 flux, sans déplacer la navigation ni le footer. Une actualisation périodique
 conserve la publication ouverte si elle existe encore.
 
-Réutiliser le fournisseur de visages du site pour tous les auteurs, y compris
-le joueur connecté. Aucun jeton Sanctuary n’est envoyé à ce service public.
+Réutiliser le fournisseur de visages du site pour les auteurs de Gazette et
+du Tableau, y compris le joueur connecté. Aucune requête de visage pour
+l’Intendance. Aucun jeton Sanctuary n’est envoyé à ce service public.
 Une initiale sert de repli si le visage n’est pas disponible. Les photos privées
 passent seulement par l’API authentifiée Sanctuary, au dépliage, et restent en
 mémoire. La déconnexion efface les contenus et invalide les réponses anciennes.

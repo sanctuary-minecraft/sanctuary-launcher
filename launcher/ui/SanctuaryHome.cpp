@@ -6,9 +6,11 @@
 #include <QClipboard>
 #include <QFontDatabase>
 #include <QComboBox>
+#include <QDateTime>
 #include <QFrame>
 #include <QGridLayout>
 #include <QLabel>
+#include <QLocale>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QStyle>
@@ -51,7 +53,6 @@ struct SanctuaryHome::Ui {
     std::array<Row, 5> rows;
     QLabel *eyebrow, *heading, *subtitle, *server, *notice, *historical, *help, *footer, *code, *codeHelp;
     QWidget *previewControls, *codePanel, *setupPanel, *community, *readyCodePanel, *toolsPanel, *dashboardEmpty;
-    QFrame* pageHeader;
     QLabel* dashboardMessage;
     QPushButton* startSetup;
     QFrame *chromeHeader, *chromeFooter;
@@ -108,6 +109,12 @@ SanctuaryHome::SanctuaryHome(QWidget* parent, View view) : QWidget(parent), m_ui
         #sanctuaryHome QProgressBar::chunk { background: #dafbe1; }
     )");
     buildUi();
+    if (m_view == View::Dashboard) {
+        auto* clock = new QTimer(this);
+        clock->setInterval(1000);
+        connect(clock, &QTimer::timeout, this, [this] { if (isVisible()) refreshClock(); });
+        clock->start();
+    }
     m_installTimer = new QTimer(this);
     m_installTimer->setInterval(150);
     connect(m_installTimer, &QTimer::timeout, this, [this] {
@@ -179,7 +186,18 @@ bool SanctuaryHome::communityUnlocked() const
 
 void SanctuaryHome::openedImpl()
 {
+    refreshClock();
     if (communityUnlocked()) for (auto* feed : m_ui->feeds) feed->reload();
+}
+
+void SanctuaryHome::refreshClock()
+{
+    if (m_view != View::Dashboard) return;
+    const QLocale locale(m_french ? QLocale::French : QLocale::English,
+                         m_french ? QLocale::France : QLocale::UnitedKingdom);
+    auto title = locale.toString(QDateTime::currentDateTime(), "dddd d MMMM yyyy · HH:mm");
+    if (!title.isEmpty()) title[0] = title[0].toUpper();
+    m_ui->heading->setText(title);
 }
 
 void SanctuaryHome::buildUi()
@@ -244,7 +262,6 @@ void SanctuaryHome::buildUi()
     connect(u.reset, &QPushButton::clicked, this, [this] { setLocalScenario("start"); });
 
     auto* header = new QFrame(column);
-    u.pageHeader = header;
     header->setObjectName("homeHeader");
     auto* heading = new QVBoxLayout(header);
     heading->setContentsMargins(0, 0, 0, 4);
@@ -589,7 +606,6 @@ void SanctuaryHome::refresh()
     const int active = activeStep();
     const bool waiting = (m_onlineSession || m_localMode) && (access == Access::Pending || access == Access::Synchronizing);
     u.previewControls->setVisible(m_view != View::Dashboard && (m_localMode || m_onlineSession));
-    u.pageHeader->setVisible(m_view != View::Dashboard);
     u.scenarios->setVisible(m_localMode && !m_onlineSession);
     u.reset->setVisible(m_localMode && !m_onlineSession);
     u.discordConnect->setVisible(m_onlineSession);
@@ -642,7 +658,9 @@ void SanctuaryHome::refresh()
     if (m_onlineSession && remoteStatus == "guild_required") heading = text("Rejoindre le Discord Sanctuary", "Join the Sanctuary Discord");
     u.heading->setText(communityUnlocked() ? (m_onlineSession ? text("Connexion Microsoft en attente", "Microsoft sign-in pending") : text("Sanctuary", "Sanctuary")) : heading);
     u.subtitle->setText(m_onlineSession && communityUnlocked() ? text("Accès Sanctuary confirmé. Vos publications sont disponibles ; le jeu attend Microsoft.", "Sanctuary access confirmed. Your posts are available; the game awaits Microsoft.") : communityUnlocked() ? text("Les nouvelles de votre communauté.", "The latest from your community.") : subtitle);
-    u.eyebrow->setVisible(!communityUnlocked());
+    u.eyebrow->setVisible(m_view != View::Dashboard && !communityUnlocked());
+    u.subtitle->setVisible(m_view != View::Dashboard);
+    refreshClock();
     const std::array<bool, 5> complete{discord, microsoft, admitted, false, installed};
     for (int i = 0; i < 5; ++i) {
         auto& r = u.rows[i];

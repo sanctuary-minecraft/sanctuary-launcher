@@ -201,6 +201,10 @@ private slots:
         QBuffer buffer(&provider.image);
         QVERIFY(buffer.open(QIODevice::WriteOnly));
         QVERIFY(skinFace.save(&buffer,"PNG"));
+        SanctuaryFeed bulletin("bulletin",nullptr,&provider);
+        bulletin.setEntries({QJsonObject{{"id","33333333-3333-4333-8333-333333333333"},{"author_name","PlayerOne"},{"title","Stewardship"}}});
+        QVERIFY(bulletin.findChildren<QLabel*>("playerFace").isEmpty());
+        QCOMPARE(provider.requests.size(),0);
         SanctuaryFeed feed("article",nullptr,&provider);
         const QJsonObject first{{"id","11111111-1111-4111-8111-111111111111"},{"author_name","PlayerOne"},{"title","First"}};
         auto second=first;
@@ -224,6 +228,11 @@ private slots:
         QCOMPARE(provider.requests.size(),2);
         QCoreApplication::sendPostedEvents(nullptr,QEvent::DeferredDelete);
         QVERIFY(!feed.findChild<QLabel*>("playerFace")->pixmap().isNull());
+        SanctuaryFeed board("notice",nullptr,&provider);
+        board.setEntries({first});
+        auto* boardFace=board.findChild<QLabel*>("playerFace");
+        QVERIFY(boardFace);
+        QTRY_VERIFY(!boardFace->pixmap().isNull());
     }
     void unopenedSettingsDoNotOverwritePreferences()
     {
