@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "date": "2026-11-08",
+  "repository": "sanctuary-minecraft/sanctuary-launcher",
+  "archive_tag": "archive/release-foundation-20261108",
+  "previous_main": "e5542b39a6165df1b9aeee70d1482655cd3d177b",
+  "import_commit": "6c2c924b05bd6017d0adfa629312080e3ace33c5",
+  "sources": [
+    {
+      "source": "existing-sanctuary-bootstrap",
+      "original_commit": "f1c7a40010ef21169e4d9ab45a9f26ca98d9c0ad",
+      "imported_commit": "2e2e11fb525be51e90fee182d6dd4f8257db2277",
+      "file_count": 11
+    }
+  ],
+  "source_history_policy": "Original commit IDs and release tags retained in sanctuary and sanctuary-web; component projections retain filtered file histories.",
+  "runtime_status": "Source import only; no deployment or new standalone service."
+}
