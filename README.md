@@ -51,6 +51,9 @@ Le test ne change pas le Trousseau Discord ni l’admission Sanctuary. Voir
 [le contrat et la recette Microsoft](docs/microsoft.md). Si le navigateur
 reprend le mauvais compte, ouvrir microsoft.com/link dans une fenêtre privée
 permet d’utiliser le compte qui possède le jeu sans déconnecter Azure.
+La recette réelle du 9 novembre passe Microsoft et Xbox, puis reçoit un refus
+403 du service de connexion Minecraft ; le profil et la licence restent à
+vérifier une fois l’accès du Client ID confirmé.
 
 La session du launcher est limitée à la lecture et expire après sept jours.
 Sur macOS, le jeton est conservé dans le Trousseau, séparément pour chaque

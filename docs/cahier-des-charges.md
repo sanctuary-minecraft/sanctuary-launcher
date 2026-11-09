@@ -76,7 +76,7 @@ ne doivent pas devenir des constantes dispersées dans le launcher.
 | Shaders Sanctuary | Présents dans le mod ; le profil de première installation reste à adapter |
 | Actualités FR/EN | Lecture native de la page publique `/actualites` ; contrat JSON/cache durable encore à préparer |
 | Fork Sanctuary | Fenêtre blanche, navigation native intégrée et pack beta.373 installés/testés localement ; jeu non testé |
-| Application Microsoft Sanctuary | Créée le 8 novembre ; test par code raccordé au profil local, réponse AppID et recette complète à confirmer |
+| Application Microsoft Sanctuary | Test réel du 9 novembre : Microsoft et Xbox passent, création de session Minecraft refusée 403 ; profil/licence et décision AppID non confirmés |
 | Admission actuelle du site et du mod | Candidature acceptée/parrainée, synchronisation whitelist, puis code obligatoire à la première création du personnage |
 | Parcours en un bloc de cinq étapes, dont le code facultatif | Cible retenue ; liaisons authentifiées et activation sans saisie restent à développer |
 | Mise à jour de l'application launcher | Chaîne à préparer, distincte de celle du pack |

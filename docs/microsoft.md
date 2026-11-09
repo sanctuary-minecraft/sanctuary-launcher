@@ -124,5 +124,9 @@ utilisé ne possède toutefois pas Minecraft et Xbox refuse la suite avec
 `2148916233` (profil Xbox Live absent). Aucun profil Minecraft n’est validé pour
 cet essai et aucun compte partiel n’est mémorisé. L’utilisation du compte de jeu
 dans une fenêtre privée évite de reprendre automatiquement la session du compte
-Azure. Ce second essai reste à terminer ; la réception du formulaire AppID ne
-vaut toujours pas confirmation de l’accès aux services Minecraft.
+Azure. Ce second essai réussit Microsoft et Xbox/XSTS, puis Minecraft renvoie
+403 lors de la création de session (`/launcher/login`). Le profil et la licence
+ne sont donc pas encore confirmés ; aucun compte partiel n’est mémorisé. Ce
+refus est cohérent avec une autorisation AppID à confirmer, mais le code HTTP
+seul n’établit pas sa cause précise. La réception du formulaire ne vaut pas
+approbation et aucune réponse formelle n’est vérifiée pendant cette recette.

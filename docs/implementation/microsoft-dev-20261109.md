@@ -49,9 +49,14 @@ ou à un refus AppID par Mojang.
 
 Safari reprenait automatiquement le compte déjà connecté. Une fenêtre privée
 Microsoft est ouverte pour essayer le compte qui possède déjà Minecraft, sans
-déconnecter le compte d’administration Azure. La validation avec ce compte
-reste à constater. Aucun identifiant personnel, code, jeton ou capture de
-connexion n’est versionné.
+déconnecter le compte d’administration Azure. Ce second essai avec le compte
+de jeu valide Microsoft puis Xbox/XSTS ; le service suivant refuse la création
+de session Minecraft avec HTTP 403 sur `/launcher/login`. Le dialogue natif
+confirme « Connexion Microsoft validée ; accès Minecraft non confirmé ».
+La licence et le profil Minecraft n’ont pas été atteints et aucun compte
+partiel n’est enregistré. Le refus est cohérent avec la demande AppID encore
+sans confirmation d’approbation, sans que le seul 403 établisse sa cause précise.
+Aucun identifiant personnel, code, jeton ou capture de connexion n’est versionné.
 
 Le dialogue explique désormais cette possibilité de choisir un autre compte.
 Si le moteur Prism renouvelle un code, l’indication est explicite et les boutons
@@ -61,3 +66,18 @@ profil de test. Nouvelle construction et 25 suites réussies après ces ajusteme
 sans relancer le processus pendant l’authentification interactive en cours.
 
 Référence protocole : [Microsoft — flux de code de périphérique](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code).
+
+
+## Conclusion de la recette interactive
+
+Connexion Microsoft réelle et passage Xbox vérifiés avec l’application
+Sanctuary. Refus de session par Minecraft 403 constaté dans le dialogue ; aucun
+succès de profil, de licence ou de jeu n’est revendiqué. Le résultat utilisateur
+initial a été précisé par l’observation du launcher et les deux essais : le
+premier compte était celui sans Minecraft ; le second utilise la fenêtre
+privée et atteint bien le service Minecraft. Les diagnostics consultés sont
+limités aux étapes et codes d’erreur, sans jetons.
+
+Attendre la confirmation AppID ou faire clarifier ce refus avant de reprendre
+le test complet. Aucun second formulaire AppID n’est envoyé. Jouer reste
+désactivé et le dialogue de résultat est laissé disponible dans le launcher.
