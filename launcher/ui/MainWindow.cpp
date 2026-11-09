@@ -128,6 +128,7 @@
 #include "KonamiCode.h"
 #include "SanctuaryHome.h"
 #include "SanctuaryWorkspace.h"
+#include "SanctuaryMicrosoftDialog.h"
 #include "SanctuaryFeed.h"
 #include "SanctuaryPack.h"
 #include "SanctuarySession.h"
@@ -473,6 +474,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     setWindowTitle("Sanctuary Launcher — Sanctuary Beta");
     auto* discord = new SanctuarySession(APPLICATION->network(), this);
     for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
+        connect(page, &SanctuaryHome::microsoftTestRequested, this, &MainWindow::testSanctuaryMicrosoft);
         connect(page, &SanctuaryHome::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
         connect(page, &SanctuaryHome::settingsRequested, this, [this] { showSanctuarySettings(); });
         connect(page, &SanctuaryHome::accountsRequested, this, [this] { showSanctuarySettings("accounts"); });
@@ -488,6 +490,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(page, &SanctuaryHome::discordRefreshRequested, discord, &SanctuarySession::refresh);
     }
     connect(discord, &SanctuarySession::browserRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
+    connect(APPLICATION->accounts(), &AccountList::listChanged, this, &MainWindow::refreshSanctuaryHome);
+    connect(APPLICATION->accounts(), &AccountList::listActivityChanged, this, &MainWindow::refreshSanctuaryHome);
     discord->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
     QTimer::singleShot(0, discord, [discord] { discord->restore(APPLICATION->dataRoot()); });
     connect(m_sanctuaryPack, &SanctuaryPack::changed, this, &MainWindow::refreshSanctuaryHome);
@@ -511,10 +515,24 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 void MainWindow::refreshSanctuaryHome()
 {
     if (!m_sanctuaryHome || !m_sanctuaryPack) return;
+    const bool testEnabled = APPLICATION->settings()->get("SanctuaryMicrosoftDevTest").toBool()
+        && !APPLICATION->getMSAClientID().isEmpty();
+    MinecraftAccountPtr verifiedAccount;
+    if (testEnabled) {
+        for (int i = 0; i < APPLICATION->accounts()->count(); ++i) {
+            const auto account = APPLICATION->accounts()->at(i);
+            if (account->accountType() == AccountType::MSA && account->ownsMinecraft() && account->hasProfile()
+                && account->accountState() == AccountState::Online && account->accountData()->msaClientID == APPLICATION->getMSAClientID()) {
+                verifiedAccount = account;
+                break;
+            }
+        }
+    }
     for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
         page->setState(m_sanctuaryPack->instance() != nullptr,
             APPLICATION->capabilities() & Application::SupportsMSA,
             APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+        page->setMicrosoftTestState(testEnabled, bool(verifiedAccount), verifiedAccount ? verifiedAccount->profileName() : QString(), m_sanctuaryMicrosoftMessage);
         page->setPackState(m_sanctuaryPack->verified(), m_sanctuaryPack->busy(),
             m_sanctuaryPack->version(), m_sanctuaryPack->message(), m_sanctuaryPack->progress());
     }
@@ -524,6 +542,20 @@ void MainWindow::refreshSanctuaryHome()
         m_sanctuaryWorkspace->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
     }
     if (m_sanctuaryNews) m_sanctuaryNews->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+}
+
+void MainWindow::testSanctuaryMicrosoft()
+{
+    if (!APPLICATION->settings()->get("SanctuaryMicrosoftDevTest").toBool() || APPLICATION->getMSAClientID().isEmpty()) return;
+    showSanctuaryTools("setup");
+    const auto result = SanctuaryMicrosoftDialog::run(this, APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+    if (result.account) {
+        APPLICATION->accounts()->addAccount(result.account);
+        APPLICATION->accounts()->setDefaultAccount(result.account);
+    }
+    m_sanctuaryMicrosoftMessage = result.message;
+    refreshSanctuaryHome();
+    m_sanctuarySetup->showFeedback(result.message);
 }
 
 void MainWindow::showSanctuaryHome()

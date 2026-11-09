@@ -186,6 +186,15 @@ void SanctuaryHome::setDiscordSession(SanctuarySession* session)
     update();
 }
 
+void SanctuaryHome::setMicrosoftTestState(bool enabled, bool verified, const QString& profile, const QString& message)
+{
+    m_microsoftDevTest = enabled;
+    m_microsoftVerified = enabled && verified;
+    m_microsoftProfile = profile;
+    m_microsoftMessage = message;
+    refresh();
+}
+
 bool SanctuaryHome::communityUnlocked() const
 {
     if (m_view == View::Setup) return false;
@@ -508,6 +517,7 @@ void SanctuaryHome::buildUi()
         else emit linkRequested(QUrl("https://sanctuary-minecraft.net/candidature"));
     });
     connect(u.rows[1].action, &QPushButton::clicked, this, [this] {
+        if (m_microsoftDevTest) { emit microsoftTestRequested(); return; }
         if (m_onlineSession) return;
         if (m_localMode) { m_local.microsoft = true; commitLocalChange(); }
         else if (m_microsoftAvailable) emit accountsRequested();
@@ -597,9 +607,13 @@ void SanctuaryHome::setLocalScenario(const QString& scenario)
 }
 int SanctuaryHome::activeStep() const
 {
-    if (m_onlineSession) return !m_discordConnected ? 1 : m_discordProfile.value("access").toObject().value("status") == "granted" ? 2 : 3;
+    if (m_onlineSession) {
+        if (!m_discordConnected) return 1;
+        if (m_discordProfile.value("access").toObject().value("status") != "granted") return 3;
+        return m_microsoftVerified ? 5 : 2;
+    }
     if (!m_localMode || !m_local.discord) return 1;
-    if (!m_local.microsoft) return 2;
+    if (m_microsoftDevTest ? !m_microsoftVerified : !m_local.microsoft) return 2;
     if (m_local.access != Access::Granted) return 3;
     return m_codeVisible ? 4 : 5;
 }
@@ -619,7 +633,7 @@ void SanctuaryHome::refresh()
         {"synchronizing", Access::Synchronizing}, {"rejected", Access::Rejected}, {"revoked", Access::Revoked}};
     const auto access = m_onlineSession ? accessStates.value(remoteStatus, Access::None) : m_local.access;
     const bool discord = m_onlineSession ? m_discordConnected : m_localMode && m_local.discord;
-    const bool microsoft = !m_onlineSession && m_localMode && m_local.microsoft;
+    const bool microsoft = m_microsoftDevTest ? m_microsoftVerified : !m_onlineSession && m_localMode && m_local.microsoft;
     const bool admitted = m_onlineSession ? discord && access == Access::Granted : m_localMode && access == Access::Granted;
     const bool installed = m_realPack ? m_packVerified : m_localMode && m_local.installed;
     const bool installing = m_realPack ? m_packBusy : m_installTimer && m_installTimer->isActive();
@@ -716,6 +730,17 @@ void SanctuaryHome::refresh()
             m.action->setToolTip(m.detail->text());
         }
     }
+    if (m_microsoftDevTest) {
+        m.detail->setText(m_microsoftMessage.isEmpty()
+            ? (m_microsoftVerified ? m_microsoftProfile : text("Test réel Microsoft → Xbox → Minecraft disponible.", "Live Microsoft → Xbox → Minecraft test available."))
+            : m_microsoftMessage.section('\n',0,0));
+        m.detail->setToolTip(m_microsoftMessage);
+        if (!m_microsoftVerified) {
+            action(1,text("Tester Microsoft · dev", "Test Microsoft · dev"),active == 2);
+            m.action->setEnabled(m_microsoftAvailable);
+            m.action->setToolTip(text("Connexion réelle par code avec l’application Sanctuary.", "Live device-code sign-in with the Sanctuary application."));
+        }
+    }
     auto& a = u.rows[2];
     a.detail->setText(text("Candidature ou parrainage", "Application or sponsorship"));
     a.status->setText(text("À vérifier", "Not checked"));
@@ -795,7 +820,7 @@ void SanctuaryHome::refresh()
     if (ready && !m_communityVisible) for (auto* feed : u.feeds) feed->reload();
     m_communityVisible = ready;
     u.play->setText(text("Jouer", "Play"));
-    u.play->setEnabled(!m_onlineSession && m_localMode && discord && microsoft && admitted && installed && !installing);
+    u.play->setEnabled(!m_microsoftDevTest && !m_onlineSession && m_localMode && discord && microsoft && admitted && installed && !installing);
     u.play->setToolTip(text("En mode local, ce bouton vérifie le parcours sans lancer Minecraft.", "In local mode, this checks the flow without launching Minecraft."));
     if (m_onlineSession) u.play->setToolTip(text("Le lancement attend le raccordement Microsoft/Mojang.", "Game launch awaits Microsoft/Mojang integration."));
     u.help->setText(m_realPack ? text("Comptes et accès locaux. Les essais du jeu et du serveur attendent Mojang.",
@@ -804,6 +829,7 @@ void SanctuaryHome::refresh()
                                                   "Local simulation only. Minecraft, server and character tests await Mojang approval.")
                                     : text("Connexion et accès au serveur en attente du raccordement Microsoft/Mojang.", "Sign-in and server access await Microsoft/Mojang integration."));
     if (m_onlineSession) u.help->setText(text("Discord et accès réels · lancement Minecraft en attente de Microsoft/Mojang.", "Real Discord account and access · Minecraft launch awaits Microsoft/Mojang."));
+    if (m_microsoftDevTest) u.help->setText(text("Test Microsoft réel · lancement du jeu désactivé pour ce lot.", "Live Microsoft test · game launch disabled for this milestone."));
     u.mods->setText("Mods");
     u.shaders->setText("Shaders");
     u.instanceSettings->setText(text("Réglages", "Settings"));

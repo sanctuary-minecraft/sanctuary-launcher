@@ -1,12 +1,13 @@
 # Cahier des charges de Sanctuary Launcher
 
-Version documentaire **0.9**, actualisée le **8 novembre 2026**. Sanctuary
+Version documentaire **0.10**, actualisée le **9 novembre 2026**. Sanctuary
 Launcher est un fork natif de Prism avec une fenêtre principale blanche,
 une seule instance officielle Sanctuary Beta et ses outils intégrés.
 
 La décision courante distingue **Accueil** et **Bien démarrer** dans une
-seule fenêtre. L'accueil quotidien affiche les trois flux sans bordures ni
-titres de rubrique, avec le visage Minecraft et le contenu des auteurs.
+seule fenêtre. L’accueil quotidien affiche Accueil, la date et l’heure, puis
+les trois cadres gris clair avec leurs titres. Les publications sont dépliables ;
+les visages Minecraft restent dans la Gazette et le Tableau.
 Le tutoriel permanent conserve les cinq étapes, même après Discord : la
 connexion Microsoft doit rester accessible et son indisponibilité temporaire
 expliquée. Le code SGA reste facultatif. Actualités conserve son onglet séparé.
@@ -14,8 +15,10 @@ expliquée. Le code SGA reste facultatif. Actualités conserve son onglet sépar
 Le lot natif porte cette interface, l'installation du pack et la connexion
 Discord réelle au site. Le dossier d'accès et les contenus privés sont lus
 avec une session propre au launcher. Aucun droit d'écriture ou d'administration
-n'est accordé par cette session. Microsoft et le jeu restent en attente :
-Discord ne remplace ni la possession de Minecraft ni la session de jeu.
+n'est accordé par cette session. Le test Microsoft réel est disponible dans le
+profil local de développement, avec le moteur Prism et l’AppID Sanctuary.
+Le jeu reste désactivé dans ce lot. Discord ne remplace ni la possession de
+Minecraft ni la session de jeu.
 Voir le [contrat Discord](discord-connexion.md) et la
 [recette du lot local](implementation/launcher-local-20261108.md), conservée
 pour son périmètre initial. Les maquettes restent historiques.
@@ -56,7 +59,7 @@ d'évolution, **hors périmètre de la V1 et sans déploiement planifié à ce s
 | GitHub comme référence | Sources dans l'organisation `sanctuary-minecraft`, Gitea archivé |
 | Sanctuary Update à la demande | Un push seul ne déclenche pas de déploiement |
 | Shaders et Sound Physics activés initialement | Initialiser le profil dédié une fois, puis respecter les choix du joueur |
-| Microsoft en attente | Le cadrage et les écrans peuvent avancer ; l'authentification réelle reste à raccorder |
+| Test Microsoft en développement | Parcours par code réel avec l’AppID Sanctuary ; licence/profil exigés, Jouer reste désactivé |
 
 ## 2. Existant et base Prism
 
@@ -64,7 +67,7 @@ Le pack de départ du cadrage, **beta.372**, utilise Minecraft **26.3**,
 Fabric **0.19.5** et Java **25**. Ces valeurs seront lues dans les métadonnées de publication et
 ne doivent pas devenir des constantes dispersées dans le launcher.
 
-| Élément | État au 8 novembre 2026 |
+| Élément | État au 9 novembre 2026 |
 | --- | --- |
 | Pack et instance Prism du site | Installation et mises à jour packwiz existantes |
 | Bootstrap Sanctuary | Sources, logo et empreintes conservés dans `existing/` |
@@ -73,7 +76,7 @@ ne doivent pas devenir des constantes dispersées dans le launcher.
 | Shaders Sanctuary | Présents dans le mod ; le profil de première installation reste à adapter |
 | Actualités FR/EN | Lecture native de la page publique `/actualites` ; contrat JSON/cache durable encore à préparer |
 | Fork Sanctuary | Fenêtre blanche, navigation native intégrée et pack beta.373 installés/testés localement ; jeu non testé |
-| Application Microsoft Sanctuary | Créée le 8 novembre, flux clients publics activés ; accès Minecraft et intégration au fork en attente |
+| Application Microsoft Sanctuary | Créée le 8 novembre ; test par code raccordé au profil local, réponse AppID et recette complète à confirmer |
 | Admission actuelle du site et du mod | Candidature acceptée/parrainée, synchronisation whitelist, puis code obligatoire à la première création du personnage |
 | Parcours en un bloc de cinq étapes, dont le code facultatif | Cible retenue ; liaisons authentifiées et activation sans saisie restent à développer |
 | Mise à jour de l'application launcher | Chaîne à préparer, distincte de celle du pack |
@@ -389,6 +392,15 @@ prétendre qu'elle est déjà fournie par ce cadrage.
 expirée, licence absente, profil Xbox incomplet et refus des services. Renouveler
 une session selon le mécanisme Microsoft ; redemander la connexion lorsqu'elle
 ne peut pas être rétablie. La validation de propriété du jeu reste obligatoire.
+
+**AUTH-DEV.** Le profil Run active `SanctuaryMicrosoftDevTest` et le Client ID
+Sanctuary uniquement dans son dossier isolé. Bien démarrer propose Tester
+Microsoft · dev, avec un unique flux DeviceCode du moteur Prism. Distinguer
+Microsoft connecté de la validation Xbox/Minecraft ; ajouter le compte seulement
+après confirmation de la licence et du profil. Annuler interrompt la tâche.
+Jouer reste désactivé même après succès de ce test. Aucun changement du Trousseau
+Discord ou de signature n’est nécessaire. Voir la
+[recette Microsoft de développement](implementation/microsoft-dev-20261109.md).
 
 **AUTH-04.** Raccorder la connexion Discord au dossier du site et associer le
 profil Minecraft réellement vérifié, avec son identifiant stable, au même

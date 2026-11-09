@@ -4,7 +4,7 @@ Le **8 novembre 2026**, après l'exploration en trois blocs, Koka retient à
 nouveau **un seul bloc contenant les étapes 1 à 5**, dans la **DA blanche**.
 Le **titre de l'étape en cours** occupe le haut du bloc de préparation. Le mot-symbole du
 site, le badge historique, le code SGA facultatif et tous les outils Prism
-restent demandés. Le [cahier des charges 0.9](../cahier-des-charges.md) fixe
+restent demandés. Le [cahier des charges 0.10](../cahier-des-charges.md) fixe
 ce parcours.
 
 ## Application native actuelle

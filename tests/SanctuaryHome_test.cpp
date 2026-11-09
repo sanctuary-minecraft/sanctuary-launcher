@@ -359,6 +359,34 @@ private slots:
         const auto capture=qEnvironmentVariable("SANCTUARY_CAPTURE_DIR");
         if (!capture.isEmpty()) QVERIFY(window.grab().save(capture+"/getting-started-fr.png"));
     }
+    void microsoftDevelopmentTestRequestsRealAuthAndNeverEnablesGameLaunch()
+    {
+        SanctuaryHome setup(nullptr,SanctuaryHome::View::Setup);
+        setup.setEmbedded(true);
+        setup.setState(true,true,true);
+        setup.setPackState(true,false,"beta.373","Pack verified");
+        const QJsonObject profile{{"version",1},{"user",QJsonObject{{"display_name","Test player"}}},{"access",QJsonObject{{"status","granted"}}}};
+        setup.setDiscordState(true,false,profile,"Discord connected");
+        setup.setMicrosoftTestState(true,false);
+        setup.resize(1000,680);
+        setup.show();
+        QSignalSpy login(&setup,&SanctuaryHome::microsoftTestRequested);
+        QSignalSpy local(&setup,&SanctuaryHome::localStateChanged);
+        QVERIFY(action(setup,"microsoft")->isEnabled());
+        QTest::mouseClick(action(setup,"microsoft"),Qt::LeftButton);
+        QCOMPARE(login.count(),1);
+        QCOMPARE(local.count(),0);
+        QCOMPARE(setup.activeStep(),2);
+        setup.setMicrosoftTestState(true,false,{},"Microsoft validated; Minecraft not confirmed.\nService error");
+        QCOMPARE(setup.activeStep(),2);
+        QVERIFY(!action(setup,"play")->isEnabled());
+        setup.setMicrosoftTestState(true,true,"TestPlayer");
+        QCOMPARE(setup.activeStep(),5);
+        QCOMPARE(label(setup,"detail2")->text(),QString("TestPlayer"));
+        QVERIFY(!action(setup,"play")->isEnabled());
+        setup.setMicrosoftTestState(false,false);
+        QVERIFY(!action(setup,"microsoft")->isEnabled());
+    }
     void realDiscordAccessCannotBeReplacedByLocalScenarios()
     {
         SanctuaryHome home;

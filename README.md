@@ -23,7 +23,8 @@ Chaque flux peut défiler dans le body ; Jouer reste fixé en bas à droite.
 **Bien démarrer** est le premier onglet, permanent dans la même fenêtre. Il conserve
 les cinq étapes : Discord, Microsoft, accès Sanctuary, code SGA facultatif et
 installation. Il reste accessible après la connexion Discord, avec l'étape
-Microsoft visible et explicitement en attente d'autorisation. Une première
+Microsoft visible. Dans le profil de développement, Tester Microsoft · dev
+utilise la vraie application Sanctuary ; ailleurs la connexion reste en attente. Une première
 arrivée sans session Discord ou sans pack vérifié ouvre cette page. Un joueur
 ayant une session et le pack retrouve l'accueil, avec un lien vers le tutoriel.
 Les deux pages partagent la même session et la même installation.
@@ -40,10 +41,14 @@ ou admission créée automatiquement. Les trois panneaux utilisent les vraies
 publications privées, après récupération d'un accès confirmé. Koka confirme
 la connexion réelle et leur affichage le 8 novembre 2026.
 
-Microsoft/Mojang reste à raccorder : **Jouer reste désactivé**, même si Discord
-retrouve un accès accordé. Les comptes Microsoft simulés des tests ne valent
-pas une connexion réelle. Les contenus communautaires peuvent être lus sans
-attendre Microsoft ; les étapes et leur état restent dans Bien démarrer.
+**La connexion Microsoft est testable en développement** depuis Bien démarrer.
+Le parcours par code réutilise le moteur Prism : Microsoft, Xbox, services
+Minecraft, licence et profil. Le dialogue indique si Microsoft réussit alors
+que la vérification Minecraft échoue. Un compte est ajouté uniquement si la
+licence et le profil sont confirmés. **Jouer reste désactivé pour ce lot**, même
+en cas de succès complet ; le lancement et la connexion serveur sont différés.
+Le test ne change pas le Trousseau Discord ni l’admission Sanctuary. Voir
+[le contrat et la recette Microsoft](docs/microsoft.md).
 
 La session du launcher est limitée à la lecture et expire après sept jours.
 Sur macOS, le jeton est conservé dans le Trousseau, séparément pour chaque
@@ -73,7 +78,7 @@ Sanctuary. Les réglages globaux s'ouvrent également dans cette fenêtre.
 Les sous-dialogues utiles, sélecteurs de fichiers et ouvertures explicites
 du navigateur ou du gestionnaire de fichiers restent natifs.
 
-Voir le [cahier des charges 0.9](docs/cahier-des-charges.md), le
+Voir le [cahier des charges 0.10](docs/cahier-des-charges.md), le
 [contrat des outils](docs/outils-prism.md) et la
 [recette du lot local](docs/implementation/launcher-local-20261108.md), complétée
 par les recettes de l'[accueil fixe](docs/implementation/accueil-fixe-20261108.md)

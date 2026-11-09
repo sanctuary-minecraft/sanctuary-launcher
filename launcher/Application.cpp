@@ -796,6 +796,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("SanctuaryInstanceId", QString());
         m_settings->registerSetting("SanctuaryLocalMode", false);
         m_settings->registerSetting("SanctuaryLocalState", QString());
+        m_settings->registerSetting("SanctuaryMicrosoftDevTest", false);
         m_settings->registerSetting("SanctuaryPackVersion", QString());
         m_settings->registerSetting("SanctuaryPackHash", QString());
 

@@ -33,6 +33,7 @@ public:
     bool communityUnlocked() const;
     void setDiscordSession(SanctuarySession* session);
     void setDiscordState(bool connected, bool busy, const QJsonObject& profile, const QString& message);
+    void setMicrosoftTestState(bool enabled, bool verified, const QString& profile = {}, const QString& message = {});
 
 signals:
     void installRequested();
@@ -47,6 +48,7 @@ signals:
     void discordRequested();
     void discordDisconnectRequested();
     void discordRefreshRequested();
+    void microsoftTestRequested();
 
 private:
     enum class Access { None, Pending, Synchronizing, Granted, Rejected, Revoked };
@@ -75,6 +77,8 @@ private:
     bool m_onlineSession = false, m_discordConnected = false, m_discordBusy = false;
     QJsonObject m_discordProfile;
     QString m_discordMessage;
+    bool m_microsoftDevTest = false, m_microsoftVerified = false;
+    QString m_microsoftProfile, m_microsoftMessage;
     void buildUi();
     void refresh();
     void refreshClock();

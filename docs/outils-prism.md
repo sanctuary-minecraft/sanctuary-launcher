@@ -1,6 +1,6 @@
 # Les outils Prism dans Sanctuary Launcher
 
-Contrat du [cahier des charges 0.9](cahier-des-charges.md), actualisé le
+Contrat du [cahier des charges 0.10](cahier-des-charges.md), actualisé le
 8 novembre 2026. Le choix d'une **seule instance officielle** et d'une
 **fenêtre principale unique** remplace la navigation multi-instance exposée
 par les premières propositions. Les données préexistantes ne sont pas supprimées.

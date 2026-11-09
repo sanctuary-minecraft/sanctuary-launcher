@@ -17,7 +17,7 @@ et les essais réels restent à faire.
 | Autoriser les flux clients publics | Activé et enregistré |
 | URI de redirection | Aucun à ce stade : le parcours préparé est le code de périphérique |
 | Secret client | Aucun créé |
-| Intégration au binaire | Non activée ; `Launcher_MSA_CLIENT_ID` reste vide |
+| Intégration au binaire | Valeur par défaut vide ; le profil local Run configure MSAClientIDOverride avec l’AppID Sanctuary |
 | Demande AppID Minecraft | Envoyée le 8 novembre 2026 ; réception confirmée, décision en attente |
 
 Les deux identifiants ci-dessus ne sont pas des secrets d'authentification.
@@ -93,10 +93,24 @@ conditionné à l’autorisation du service ; un mode de développement local
 n’accorde pas lui-même cet accès. Le [formulaire officiel d’examen](https://aka.ms/mce-reviewappid)
 reste la référence de cette demande.
 
-Cette vérification documentaire n’active pas la connexion dans le binaire :
-le Client ID reste vide et le bouton Microsoft reste désactivé. Le diagnostic
-de connexion Microsoft reste à raccorder ; aucun compte réel, jeton ou essai
-Minecraft n’a été utilisé pour ce point de situation.
+Le test est désormais raccordé à **Bien démarrer → Tester Microsoft · dev**.
+Le script Run configure uniquement `build/local-launcher` avec l’AppID public
+Sanctuary et `SanctuaryMicrosoftDevTest=true`. La valeur compilée par défaut
+reste vide ; le test n’est pas activé automatiquement dans un autre profil.
+
+Le dialogue lance un seul `AuthFlow::Action::DeviceCode` du moteur Prism,
+cohérent avec l’application Entra sans URI de redirection. Il affiche le code
+court, ouvre uniquement l’adresse Microsoft attendue sur clic et distingue
+Microsoft validé d’un accès Minecraft non confirmé. Les textes des erreurs
+restent simples ; aucune donnée de jeton n’est affichée par ce dialogue.
+Annuler ferme le dialogue et interrompt la tâche. Un succès Microsoft seul
+ne coche pas l’étape Minecraft : le compte doit aussi posséder le jeu et avoir
+un profil vérifié. Alors seulement il est ajouté à la liste native Prism du
+profil local (fichier propriétaire uniquement). Jouer reste désactivé.
+
+Le Trousseau Discord et la signature ad hoc ne changent pas. Aucun certificat
+n’est créé. Le résultat du test réel avec Koka est consigné dans la
+[recette du lot](implementation/microsoft-dev-20261109.md).
 
 Références : [enregistrement Entra](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app),
 [compte personnel sans annuaire](https://learn.microsoft.com/en-us/troubleshoot/entra/entra-id/app-integration/error-code-AADSTS50020-user-account-identity-provider-does-not-exist#solution-create-an-azure-account-with-a-new-tenant),

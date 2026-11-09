@@ -28,6 +28,20 @@ profile.mkdir(parents=True,exist_ok=True)
 config=profile/'sanctuary-launcher.cfg'
 if not config.exists():
     config.write_text('[General]\nLanguage=fr\nApplicationTheme=system\nIconTheme=pe_colored\nSanctuaryLocalMode=true\nIgnoreJavaWizard=true\nUserAskedAboutAutomaticJavaDownload=true\nAutomaticJavaDownload=false\nAutomaticJavaSwitch=false\nJavaPath=/opt/homebrew/opt/openjdk@17/bin/java\nPastebinURL=\n'.replace('/opt/homebrew/opt/openjdk@17/bin/java',sys.argv[2]),encoding='utf-8')
+# Public Entra registration, confined to this development profile.
+content=config.read_text(encoding='utf-8')
+lines=content.splitlines()
+start=next((i+1 for i,line in enumerate(lines) if line.strip()=='[General]'),None)
+if start is None:
+    lines.extend(['','[General]'])
+    start=len(lines)
+end=next((i for i in range(start,len(lines)) if lines[i].startswith('[')),len(lines))
+section=lines[start:end]
+for key,value in {'MSAClientIDOverride':'8e8a2428-a727-4668-98ea-2fdaf0037943','SanctuaryMicrosoftDevTest':'true'}.items():
+    section=[line for line in section if not line.startswith(key+'=')]
+    section.append(key+'='+value)
+config.write_text('\n'.join(lines[:start]+section+lines[end:])+'\n',encoding='utf-8')
+profile.chmod(0o700)
 print('Profil local isolé :',profile)
 PY
 if [[ "$sanctuary_mode" == --debug ]]; then
