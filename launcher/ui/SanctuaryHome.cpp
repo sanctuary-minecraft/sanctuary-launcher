@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "SanctuaryHome.h"
 #include "SanctuaryFeed.h"
+#include "SanctuaryWordmark.h"
 #include "SanctuarySession.h"
 #include <QApplication>
 #include <QClipboard>
@@ -235,9 +236,8 @@ void SanctuaryHome::buildUi()
     u.chromeHeader->setObjectName("header");
     auto* brand = new QHBoxLayout(u.chromeHeader);
     brand->setContentsMargins(0, 0, 0, 6);
-    auto* wordmark = label(u.chromeHeader, "wordmark");
-    wordmark->setPixmap(QPixmap(":/sanctuary/wordmark.png").scaledToWidth(180, Qt::SmoothTransformation));
-    wordmark->setAccessibleName("Sanctuary");
+    auto* wordmark = new SanctuaryWordmark(u.chromeHeader);
+    wordmark->setObjectName("wordmark");
     brand->addWidget(wordmark);
     brand->addStretch();
     u.server = label(u.chromeHeader, "serverStatus");

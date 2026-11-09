@@ -135,3 +135,20 @@ deux pages et leur origine de header à la page Actualités, à 1000 × 680,
 contrôlés dans `build/native/captures-alignment/`, avec publications et profil
 de test. Les cadres et Jouer restent visibles. Aucun changement Web, pack,
 serveur, monde ou essai Minecraft.
+
+## Ajustement LAUNCH-22 — logo Retina, 9 novembre 2026
+
+Branche `codex/launcher-retina-wordmark`. SanctuaryWordmark dessine le PNG
+original directement avec QPainter, sans bitmap intermédiaire de 180 px.
+Les deux emplacements conservent leur taille logique et leurs alignements.
+Les 25 suites CTest passent à facteur 2 et le rendu Qt 2240 × 1520 est contrôlé
+avec des données de test dans `build/native/captures-retina/`.
+
+Le premier lancement a hérité du facteur ×2 des tests et grossi l’application,
+comme signalé par Koka. Le script Run retire désormais QT_SCALE_FACTOR lors
+du lancement réel. Nouvelle recette à échelle normale : 25 suites réussies,
+profil isolé relancé. Aucun réglage système de taille n’est changé.
+
+Le dialogue du Trousseau vient de l’identité ad hoc modifiée par les rebuilds.
+Koka choisit finalement de conserver ce fonctionnement : aucun certificat créé,
+aucune signature stable mise en place, aucun réglage du Trousseau modifié.

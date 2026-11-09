@@ -836,6 +836,8 @@ SET(LAUNCHER_SOURCES
     ui/SanctuaryHome.h
     ui/SanctuaryWorkspace.cpp
     ui/SanctuaryWorkspace.h
+    ui/SanctuaryWordmark.cpp
+    ui/SanctuaryWordmark.h
     ui/SanctuaryFeed.cpp
     ui/SanctuaryFeed.h
     SanctuarySession.cpp

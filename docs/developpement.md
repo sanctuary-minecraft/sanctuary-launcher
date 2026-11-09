@@ -47,6 +47,10 @@ Les autres plateformes restent à compiler et à tester.
   avec Bien démarrer/Accueil/Actualités, une colonne logo/navigation à gauche et la colonne de contenu alignée
   sur le logo en haut. Aucun nom de pack n'est accolé au PNG. Bien démarrer,
   Accueil et Actualités précèdent les pages du jeu.
+- `SanctuaryWordmark` dessine directement le PNG original 1024 × 172 avec
+  QPainter dans sa taille logique de 180 × 30. Aucun bitmap intermédiaire
+  180 px : le moteur Qt rend à la densité réelle de l’écran, y compris Retina.
+  Le même widget est utilisé dans la barre latérale et l’accueil autonome.
 - `SanctuaryHome` utilise un header d'étape, un body flexible et un footer
   fixe avec Jouer en bas à droite. Aucun `QScrollArea` ne contient l'accueil.
   `setEmbedded(true)` retire les marges du conteneur interne et sa limite de

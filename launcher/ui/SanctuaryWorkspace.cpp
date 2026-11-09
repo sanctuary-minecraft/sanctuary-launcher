@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "SanctuaryWorkspace.h"
+#include "SanctuaryWordmark.h"
 #include "ui/pages/BasePage.h"
 #include <QFrame>
 #include <QLabel>
@@ -36,10 +37,8 @@ SanctuaryWorkspace::SanctuaryWorkspace(QWidget* parent) : QWidget(parent)
     auto* body = new QHBoxLayout(this);
     body->setContentsMargins(22, 18, 22, 18);
     auto* sidebar = new QVBoxLayout;
-    auto* wordmark = new QLabel(this);
+    auto* wordmark = new SanctuaryWordmark(this);
     wordmark->setObjectName("workspaceWordmark");
-    wordmark->setPixmap(QPixmap(":/sanctuary/wordmark.png").scaledToWidth(180, Qt::SmoothTransformation));
-    wordmark->setAccessibleName("Sanctuary");
     sidebar->addWidget(wordmark, 0, Qt::AlignLeft | Qt::AlignTop);
     auto* navScroll = new QScrollArea(this);
     navScroll->setWidgetResizable(true);

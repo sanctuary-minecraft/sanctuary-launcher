@@ -77,6 +77,27 @@ Après autorisation, raccorder le Client ID au fork, vérifier les erreurs et
 annulations de connexion, puis tester le parcours avec un compte possédant le
 jeu. La préparation du pack et de l'accueil peut continuer entre-temps.
 
+## Test de développement avant la réponse Mojang — 9 novembre 2026
+
+La connexion Microsoft peut être préparée et essayée séparément de l’accès
+Minecraft. Le [flux Microsoft de code de périphérique](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code)
+permet de tester l’affichage du code, la connexion, le consentement, le retour,
+l’annulation et l’expiration avec l’application Sanctuary. Un succès Microsoft
+ne valide pas la licence, le profil Minecraft ou le lancement : ces étapes
+utilisent ensuite les services Minecraft et l’autorisation AppID concernée
+par la demande déjà envoyée.
+
+Le statut confirmé reste la réception de la demande du 8 novembre ; aucune
+réponse d’approbation n’a été vérifiée pendant ce lot. Le test complet reste
+conditionné à l’autorisation du service ; un mode de développement local
+n’accorde pas lui-même cet accès. Le [formulaire officiel d’examen](https://aka.ms/mce-reviewappid)
+reste la référence de cette demande.
+
+Cette vérification documentaire n’active pas la connexion dans le binaire :
+le Client ID reste vide et le bouton Microsoft reste désactivé. Le diagnostic
+de connexion Microsoft reste à raccorder ; aucun compte réel, jeton ou essai
+Minecraft n’a été utilisé pour ce point de situation.
+
 Références : [enregistrement Entra](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app),
 [compte personnel sans annuaire](https://learn.microsoft.com/en-us/troubleshoot/entra/entra-id/app-integration/error-code-AADSTS50020-user-account-identity-provider-does-not-exist#solution-create-an-azure-account-with-a-new-tenant),
 [AppID Review](https://aka.ms/mce-reviewappid).

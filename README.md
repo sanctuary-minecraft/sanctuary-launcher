@@ -29,7 +29,9 @@ ayant une session et le pack retrouve l'accueil, avec un lien vers le tutoriel.
 Les deux pages partagent la même session et la même installation.
 
 **Actualités** consulte l'historique des publications du site dans un onglet
-séparé. Le logo original occupe seul le haut de la barre latérale.
+séparé. Le logo PNG original occupe seul le haut de la barre latérale ; il est
+dessiné depuis sa résolution complète pour les écrans Retina, sans réduction
+intermédiaire en basse résolution.
 
 **Discord est raccordé au site Sanctuary** : Connecter Discord ouvre le
 navigateur, puis une confirmation lie ce launcher au compte déjà présent.

@@ -33,7 +33,8 @@ PY
 if [[ "$sanctuary_mode" == --debug ]]; then
     exec lldb -- "$sanctuary_bundle/Contents/MacOS/sanctuary-launcher" --dir "$sanctuary_profile"
 fi
-/usr/bin/open -n "$sanctuary_bundle" --args --dir "$sanctuary_profile" --alive
+# A synthetic scale used by offscreen tests must not magnify the real app.
+env -u QT_SCALE_FACTOR /usr/bin/open -n "$sanctuary_bundle" --args --dir "$sanctuary_profile" --alive
 if [[ "$sanctuary_mode" == --verify ]]; then
     python3 - "$sanctuary_profile" <<'PY'
 import subprocess,sys,time
