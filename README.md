@@ -48,7 +48,9 @@ que la vérification Minecraft échoue. Un compte est ajouté uniquement si la
 licence et le profil sont confirmés. **Jouer reste désactivé pour ce lot**, même
 en cas de succès complet ; le lancement et la connexion serveur sont différés.
 Le test ne change pas le Trousseau Discord ni l’admission Sanctuary. Voir
-[le contrat et la recette Microsoft](docs/microsoft.md).
+[le contrat et la recette Microsoft](docs/microsoft.md). Si le navigateur
+reprend le mauvais compte, ouvrir microsoft.com/link dans une fenêtre privée
+permet d’utiliser le compte qui possède le jeu sans déconnecter Azure.
 
 La session du launcher est limitée à la lecture et expire après sept jours.
 Sur macOS, le jeton est conservé dans le Trousseau, séparément pour chaque

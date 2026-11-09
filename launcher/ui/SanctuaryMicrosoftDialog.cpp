@@ -39,9 +39,16 @@ SanctuaryMicrosoftDialog::Result SanctuaryMicrosoftDialog::run(QWidget* parent, 
     open->setObjectName("openMicrosoft");
     open->setEnabled(false);
     layout->addWidget(open);
+    label("microsoftOtherAccount",text("Autre compte : ouvrez microsoft.com/link dans une fenêtre privée et utilisez ce code.",
+                                      "Different account: open microsoft.com/link in a private window and use this code."));
     auto* copy = new QPushButton(text("Copier le code", "Copy code"),&dialog);
     copy->setEnabled(false);
     layout->addWidget(copy);
+    QObject::connect(open,&QPushButton::clicked,open,[open] {
+        const auto url = open->property("verificationUrl").toUrl();
+        if (!url.isEmpty()) QDesktopServices::openUrl(url);
+    });
+    QObject::connect(copy,&QPushButton::clicked,copy,[code] { QApplication::clipboard()->setText(code->text()); });
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Cancel,&dialog);
     buttons->button(QDialogButtonBox::Cancel)->setText(text("Annuler", "Cancel"));
     layout->addWidget(buttons);
@@ -65,14 +72,15 @@ SanctuaryMicrosoftDialog::Result SanctuaryMicrosoftDialog::run(QWidget* parent, 
                                  "Unexpected Microsoft sign-in address. Cancel and retry."));
             return;
         }
+        const bool renewed = !code->text().isEmpty() && code->text() != value;
         code->setText(value);
-        status->setText(text("Ouvrez Microsoft, saisissez ce code et connectez-vous avec le compte qui possède Minecraft Java.",
-                             "Open Microsoft, enter this code and sign in with the account that owns Minecraft Java."));
+        status->setText(renewed ? text("Code renouvelé : saisissez le nouveau code affiché ici dans Microsoft.", "Code renewed: enter the new code shown here on Microsoft.")
+            : text("Ouvrez Microsoft, saisissez ce code et connectez-vous avec le compte qui possède Minecraft Java.",
+                   "Open Microsoft, enter this code and sign in with the account that owns Minecraft Java."));
+        open->setProperty("verificationUrl",url);
         open->setEnabled(true);
         copy->setEnabled(true);
         dialog.adjustSize();
-        QObject::connect(open,&QPushButton::clicked,open,[url] { QDesktopServices::openUrl(url); });
-        QObject::connect(copy,&QPushButton::clicked,copy,[value] { QApplication::clipboard()->setText(value); });
     });
     QObject::connect(flow.get(),&Task::failed,&dialog,[&result,account,status,checkpoint,open,copy,code,buttons,text](const QString& reason) {
         const bool microsoft = !account->accountData()->msaToken.token.isEmpty();

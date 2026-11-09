@@ -492,6 +492,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(discord, &SanctuarySession::browserRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
     connect(APPLICATION->accounts(), &AccountList::listChanged, this, &MainWindow::refreshSanctuaryHome);
     connect(APPLICATION->accounts(), &AccountList::listActivityChanged, this, &MainWindow::refreshSanctuaryHome);
+    connect(APPLICATION->accounts(), &AccountList::defaultAccountChanged, this, &MainWindow::refreshSanctuaryHome);
     discord->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
     QTimer::singleShot(0, discord, [discord] { discord->restore(APPLICATION->dataRoot()); });
     connect(m_sanctuaryPack, &SanctuaryPack::changed, this, &MainWindow::refreshSanctuaryHome);
@@ -518,16 +519,10 @@ void MainWindow::refreshSanctuaryHome()
     const bool testEnabled = APPLICATION->settings()->get("SanctuaryMicrosoftDevTest").toBool()
         && !APPLICATION->getMSAClientID().isEmpty();
     MinecraftAccountPtr verifiedAccount;
-    if (testEnabled) {
-        for (int i = 0; i < APPLICATION->accounts()->count(); ++i) {
-            const auto account = APPLICATION->accounts()->at(i);
-            if (account->accountType() == AccountType::MSA && account->ownsMinecraft() && account->hasProfile()
-                && account->accountState() == AccountState::Online && account->accountData()->msaClientID == APPLICATION->getMSAClientID()) {
-                verifiedAccount = account;
-                break;
-            }
-        }
-    }
+    const auto account = APPLICATION->accounts()->defaultAccount();
+    if (testEnabled && account && account->accountType() == AccountType::MSA && account->ownsMinecraft() && account->hasProfile()
+        && account->accountState() == AccountState::Online && account->accountData()->msaClientID == APPLICATION->getMSAClientID())
+        verifiedAccount = account;
     for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
         page->setState(m_sanctuaryPack->instance() != nullptr,
             APPLICATION->capabilities() & Application::SupportsMSA,

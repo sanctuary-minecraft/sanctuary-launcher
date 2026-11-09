@@ -38,8 +38,26 @@ confirmé / compte vérifié / test désactivé respecte les états attendus.
 Recette native : le service Microsoft accepte la demande de code avec
 l’AppID Sanctuary. Code reçu, ouverture du dialogue et annulation vérifiés ;
 aucun compte ajouté. Un défaut de hauteur du libellé du code a été repéré et
-corrigé avant la recette utilisateur. Le résultat de l’authentification
-avec le compte de Koka reste à constater ; un code reçu ne prouve ni la
-connexion du joueur ni l’approbation des services Minecraft.
+corrigé avant la recette utilisateur.
+
+Un essai réel confirme ensuite Microsoft, l’authentification Xbox utilisateur,
+puis un refus XSTS `2148916233` : le compte utilisé n’a pas de profil Xbox Live.
+Koka confirme que ce compte ne possède pas Minecraft. Le parcours n’a donc
+pas atteint la demande de session Minecraft, la licence ou le profil ; aucun
+compte n’a été ajouté. Ce résultat ne permet pas de conclure à une approbation
+ou à un refus AppID par Mojang.
+
+Safari reprenait automatiquement le compte déjà connecté. Une fenêtre privée
+Microsoft est ouverte pour essayer le compte qui possède déjà Minecraft, sans
+déconnecter le compte d’administration Azure. La validation avec ce compte
+reste à constater. Aucun identifiant personnel, code, jeton ou capture de
+connexion n’est versionné.
+
+Le dialogue explique désormais cette possibilité de choisir un autre compte.
+Si le moteur Prism renouvelle un code, l’indication est explicite et les boutons
+utilisent uniquement le code et le lien courants, sans ajouter de connexions
+supplémentaires. L’UI suit le compte par défaut vérifié, lié au Client ID du
+profil de test. Nouvelle construction et 25 suites réussies après ces ajustements,
+sans relancer le processus pendant l’authentification interactive en cours.
 
 Référence protocole : [Microsoft — flux de code de périphérique](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code).

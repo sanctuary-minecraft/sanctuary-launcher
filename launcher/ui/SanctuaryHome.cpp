@@ -829,7 +829,10 @@ void SanctuaryHome::refresh()
                                                   "Local simulation only. Minecraft, server and character tests await Mojang approval.")
                                     : text("Connexion et accès au serveur en attente du raccordement Microsoft/Mojang.", "Sign-in and server access await Microsoft/Mojang integration."));
     if (m_onlineSession) u.help->setText(text("Discord et accès réels · lancement Minecraft en attente de Microsoft/Mojang.", "Real Discord account and access · Minecraft launch awaits Microsoft/Mojang."));
-    if (m_microsoftDevTest) u.help->setText(text("Test Microsoft réel · lancement du jeu désactivé pour ce lot.", "Live Microsoft test · game launch disabled for this milestone."));
+    if (m_microsoftDevTest) {
+        u.help->setText(text("Test Microsoft réel · lancement du jeu désactivé pour ce lot.", "Live Microsoft test · game launch disabled for this milestone."));
+        u.play->setToolTip(text("Le lancement du jeu est désactivé dans ce test de développement.", "Game launch is disabled in this development test."));
+    }
     u.mods->setText("Mods");
     u.shaders->setText("Shaders");
     u.instanceSettings->setText(text("Réglages", "Settings"));

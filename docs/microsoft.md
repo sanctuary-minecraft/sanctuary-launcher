@@ -4,7 +4,7 @@ L'application **Sanctuary Launcher** a été créée et vérifiée dans Microsof
 Entra le **8 novembre 2026**, après la création du compte Azure et de son
 annuaire. La demande d'accès Minecraft a été envoyée le même jour à la demande
 de Koka. Microsoft Forms confirme sa réception ; l'autorisation est en attente
-et les essais réels restent à faire.
+et le résultat des essais de développement est décrit ci-dessous.
 
 ## Configuration enregistrée
 
@@ -115,3 +115,14 @@ n’est créé. Le résultat du test réel avec Koka est consigné dans la
 Références : [enregistrement Entra](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app),
 [compte personnel sans annuaire](https://learn.microsoft.com/en-us/troubleshoot/entra/entra-id/app-integration/error-code-AADSTS50020-user-account-identity-provider-does-not-exist#solution-create-an-azure-account-with-a-new-tenant),
 [AppID Review](https://aka.ms/mce-reviewappid).
+
+
+### Premier résultat réel
+
+Microsoft accepte le code et une authentification réelle réussit. Le compte
+utilisé ne possède toutefois pas Minecraft et Xbox refuse la suite avec
+`2148916233` (profil Xbox Live absent). Aucun profil Minecraft n’est validé pour
+cet essai et aucun compte partiel n’est mémorisé. L’utilisation du compte de jeu
+dans une fenêtre privée évite de reprendre automatiquement la session du compte
+Azure. Ce second essai reste à terminer ; la réception du formulaire AppID ne
+vaut toujours pas confirmation de l’accès aux services Minecraft.
