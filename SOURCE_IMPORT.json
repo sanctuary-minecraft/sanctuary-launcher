@@ -14,7 +14,7 @@
     }
   ],
   "source_history_policy": "Original commit IDs and release tags retained in sanctuary and sanctuary-web; component projections retain filtered file histories.",
-  "runtime_status": "Prism fork development source and isolated local macOS build; no game, server or public launcher deployment.",
+  "runtime_status": "Isolated local macOS development build; online Minecraft launch, direct Beta connection and existing character confirmed on 2026-11-13. No public launcher binary distribution.",
   "migration_verified": true,
   "gitea_status": "archived-read-only",
   "receipt": "https://github.com/sanctuary-minecraft/sanctuary-docs/blob/main/docs/github-migration-20261108.json",
@@ -25,7 +25,7 @@
     "retained_tag": "upstream/prism/11.1.1",
     "commit": "7d2d3c1ec6fcf8255ebacd02d9f792688575dfb4",
     "history_policy": "Merge both histories; preserve existing Sanctuary content and upstream licensing.",
-    "implementation": "Native C++20 / Qt6 home, local macOS development build; Microsoft deferred.",
+    "implementation": "Native C++20 / Qt6 single-instance workspace, Discord/Microsoft sign-in and online launch through Prism; local macOS development build.",
     "validation": "docs/developpement.md"
   }
 }

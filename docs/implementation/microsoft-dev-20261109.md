@@ -2,6 +2,13 @@
 
 Ticket LAUNCH-23, branche `codex/launcher-microsoft-dev`.
 
+**Complément du 13 novembre :** le même parcours avec l’AppID Sanctuary réussit
+jusqu’à la possession du jeu et au profil. Après la confirmation utilisateur,
+l’onglet Bien démarrer affiche réellement les trois vérifications réussies.
+Le refus 403 décrit ci-dessous est l’état historique du 9 novembre. Aucun
+second formulaire ou changement Entra n’a été nécessaire pendant ce nouvel
+essai. Le [lot LAUNCH-24](play-server-20261113.md) reprend le lancement réel.
+
 ## Résultat disponible
 
 Bien démarrer propose **Tester Microsoft · dev** dans le profil local Run.

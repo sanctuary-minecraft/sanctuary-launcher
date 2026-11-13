@@ -211,13 +211,15 @@ bool SanctuaryWorkspace::requestClose()
     return true;
 }
 
-void SanctuaryWorkspace::setGameBusy(bool busy)
+void SanctuaryWorkspace::setGameBusy(bool synchronizing, bool running)
 {
-    m_save->setEnabled(!busy);
+    m_save->setEnabled(!synchronizing && !running);
     for (auto* page : m_pages) {
         if (page->id() != "home" && page->id() != "news" && page->id() != "setup") {
-            dynamic_cast<QWidget*>(page)->setEnabled(!busy);
-            m_navigation.value(page->id())->setEnabled(!busy);
+            const bool readOnly = QStringList{"console", "logs", "screenshots"}.contains(page->id());
+            const bool enabled = !synchronizing && (!running || readOnly);
+            dynamic_cast<QWidget*>(page)->setEnabled(enabled);
+            m_navigation.value(page->id())->setEnabled(enabled);
         }
     }
 }

@@ -20,7 +20,7 @@ public:
     ~SanctuaryWorkspace() override;
     void setPages(const QList<BasePage*>& pages, bool global = false);
     void appendPages(const QList<BasePage*>& pages);
-    void setGameBusy(bool busy);
+    void setGameBusy(bool synchronizing, bool running = false);
     void setFrench(bool french);
     bool saveAll();
     bool selectPage(QString pageId) override;

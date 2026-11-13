@@ -20,14 +20,17 @@ for line in subprocess.check_output(['ps','-ax','-o','pid=','-o','command='],tex
         except ProcessLookupError: pass
 PY
 "$sanctuary_root/scripts/build-sanctuary-macos.sh"
-python3 - "$sanctuary_profile" "$(brew --prefix openjdk@17)/bin/java" <<'PY'
+# Java 17 builds Prism's helpers; Minecraft 26.3 requires Java 25.
+sanctuary_game_java="$(/usr/libexec/java_home -v 25 2>/dev/null || true)/bin/java"
+[[ -x "$sanctuary_game_java" ]] || sanctuary_game_java="$(brew --prefix openjdk@17)/bin/java"
+python3 - "$sanctuary_profile" "$(brew --prefix openjdk@17)/bin/java" "$sanctuary_game_java" <<'PY'
 from pathlib import Path
 import sys
 profile=Path(sys.argv[1])
 profile.mkdir(parents=True,exist_ok=True)
 config=profile/'sanctuary-launcher.cfg'
 if not config.exists():
-    config.write_text('[General]\nLanguage=fr\nApplicationTheme=system\nIconTheme=pe_colored\nSanctuaryLocalMode=true\nIgnoreJavaWizard=true\nUserAskedAboutAutomaticJavaDownload=true\nAutomaticJavaDownload=false\nAutomaticJavaSwitch=false\nJavaPath=/opt/homebrew/opt/openjdk@17/bin/java\nPastebinURL=\n'.replace('/opt/homebrew/opt/openjdk@17/bin/java',sys.argv[2]),encoding='utf-8')
+    config.write_text('[General]\nLanguage=fr\nApplicationTheme=system\nIconTheme=pe_colored\nSanctuaryLocalMode=true\nIgnoreJavaWizard=true\nUserAskedAboutAutomaticJavaDownload=true\nAutomaticJavaDownload=false\nAutomaticJavaSwitch=false\nJavaPath='+sys.argv[3]+'\nPastebinURL=\n',encoding='utf-8')
 # Public Entra registration, confined to this development profile.
 content=config.read_text(encoding='utf-8')
 lines=content.splitlines()
@@ -37,6 +40,8 @@ if start is None:
     start=len(lines)
 end=next((i for i in range(start,len(lines)) if lines[i].startswith('[')),len(lines))
 section=lines[start:end]
+# Migrate only the old Run default, preserving any explicitly selected runtime.
+section=[('JavaPath='+sys.argv[3]) if line=='JavaPath='+sys.argv[2] else line for line in section]
 for key,value in {'MSAClientIDOverride':'8e8a2428-a727-4668-98ea-2fdaf0037943','SanctuaryMicrosoftDevTest':'true'}.items():
     section=[line for line in section if not line.startswith(key+'=')]
     section.append(key+'='+value)

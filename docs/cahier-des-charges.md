@@ -1,6 +1,6 @@
 # Cahier des charges de Sanctuary Launcher
 
-Version documentaire **0.10**, actualisée le **9 novembre 2026**. Sanctuary
+Version documentaire **0.11**, actualisée le **13 novembre 2026**. Sanctuary
 Launcher est un fork natif de Prism avec une fenêtre principale blanche,
 une seule instance officielle Sanctuary Beta et ses outils intégrés.
 
@@ -17,8 +17,10 @@ Discord réelle au site. Le dossier d'accès et les contenus privés sont lus
 avec une session propre au launcher. Aucun droit d'écriture ou d'administration
 n'est accordé par cette session. Le test Microsoft réel est disponible dans le
 profil local de développement, avec le moteur Prism et l’AppID Sanctuary.
-Le jeu reste désactivé dans ce lot. Discord ne remplace ni la possession de
-Minecraft ni la session de jeu.
+La recette du 13 novembre confirme la licence et le profil Minecraft. Le bouton
+Jouer est raccordé au lancement en ligne et à la connexion directe Beta,
+avec console intégrée ; la recette réelle est [consignée séparément](implementation/play-server-20261113.md).
+Discord ne remplace ni la possession de Minecraft ni la session de jeu.
 Voir le [contrat Discord](discord-connexion.md) et la
 [recette du lot local](implementation/launcher-local-20261108.md), conservée
 pour son périmètre initial. Les maquettes restent historiques.
@@ -59,7 +61,7 @@ d'évolution, **hors périmètre de la V1 et sans déploiement planifié à ce s
 | GitHub comme référence | Sources dans l'organisation `sanctuary-minecraft`, Gitea archivé |
 | Sanctuary Update à la demande | Un push seul ne déclenche pas de déploiement |
 | Shaders et Sound Physics activés initialement | Initialiser le profil dédié une fois, puis respecter les choix du joueur |
-| Test Microsoft en développement | Parcours par code réel avec l’AppID Sanctuary ; licence/profil exigés, Jouer reste désactivé |
+| Microsoft et lancement en développement | AppID Sanctuary, licence/profil vérifiés et pseudo correspondant au dossier admis ; pack vérifié, lancement en ligne Prism et connexion directe Beta |
 
 ## 2. Existant et base Prism
 

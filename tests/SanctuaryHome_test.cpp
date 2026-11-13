@@ -359,7 +359,7 @@ private slots:
         const auto capture=qEnvironmentVariable("SANCTUARY_CAPTURE_DIR");
         if (!capture.isEmpty()) QVERIFY(window.grab().save(capture+"/getting-started-fr.png"));
     }
-    void microsoftDevelopmentTestRequestsRealAuthAndNeverEnablesGameLaunch()
+    void microsoftDevelopmentTestRequestsRealAuthWithoutInventingAdmission()
     {
         SanctuaryHome setup(nullptr,SanctuaryHome::View::Setup);
         setup.setEmbedded(true);
@@ -384,8 +384,68 @@ private slots:
         QCOMPARE(setup.activeStep(),5);
         QCOMPARE(label(setup,"detail2")->text(),QString("TestPlayer"));
         QVERIFY(!action(setup,"play")->isEnabled());
+        QCOMPARE(action(setup,"microsoft")->text(),QString("Changer de compte"));
+        QTest::mouseClick(action(setup,"microsoft"),Qt::LeftButton);
+        QCOMPARE(login.count(),2);
         setup.setMicrosoftTestState(false,false);
         QVERIFY(!action(setup,"microsoft")->isEnabled());
+    }
+    void onlinePlayRequiresTheAdmittedMinecraftAccountAndAnIdleVerifiedPack()
+    {
+        SanctuaryHome home(nullptr,SanctuaryHome::View::Setup);
+        home.setState(true,true,true);
+        home.setLocalMode(true);
+        home.setLocalScenario("ready");
+        home.setPackState(true,false,"beta.373","Pack verified");
+        QJsonObject profile{{"version",1},{"user",QJsonObject{{"display_name","Test player"},{"minecraft_username","TestPlayer"}}},
+            {"access",QJsonObject{{"status","granted"}}}};
+        home.setDiscordState(true,false,profile,"Connected");
+        home.setMicrosoftTestState(true,false);
+        home.show();
+        QSignalSpy real(&home,&SanctuaryHome::playRequested);
+        QSignalSpy local(&home,&SanctuaryHome::localPlayRequested);
+        auto blocked = [&] {
+            QVERIFY(!home.canLaunchGame());
+            QVERIFY(!action(home,"play")->isEnabled());
+            QVERIFY(QMetaObject::invokeMethod(action(home,"play"),"clicked"));
+            QCOMPARE(real.count(),0);
+            QCOMPARE(local.count(),0);
+        };
+        blocked();
+        home.setMicrosoftTestState(true,true,"OtherPlayer");
+        blocked();
+        home.setMicrosoftTestState(true,true,"testplayer"); // Minecraft names are case insensitive.
+        QVERIFY(home.canLaunchGame());
+        QVERIFY(action(home,"play")->isEnabled());
+        home.setGameBusy(true);
+        blocked();
+        QVERIFY(!action(home,"install")->isEnabled());
+        home.setGameBusy(false);
+        QVERIFY(action(home,"install")->isEnabled());
+        home.setPackState(false,false,"beta.373","Changed file");
+        blocked();
+        home.setPackState(true,true,"beta.373","Synchronizing");
+        blocked();
+        home.setPackState(true,false,"beta.373","Verified");
+        for (const auto& status : {"pending","synchronizing","revoked","rejected","guild_required"}) {
+            auto denied = profile;
+            denied["access"] = QJsonObject{{"status",status}};
+            home.setDiscordState(true,false,denied,"Waiting");
+            blocked();
+        }
+        home.setDiscordState(true,true,profile,"Refreshing");
+        blocked();
+        home.setDiscordState(false,false,{},"Disconnected");
+        blocked();
+        home.setDiscordState(true,false,profile,"Connected");
+        home.setState(false,true,true);
+        blocked();
+        home.setState(true,true,false);
+        QVERIFY(home.canLaunchGame());
+        QTest::mouseClick(action(home,"play"),Qt::LeftButton);
+        QCOMPARE(real.count(),1);
+        QCOMPARE(local.count(),0);
+        QVERIFY(!label(home,"readyCodeValue")->isVisible()); // No code entry required.
     }
     void realDiscordAccessCannotBeReplacedByLocalScenarios()
     {

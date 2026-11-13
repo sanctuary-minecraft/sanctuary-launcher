@@ -1,7 +1,7 @@
 # Les outils Prism dans Sanctuary Launcher
 
-Contrat du [cahier des charges 0.10](cahier-des-charges.md), actualisé le
-8 novembre 2026. Le choix d'une **seule instance officielle** et d'une
+Contrat du [cahier des charges 0.11](cahier-des-charges.md), actualisé le
+13 novembre 2026. Le choix d'une **seule instance officielle** et d'une
 **fenêtre principale unique** remplace la navigation multi-instance exposée
 par les premières propositions. Les données préexistantes ne sont pas supprimées.
 
@@ -24,7 +24,7 @@ spécialisés et ouvertures de dossiers restent des actions natives explicites.
 | Packs de shaders | Gestion des packs et ajouts compatibles |
 | Captures d'écran | Consultation, gestion locale et dossier |
 | Mondes | Sauvegardes locales et outils associés, dont datapacks applicables |
-| Serveurs | Favoris et gestion native ; connexion réelle non testée dans ce lot |
+| Serveurs | Favoris et gestion native ; Jouer rejoint directement la Beta par le moteur Prism |
 | Versions | Minecraft, chargeur et composants |
 | Réglages du jeu | Java, mémoire et paramètres de lancement |
 | Journaux | Console et autres logs de l'instance |
@@ -56,7 +56,8 @@ Les pages et leur navigation ont été exercées dans la fenêtre native, et les
 tests couvrent leur conteneur commun. Cela ne valide pas chaque opération
 interne de Prism ni tous les services tiers. Les clés CurseForge/Imgur amont
 restent absentes. Discord et le dossier du site sont raccordés par une session de lecture ;
-Microsoft Sanctuary, le lancement réel et la connexion au serveur restent
-à raccorder/tester. La console du futur
-lancement doit également rester intégrée au parcours de la fenêtre unique.
+Microsoft Sanctuary, le lancement en ligne et la connexion directe Beta sont
+vérifiés le 13 novembre. La console reste dans la fenêtre principale. Pendant
+la partie, les pages d’édition sont suspendues ; console, autres journaux et
+captures restent accessibles. Voir la [recette réelle](implementation/play-server-20261113.md).
 Les mondes locaux ne donnent aucun accès d'administration au monde serveur.

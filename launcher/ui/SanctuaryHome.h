@@ -34,6 +34,8 @@ public:
     void setDiscordSession(SanctuarySession* session);
     void setDiscordState(bool connected, bool busy, const QJsonObject& profile, const QString& message);
     void setMicrosoftTestState(bool enabled, bool verified, const QString& profile = {}, const QString& message = {});
+    void setGameBusy(bool busy);
+    bool canLaunchGame() const;
 
 signals:
     void installRequested();
@@ -78,6 +80,7 @@ private:
     QJsonObject m_discordProfile;
     QString m_discordMessage;
     bool m_microsoftDevTest = false, m_microsoftVerified = false;
+    bool m_gameBusy = false;
     QString m_microsoftProfile, m_microsoftMessage;
     void buildUi();
     void refresh();

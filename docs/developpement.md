@@ -10,7 +10,8 @@ Le lot `codex/launcher-local-onboarding` porte le
 Actualités dans la navigation, cinq étapes avant préparation puis rubriques
 communautaires. La [recette](implementation/launcher-local-20261108.md)
 conserve la recette initiale. Le [raccordement Discord](discord-connexion.md)
-utilise désormais le vrai compte et le dossier du site ; Microsoft reste différé.
+utilise le vrai compte et le dossier du site. Microsoft et le lancement réel
+sont vérifiés dans [LAUNCH-24](implementation/play-server-20261113.md).
 
 ## Construire et lancer sur macOS
 
@@ -33,9 +34,13 @@ ouvrent respectivement les journaux système et LLDB. L'action Run de
 `.codex/environments/environment.toml` pointe vers ce script.
 
 Pour construire sans relancer : `./scripts/build-sanctuary-macos.sh`.
-Les auxiliaires Java de Prism sont compilés avec **JDK 17**. Ce JDK exécute
-également le bootstrap packwiz dans le profil de test ; **le jeu requiert
-Java 25**. Aucun démarrage du jeu n'est effectué par cette recette.
+Les auxiliaires Java de Prism sont compilés avec **JDK 17**. Le script détecte
+**Java 25** avec `java_home` pour le profil de jeu et migre l’ancienne valeur
+Run Java 17 si elle est encore sélectionnée. Un autre Java choisi explicitement
+reste conservé. Sans Java 25 local, le moteur signale l’incompatibilité au
+lancement ; JDK 17 reste utilisable pour construire les auxiliaires.
+Le bootstrap packwiz fonctionne avec le Java du profil. La [recette du jeu](implementation/play-server-20261113.md)
+est distincte de la compilation et des tests Qt.
 
 Le bundle `build/native/sanctuary-launcher.app` cible macOS **26.0** et dépend
 des bibliothèques Homebrew. Il n'est ni autonome, ni signé, ni notarisé.
@@ -96,11 +101,12 @@ n'est importé. `SanctuaryLocalState` est un état de démonstration séparé ;
 `SanctuaryPackVersion` et `SanctuaryPackHash` décrivent le pack vérifié.
 Les simulations ne permettent aucun lancement de Minecraft ou accès serveur.
 Le parcours runtime utilise Discord réel, même quand SanctuaryLocalMode est
-activé pour le développement. Le Client ID Microsoft reste absent ; les
-publications sont accessibles après confirmation du dossier Sanctuary, sans
-prétendre que le compte Minecraft est déjà vérifié.
+activé pour le développement. Le profil Run utilise l’AppID public Sanctuary ;
+la licence, le profil Minecraft et le pseudo du dossier sont exigés pour Jouer.
+Les publications restent accessibles selon le dossier Sanctuary indépendamment
+de la préparation du jeu.
 
-Le Client ID Microsoft du binaire reste vide jusqu'au raccordement prévu.
+Le Client ID Microsoft compilé reste vide ; Run configure le seul profil local.
 Les clés CurseForge/Imgur et les mises à jour automatiques du binaire Prism
 restent désactivées. Les métadonnées du jeu, traductions et aides publiques
 Prism restent utilisées. Les textes propres à Sanctuary sont FR/EN ; les
@@ -128,3 +134,9 @@ sur la même instance, avec conservation de sentinelles locales et d'un mod
 facultatif désactivé. Elle ne valide ni Minecraft, ni personnage, ni serveur,
 ni Vulkan/shaders/Sound Physics. Les essais graphiques futurs ciblent Vulkan.
 Aucun site, serveur, canal packwiz ni Prism personnel n'est modifié par ce lot.
+
+Le lot [LAUNCH-24 du 13 novembre](implementation/play-server-20261113.md) complète
+cette recette historique : Microsoft vérifié, lancement en ligne Java 25,
+Vulkan, connexion directe Beta et personnage confirmé par Koka. Le script
+embarque les trois auxiliaires Java Prism dans le bundle et compare leurs
+octets aux JAR construits. Le lancement conserve l’icône gérée par packwiz.

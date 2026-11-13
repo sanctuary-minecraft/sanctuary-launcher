@@ -474,6 +474,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     setWindowTitle("Sanctuary Launcher — Sanctuary Beta");
     auto* discord = new SanctuarySession(APPLICATION->network(), this);
     for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
+        connect(page, &SanctuaryHome::playRequested, this, &MainWindow::launchSanctuary);
         connect(page, &SanctuaryHome::microsoftTestRequested, this, &MainWindow::testSanctuaryMicrosoft);
         connect(page, &SanctuaryHome::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
         connect(page, &SanctuaryHome::settingsRequested, this, [this] { showSanctuarySettings(); });
@@ -481,6 +482,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(page, &SanctuaryHome::advancedRequested, this, [this] { showSanctuaryTools("mods"); });
         connect(page, &SanctuaryHome::instanceToolRequested, this, &MainWindow::showSanctuaryTools);
         connect(page, &SanctuaryHome::installRequested, this, [this] {
+            if (!APPLICATION->updatesAreAllowed()) return;
             if (m_sanctuaryPack->busy()) m_sanctuaryPack->cancel();
             else m_sanctuaryPack->installOrUpdate();
         });
@@ -493,6 +495,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(APPLICATION->accounts(), &AccountList::listChanged, this, &MainWindow::refreshSanctuaryHome);
     connect(APPLICATION->accounts(), &AccountList::listActivityChanged, this, &MainWindow::refreshSanctuaryHome);
     connect(APPLICATION->accounts(), &AccountList::defaultAccountChanged, this, &MainWindow::refreshSanctuaryHome);
+    connect(APPLICATION, &Application::updateAllowedChanged, this, &MainWindow::refreshSanctuaryHome);
     discord->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
     QTimer::singleShot(0, discord, [discord] { discord->restore(APPLICATION->dataRoot()); });
     connect(m_sanctuaryPack, &SanctuaryPack::changed, this, &MainWindow::refreshSanctuaryHome);
@@ -530,13 +533,49 @@ void MainWindow::refreshSanctuaryHome()
         page->setMicrosoftTestState(testEnabled, bool(verifiedAccount), verifiedAccount ? verifiedAccount->profileName() : QString(), m_sanctuaryMicrosoftMessage);
         page->setPackState(m_sanctuaryPack->verified(), m_sanctuaryPack->busy(),
             m_sanctuaryPack->version(), m_sanctuaryPack->message(), m_sanctuaryPack->progress());
+        page->setGameBusy(!APPLICATION->updatesAreAllowed());
     }
     ensureSanctuaryPages();
     if (m_sanctuaryWorkspace) {
-        m_sanctuaryWorkspace->setGameBusy(m_sanctuaryPack->busy());
+        m_sanctuaryWorkspace->setGameBusy(m_sanctuaryPack->busy(), !APPLICATION->updatesAreAllowed());
         m_sanctuaryWorkspace->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
     }
     if (m_sanctuaryNews) m_sanctuaryNews->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+}
+
+void MainWindow::launchSanctuary()
+{
+    if (!m_sanctuaryWorkspace->saveAll() || (m_sanctuarySettings && !m_sanctuarySettings->saveAll())) return;
+    refreshSanctuaryHome();
+    if (!m_sanctuaryHome->canLaunchGame()) { showSanctuaryTools("setup"); return; }
+    auto* instance = m_sanctuaryPack->instance();
+    if (!instance || !instance->canLaunch()) return;
+    QString error;
+    if (!SanctuaryPack::verifyTools(instance->gameRoot(), &error)
+        || !SanctuaryPack::verifyManagedFiles(instance->gameRoot(), APPLICATION->settings()->get("SanctuaryPackHash").toString().toLatin1(), &error)) {
+        m_sanctuaryHome->showFeedback(error);
+        return;
+    }
+    // Keep Prism's online authentication, refresh, downloads, prelaunch and session checks.
+    const auto target = std::make_shared<MinecraftTarget>(MinecraftTarget::parse("beta.sanctuary-minecraft.net", false));
+    showSanctuaryTools("console");
+    if (!APPLICATION->launch(instance, LaunchMode::Normal, target, APPLICATION->accounts()->defaultAccount())) {
+        const bool fr = APPLICATION->settings()->get("Language").toString().startsWith("fr");
+        m_sanctuaryHome->showFeedback(fr ? "Le jeu n'a pas pu démarrer. Consultez les journaux du jeu."
+                                       : "The game could not start. Check the game logs.");
+    }
+    refreshSanctuaryHome();
+}
+
+bool MainWindow::showSanctuaryInstance(BaseInstance* instance, const QString& page)
+{
+    if (!m_sanctuaryPack || instance != m_sanctuaryPack->instance()) return false;
+    showSanctuaryTools(page.isEmpty() ? "console" : page);
+    if (isMinimized()) showNormal();
+    else show();
+    raise();
+    activateWindow();
+    return true;
 }
 
 void MainWindow::testSanctuaryMicrosoft()

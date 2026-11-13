@@ -1131,7 +1131,10 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     auto process = LaunchTask::create(this);
     auto pptr = process.get();
 
-    APPLICATION->icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
+    // Sanctuary Update owns the official pack's icon and verifies its hash.
+    // Prism's instance icon must not overwrite this managed file at launch.
+    if (id() != APPLICATION->settings()->get("SanctuaryInstanceId").toString())
+        APPLICATION->icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
 
     // print a header
     {

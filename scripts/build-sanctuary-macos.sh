@@ -19,4 +19,11 @@ cmake --build "$sanctuary_source_dir/build/native" --parallel "${SANCTUARY_BUILD
 sanctuary_bundle_resources="$sanctuary_source_dir/build/native/sanctuary-launcher.app/Contents/Resources"
 mkdir -p "$sanctuary_bundle_resources"
 cp "$sanctuary_source_dir/program_info/sanctuary-launcher.icns" "$sanctuary_bundle_resources/SanctuaryLauncher.icns"
+# add_jar builds these beside the bundle; the runtime searches inside it.
+sanctuary_bundle_jars="$sanctuary_source_dir/build/native/sanctuary-launcher.app/Contents/MacOS/jars"
+mkdir -p "$sanctuary_bundle_jars"
+for sanctuary_helper in JavaCheck.jar NewLaunch.jar NewLaunchLegacy.jar; do
+    cp "$sanctuary_source_dir/build/native/jars/$sanctuary_helper" "$sanctuary_bundle_jars/$sanctuary_helper"
+    cmp "$sanctuary_source_dir/build/native/jars/$sanctuary_helper" "$sanctuary_bundle_jars/$sanctuary_helper"
+done
 QT_QPA_PLATFORM=offscreen ctest --test-dir "$sanctuary_source_dir/build/native" --output-on-failure

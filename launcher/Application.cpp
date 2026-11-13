@@ -1701,6 +1701,8 @@ InstanceWindow* Application::showInstanceWindow(BaseInstance* instance, QString 
 {
     if (!instance)
         return nullptr;
+    if (m_mainWindow && m_mainWindow->showSanctuaryInstance(instance, page))
+        return nullptr;
     auto id = instance->id();
     QMutexLocker locker(&m_instanceExtrasMutex);
     auto& extras = m_instanceExtras[id];

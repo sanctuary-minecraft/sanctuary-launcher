@@ -150,6 +150,25 @@ private slots:
         QVERIFY(!table.contains("downloads"));
         QVERIFY(!table.contains("login"));
     }
+    void gameLogsRemainAccessibleWhileGameEditsAndSynchronizationAreLocked()
+    {
+        SanctuaryWorkspace workspace;
+        auto* home = new SamplePage("home");
+        auto* logs = new SamplePage("console");
+        auto* mods = new SamplePage("mods");
+        workspace.setPages({home,logs,mods});
+        workspace.setGameBusy(false,true);
+        QVERIFY(logs->isEnabled());
+        QVERIFY(workspace.findChild<QPushButton*>("nav-console")->isEnabled());
+        QVERIFY(!mods->isEnabled());
+        QVERIFY(!workspace.findChild<QPushButton*>("nav-mods")->isEnabled());
+        QVERIFY(workspace.selectPage("console"));
+        workspace.setGameBusy(true,false);
+        QVERIFY(!logs->isEnabled());
+        workspace.setGameBusy(false,false);
+        QVERIFY(mods->isEnabled());
+        QVERIFY(logs->isEnabled());
+    }
     void communityPostsKeepTextSafeAndUsePublicMinecraftFaces()
     {
         SanctuaryFeed feed("article");

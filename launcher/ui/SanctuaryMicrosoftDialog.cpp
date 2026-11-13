@@ -27,8 +27,8 @@ SanctuaryMicrosoftDialog::Result SanctuaryMicrosoftDialog::run(QWidget* parent, 
         layout->addWidget(widget);
         return widget;
     };
-    label("microsoftIntro",text("Test de développement : Microsoft → Xbox → Minecraft. Le jeu reste désactivé.",
-                              "Development test: Microsoft → Xbox → Minecraft. Game launch stays disabled."));
+    label("microsoftIntro",text("Microsoft → Xbox → Minecraft. Le lancement exige une licence et un profil vérifiés.",
+                              "Microsoft → Xbox → Minecraft. Game launch requires verified ownership and a profile."));
     auto* checkpoint = label("microsoftCheckpoint",text("Connexion Microsoft à confirmer.", "Microsoft sign-in not confirmed yet."));
     auto* status = label("microsoftStatus",text("Préparation…", "Preparing…"));
     auto* code = label("microsoftCode",{});

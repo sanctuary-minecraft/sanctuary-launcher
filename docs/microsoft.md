@@ -6,6 +6,13 @@ annuaire. La demande d'accès Minecraft a été envoyée le même jour à la dem
 de Koka. Microsoft Forms confirme sa réception ; l'autorisation est en attente
 et le résultat des essais de développement est décrit ci-dessous.
 
+**Mise à jour du 13 novembre 2026 :** le test réel avec le compte possédant
+Minecraft réussit désormais jusqu’à la licence et au profil. L’interface native
+confirme « Connexion Microsoft, licence et profil Minecraft vérifiés ».
+Le 403 du 9 novembre ne se reproduit pas sur cet essai. Cette preuve d’accès
+au service ne constitue pas une consultation d’une réponse formelle AppID.
+Le [lot de lancement suivant](implementation/play-server-20261113.md) raccorde Jouer.
+
 ## Configuration enregistrée
 
 | Propriété | Valeur |

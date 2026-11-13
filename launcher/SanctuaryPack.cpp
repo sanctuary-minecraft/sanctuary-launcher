@@ -173,7 +173,7 @@ bool SanctuaryPack::verifyManagedFiles(const QString& root, const QByteArray& pa
 void SanctuaryPack::installOrUpdate()
 {
     if (m_busy) return;
-    if (auto* inst = instance(); inst && inst->isRunning()) { m_message = packText("Fermez le jeu avant de mettre à jour le pack.", "Close the game before updating the pack."); emit changed(); return; }
+    if (!APPLICATION->updatesAreAllowed() || (instance() && instance()->isRunning())) { m_message = packText("Fermez le jeu avant de mettre à jour le pack.", "Close the game before updating the pack."); emit changed(); return; }
     m_busy = true;
     m_cancelled = false;
     m_verified = false;

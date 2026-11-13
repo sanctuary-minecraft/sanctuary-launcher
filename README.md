@@ -45,15 +45,20 @@ la connexion réelle et leur affichage le 8 novembre 2026.
 Le parcours par code réutilise le moteur Prism : Microsoft, Xbox, services
 Minecraft, licence et profil. Le dialogue indique si Microsoft réussit alors
 que la vérification Minecraft échoue. Un compte est ajouté uniquement si la
-licence et le profil sont confirmés. **Jouer reste désactivé pour ce lot**, même
-en cas de succès complet ; le lancement et la connexion serveur sont différés.
+licence et le profil sont confirmés. Le **13 novembre**, une nouvelle recette
+réelle confirme Microsoft, la licence et le profil Minecraft : le 403 du
+9 novembre ne se reproduit plus. Aucune réponse formelle AppID n’a été consultée.
 Le test ne change pas le Trousseau Discord ni l’admission Sanctuary. Voir
 [le contrat et la recette Microsoft](docs/microsoft.md). Si le navigateur
 reprend le mauvais compte, ouvrir microsoft.com/link dans une fenêtre privée
 permet d’utiliser le compte qui possède le jeu sans déconnecter Azure.
-La recette réelle du 9 novembre passe Microsoft et Xbox, puis reçoit un refus
-403 du service de connexion Minecraft ; le profil et la licence restent à
-vérifier une fois l’accès du Client ID confirmé.
+**Jouer** utilise maintenant le lancement en ligne Prism et rejoint directement
+`beta.sanctuary-minecraft.net`, avec résolution SRV native. Le compte Minecraft
+doit correspondre au pseudo du dossier Discord admis. Le pack doit être vérifié,
+et aucune synchronisation ni partie ne doit être en cours. Les scénarios de
+démonstration ne donnent pas accès au jeu réel. La console reste dans l’onglet
+Journaux du jeu ; les éditions du pack et les mises à jour sont suspendues
+pendant le lancement et la partie. Voir [la recette de lancement](docs/implementation/play-server-20261113.md).
 
 La session du launcher est limitée à la lecture et expire après sept jours.
 Sur macOS, le jeton est conservé dans le Trousseau, séparément pour chaque
@@ -83,7 +88,7 @@ Sanctuary. Les réglages globaux s'ouvrent également dans cette fenêtre.
 Les sous-dialogues utiles, sélecteurs de fichiers et ouvertures explicites
 du navigateur ou du gestionnaire de fichiers restent natifs.
 
-Voir le [cahier des charges 0.10](docs/cahier-des-charges.md), le
+Voir le [cahier des charges 0.11](docs/cahier-des-charges.md), le
 [contrat des outils](docs/outils-prism.md) et la
 [recette du lot local](docs/implementation/launcher-local-20261108.md), complétée
 par les recettes de l'[accueil fixe](docs/implementation/accueil-fixe-20261108.md)
@@ -107,8 +112,11 @@ Le script relance uniquement ce profil de développement.
 Les **25 suites CTest** passent. La navigation et l'installation ont également
 été exercées dans la fenêtre native. Le bundle `build/native/sanctuary-launcher.app`
 dépend de Homebrew, cible macOS 26 et n'est ni signé ni notarisé.
-Windows, Linux, le lancement réel du jeu, la connexion au serveur, les
-personnages et les réglages graphiques/audio restent à valider.
+Windows, Linux et les réglages graphiques/audio complets restent à valider.
+Le **13 novembre**, lancement en ligne, arrivée directe sur la Beta et présence
+du personnage sont confirmés par les journaux client/serveur et par Koka.
+Le client utilise réellement Vulkan / MoltenVK. La [recette](docs/implementation/play-server-20261113.md)
+distingue ces contrôles d’une validation graphique ou audio complète.
 
 Un push ne publie aucun binaire et ne déclenche pas Sanctuary Update.
 
@@ -122,8 +130,8 @@ Sanctuary Launcher est un fork indépendant. Les identifiants Microsoft,
 CurseForge et Imgur amont et les mises à jour du binaire Prism sont désactivés.
 Les métadonnées Minecraft et traductions publiques restent utilisées.
 
-L'[application Microsoft Sanctuary](docs/microsoft.md) est créée ; sa demande
-d'accès Minecraft attend une décision. Les sources correspondantes et la
-distribution autonome seront préparées avant livraison aux joueurs.
+L'[application Microsoft Sanctuary](docs/microsoft.md) accède aux services
+Minecraft dans la recette du 13 novembre ; aucune réponse formelle à la demande
+AppID n’a été consultée. La distribution autonome sera préparée avant livraison aux joueurs.
 Les dépôts restent privés. Les anciennes fondations Release restent sous
 `archive/release-foundation-20261108`.

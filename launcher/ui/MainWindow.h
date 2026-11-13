@@ -87,11 +87,13 @@ class MainWindow : public QMainWindow {
 
     void processURLs(QList<QUrl> urls);
     void showSanctuarySettings(const QString& page = {});
+    bool showSanctuaryInstance(BaseInstance* instance, const QString& page = {});
 
    private:
     void showSanctuaryHome();
     void refreshSanctuaryHome();
     void testSanctuaryMicrosoft();
+    void launchSanctuary();
     QString m_sanctuaryMicrosoftMessage;
     SanctuaryHome* m_sanctuaryHome = nullptr;
     SanctuaryHome* m_sanctuarySetup = nullptr;
