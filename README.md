@@ -4,7 +4,7 @@ Fork natif de **Prism Launcher 11.1.1**, avec une fenêtre Sanctuary blanche,
 les outils du jeu intégrés et une seule installation officielle Sanctuary Beta.
 La version **0.1.6** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
 
-[Téléchargements Sanctuary](https://sanctuary-minecraft.net/telechargements) · [Sources publiques et releases GitHub](https://github.com/sanctuary-minecraft/sanctuary-launcher-public)
+[Téléchargements Sanctuary](https://sanctuary-minecraft.net/telechargements) · [Sources publiques et releases GitHub](https://github.com/sanctuary-minecraft/sanctuary-launcher)
 
 ## Interface actuelle
 

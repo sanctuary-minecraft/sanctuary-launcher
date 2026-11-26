@@ -7,7 +7,7 @@ correspondantes, avec les sous-modules épinglés et les fichiers de build.
 
 ## Distribution GitHub
 
-Le [dépôt public du launcher](https://github.com/sanctuary-minecraft/sanctuary-launcher-public)
+Le [dépôt public du launcher](https://github.com/sanctuary-minecraft/sanctuary-launcher)
 contient les sources de la distribution et les builds GitHub Actions.
 Le tag `v0.1.6` correspond à l’archive source distribuée avec la version 0.1.6.
 Le workflow public utilise les runners standard pour compiler et tester les

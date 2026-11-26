@@ -33,7 +33,7 @@ options=(
     "-DLauncher_BUILD_PLATFORM=sanctuary-$platform"
     -DLauncher_MSA_CLIENT_ID=8e8a2428-a727-4668-98ea-2fdaf0037943
     -DLauncher_SANCTUARY_UPDATE_KEY=er2KxCg8YIHTQaEZkViHuJJV/EFFlNeCyLzOWyra3Fs=
-    -DLauncher_BUG_TRACKER_URL=https://github.com/sanctuary-minecraft/sanctuary-launcher-public/issues
+    -DLauncher_BUG_TRACKER_URL=https://github.com/sanctuary-minecraft/sanctuary-launcher/issues
 )
 
 case "$platform" in
@@ -55,7 +55,6 @@ case "$platform" in
     windows-x64)
         test "${MSYSTEM:-}" = CLANG64
         export CC=clang CXX=clang++
-        export MSYS2_ARG_CONV_EXCL='*'
         java_folder=$(cygpath -u "${JAVA_HOME:?set JAVA_HOME to JDK 17}")
         export PATH="$java_folder/bin:$PATH"
         export JAVA_HOME="$(cygpath -m "$java_folder")"
@@ -63,6 +62,7 @@ case "$platform" in
         fetch https://github.com/vslavik/winsparkle/releases/download/v0.9.4/WinSparkle-0.9.4.zip \
             "$build_dir/WinSparkle.zip" 6037df37fc263bd1650a1c4949681a9d40ffe991d01f35892a406cb5d103c976
         unzip -q "$build_dir/WinSparkle.zip" -d "$build_dir"
+        export MSYS2_ARG_CONV_EXCL='*'
         options+=(
             -DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG"
             "-DLauncher_WINSPARKLE_DIR=$(cygpath -m "$build_dir/WinSparkle-0.9.4")"

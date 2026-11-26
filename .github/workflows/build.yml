@@ -1,0 +1,107 @@
+name: Build Sanctuary Launcher
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to build
+        type: choice
+        options: [all, linux, macos, windows]
+        default: all
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    if: inputs.platform == 'all' || inputs.platform == 'linux'
+    runs-on: ubuntu-24.04
+    container: debian:13-slim
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install build and packaging dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            build-essential ca-certificates cmake curl file git ninja-build pkg-config unzip zip \
+            extra-cmake-modules gamemode-dev cmark libcmark-dev libarchive-dev libqrencode-dev \
+            libssl-dev libtomlplusplus-dev zlib1g-dev libsecret-1-0 qtkeychain-qt6-dev \
+            qt6-base-dev qt6-base-private-dev qt6-declarative-dev qt6-networkauth-dev \
+            qt6-svg-dev qt6-svg-plugins qt6-image-formats-plugins qt6-qpa-plugins qt6-webview-dev \
+            qml6-module-qtqml-workerscript qml6-module-qtquick qml6-module-qtwebview libqt6positioning6-plugins
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: bash scripts/ci/build.sh linux-x64
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Sanctuary-Launcher-linux-x64
+          path: dist/*
+          if-no-files-found: error
+          compression-level: 0
+
+  macos:
+    if: inputs.platform == 'all' || inputs.platform == 'macos'
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install build dependencies
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+        run: |
+          brew install extra-cmake-modules ninja cmark qrencode libarchive tomlplusplus zlib \
+            qtbase qtdeclarative qtnetworkauth qtsvg qtimageformats qttools qtwebview
+      - run: bash scripts/ci/build.sh macos-arm64
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Sanctuary-Launcher-macos-arm64
+          path: dist/*
+          if-no-files-found: error
+          compression-level: 0
+
+  windows:
+    if: inputs.platform == 'all' || inputs.platform == 'windows'
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: msys2/setup-msys2@3c51bf698df1e37b2261f53cb67797b97761185c # v2
+        with:
+          msystem: CLANG64
+          update: true
+          install: git curl zip unzip
+          pacboy: >-
+            toolchain:p cmake:p ninja:p pkgconf:p extra-cmake-modules:p nsis:p
+            qt6-base:p qt6-svg:p qt6-imageformats:p qt6-networkauth:p
+            cmark:p qrencode:p tomlplusplus:p libarchive:p
+      - run: bash scripts/ci/build.sh windows-x64
+        shell: msys2 {0}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Sanctuary-Launcher-windows-x64
+          path: dist/*
+          if-no-files-found: error
+          compression-level: 0

@@ -10,7 +10,7 @@ des prototypes privés. Les anciennes bases Release restent intégralement sous
 le tag `archive/release-foundation-20261108` et dans leurs branches existantes.
 
 - Lire README.md, SOURCE_IMPORT.json et le répertoire des dépôts de sanctuary-docs.
-- Conserver les dépôts privés, les identifiants Sanctuary et les versions historiques.
+- Ce dépôt du launcher est public à la demande de Koka. Conserver les identifiants Sanctuary et les versions historiques.
 - Ne pas appliquer les anciennes PR Release sans réévaluer leur base et leur périmètre.
 - Préserver les changements existants ; travailler dans une branche `codex/<sujet>`.
 - Aucun secret, compte, session, base SQL, monde, dépendance téléchargée ou JAR
