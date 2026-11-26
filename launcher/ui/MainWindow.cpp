@@ -108,7 +108,6 @@
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
 #include "ui/instanceview/InstanceView.h"
-#include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/LabeledToolButton.h"
 
@@ -145,6 +144,16 @@
 #include "MMCTime.h"
 
 namespace {
+SanctuaryHome::MicrosoftSignIn microsoftSignInMode()
+{
+    using Mode = SanctuaryHome::MicrosoftSignIn;
+    const auto clientId = APPLICATION->getMSAClientID();
+    if (clientId.isEmpty()) return Mode::Unavailable;
+    if (clientId == BuildConfig.MSA_CLIENT_ID) return Mode::Distribution;
+    if (APPLICATION->settings()->get("SanctuaryMicrosoftDevTest").toBool()) return Mode::Development;
+    return Mode::Unavailable;
+}
+
 QString profileInUseFilter(const QString& profile, bool used)
 {
     if (used) {
@@ -258,7 +267,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->viewMenu->addAction(ui->instanceToolBar->toggleViewAction());
     ui->viewMenu->addAction(ui->newsToolBar->toggleViewAction());
 
-    updateThemeMenu();
     updateMainToolBar();
     // OSX magic.
     setUnifiedTitleAndToolBarOnMac(true);
@@ -463,7 +471,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_sanctuaryHome->setEmbedded(true);
     m_sanctuaryWorkspace = new SanctuaryWorkspace(m_sanctuaryStack);
     m_sanctuaryNews = new SanctuaryNewsPage;
-    m_sanctuaryWorkspace->setPages({m_sanctuarySetup, m_sanctuaryHome, m_sanctuaryNews});
+    auto* discord = new SanctuarySession(APPLICATION->network(), this);
+    m_sanctuaryWorkspace->setPages({m_sanctuarySetup, m_sanctuaryHome, m_sanctuaryNews,
+        new SanctuarySitePage(SanctuarySitePage::Section::Map, discord), new SanctuarySitePage(SanctuarySitePage::Section::Wiki, discord)});
     connect(m_sanctuaryWorkspace, &SanctuaryWorkspace::homeRequested, this, &MainWindow::showSanctuaryHome);
     connect(m_sanctuaryNews, &SanctuaryNewsPage::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
     m_sanctuaryStack->addWidget(m_sanctuaryWorkspace);
@@ -471,11 +481,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     setCentralWidget(m_sanctuaryStack);
     setMinimumSize(1000, 680);
     resize(1120, 760);
-    setWindowTitle("Sanctuary Launcher — Sanctuary Beta");
-    auto* discord = new SanctuarySession(APPLICATION->network(), this);
     for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
+        page->setJoinOnPlay(APPLICATION->settings()->get("SanctuaryJoinOnPlay").toBool());
         connect(page, &SanctuaryHome::playRequested, this, &MainWindow::launchSanctuary);
-        connect(page, &SanctuaryHome::microsoftTestRequested, this, &MainWindow::testSanctuaryMicrosoft);
+        connect(page, &SanctuaryHome::playModeChanged, this, [this](bool join) {
+            APPLICATION->settings()->set("SanctuaryJoinOnPlay", join);
+            m_sanctuaryHome->setJoinOnPlay(join);
+            m_sanctuarySetup->setJoinOnPlay(join);
+        });
+        connect(page, &SanctuaryHome::microsoftSignInRequested, this, &MainWindow::connectSanctuaryMicrosoft);
         connect(page, &SanctuaryHome::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
         connect(page, &SanctuaryHome::settingsRequested, this, [this] { showSanctuarySettings(); });
         connect(page, &SanctuaryHome::accountsRequested, this, [this] { showSanctuarySettings("accounts"); });
@@ -519,18 +533,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 void MainWindow::refreshSanctuaryHome()
 {
     if (!m_sanctuaryHome || !m_sanctuaryPack) return;
-    const bool testEnabled = APPLICATION->settings()->get("SanctuaryMicrosoftDevTest").toBool()
-        && !APPLICATION->getMSAClientID().isEmpty();
+    const auto signInMode = microsoftSignInMode();
     MinecraftAccountPtr verifiedAccount;
     const auto account = APPLICATION->accounts()->defaultAccount();
-    if (testEnabled && account && account->accountType() == AccountType::MSA && account->ownsMinecraft() && account->hasProfile()
+    if (signInMode != SanctuaryHome::MicrosoftSignIn::Unavailable && account && account->accountType() == AccountType::MSA
+        && account->ownsMinecraft() && account->hasProfile()
         && account->accountState() == AccountState::Online && account->accountData()->msaClientID == APPLICATION->getMSAClientID())
         verifiedAccount = account;
     for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
         page->setState(m_sanctuaryPack->instance() != nullptr,
             APPLICATION->capabilities() & Application::SupportsMSA,
             APPLICATION->settings()->get("Language").toString().startsWith("fr"));
-        page->setMicrosoftTestState(testEnabled, bool(verifiedAccount), verifiedAccount ? verifiedAccount->profileName() : QString(), m_sanctuaryMicrosoftMessage);
+        page->setMicrosoftSignInState(signInMode, bool(verifiedAccount), verifiedAccount ? verifiedAccount->profileName() : QString(),
+                                      m_sanctuaryMicrosoftMessage);
         page->setPackState(m_sanctuaryPack->verified(), m_sanctuaryPack->busy(),
             m_sanctuaryPack->version(), m_sanctuaryPack->message(), m_sanctuaryPack->progress());
         page->setGameBusy(!APPLICATION->updatesAreAllowed());
@@ -543,11 +558,14 @@ void MainWindow::refreshSanctuaryHome()
     if (m_sanctuaryNews) m_sanctuaryNews->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
 }
 
-void MainWindow::launchSanctuary()
+void MainWindow::launchSanctuary(bool joinSanctuary)
 {
     if (!m_sanctuaryWorkspace->saveAll() || (m_sanctuarySettings && !m_sanctuarySettings->saveAll())) return;
     refreshSanctuaryHome();
-    if (!m_sanctuaryHome->canLaunchGame()) { showSanctuaryTools("setup"); return; }
+    if (joinSanctuary ? !m_sanctuaryHome->canLaunchGame() : !m_sanctuaryHome->canPlayMinecraft()) {
+        showSanctuaryTools("setup");
+        return;
+    }
     auto* instance = m_sanctuaryPack->instance();
     if (!instance || !instance->canLaunch()) return;
     QString error;
@@ -557,7 +575,8 @@ void MainWindow::launchSanctuary()
         return;
     }
     // Keep Prism's online authentication, refresh, downloads, prelaunch and session checks.
-    const auto target = std::make_shared<MinecraftTarget>(MinecraftTarget::parse("beta.sanctuary-minecraft.net", false));
+    const auto target = joinSanctuary ? std::make_shared<MinecraftTarget>(MinecraftTarget::parse("beta.sanctuary-minecraft.net", false))
+                                      : std::make_shared<MinecraftTarget>();
     showSanctuaryTools("console");
     if (!APPLICATION->launch(instance, LaunchMode::Normal, target, APPLICATION->accounts()->defaultAccount())) {
         const bool fr = APPLICATION->settings()->get("Language").toString().startsWith("fr");
@@ -578,9 +597,9 @@ bool MainWindow::showSanctuaryInstance(BaseInstance* instance, const QString& pa
     return true;
 }
 
-void MainWindow::testSanctuaryMicrosoft()
+void MainWindow::connectSanctuaryMicrosoft()
 {
-    if (!APPLICATION->settings()->get("SanctuaryMicrosoftDevTest").toBool() || APPLICATION->getMSAClientID().isEmpty()) return;
+    if (microsoftSignInMode() == SanctuaryHome::MicrosoftSignIn::Unavailable || !APPLICATION->updatesAreAllowed()) return;
     showSanctuaryTools("setup");
     const auto result = SanctuaryMicrosoftDialog::run(this, APPLICATION->settings()->get("Language").toString().startsWith("fr"));
     if (result.account) {
@@ -608,7 +627,7 @@ void MainWindow::showSanctuaryHome()
 void MainWindow::showSanctuaryTools(const QString& page)
 {
     const bool fr = APPLICATION->settings()->get("Language").toString().startsWith("fr");
-    if (page == "home" || page == "news" || page == "setup") {
+    if (page == "home" || page == "news" || page == "setup" || page == "wiki" || page == "map") {
         m_sanctuaryWorkspace->selectPage(page);
         m_sanctuaryStack->setCurrentWidget(m_sanctuaryWorkspace);
         return;
@@ -828,38 +847,6 @@ void MainWindow::updateLaunchButton()
     if (m_selectedInstance)
         m_selectedInstance->populateLaunchMenu(launchMenu);
     ui->actionLaunchInstance->setMenu(launchMenu);
-}
-
-void MainWindow::updateThemeMenu()
-{
-    QMenu* themeMenu = ui->actionChangeTheme->menu();
-
-    if (themeMenu) {
-        themeMenu->clear();
-    } else {
-        themeMenu = new QMenu(this);
-    }
-
-    auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
-
-    QActionGroup* themesGroup = new QActionGroup(this);
-
-    for (auto* theme : themes) {
-        QAction* themeAction = themeMenu->addAction(theme->name());
-
-        themeAction->setCheckable(true);
-        if (APPLICATION->settings()->get("ApplicationTheme").toString() == theme->id()) {
-            themeAction->setChecked(true);
-        }
-        themeAction->setActionGroup(themesGroup);
-
-        connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->themeManager()->setApplicationTheme(theme->id());
-            APPLICATION->settings()->set("ApplicationTheme", theme->id());
-        });
-    }
-
-    ui->actionChangeTheme->setMenu(themeMenu);
 }
 
 void MainWindow::repopulateAccountsMenu()
@@ -1553,11 +1540,6 @@ void MainWindow::on_actionViewIconThemeFolder_triggered()
     DesktopServices::openPath(APPLICATION->themeManager()->getIconThemesFolder().path(), true);
 }
 
-void MainWindow::on_actionViewWidgetThemeFolder_triggered()
-{
-    DesktopServices::openPath(APPLICATION->themeManager()->getApplicationThemesFolder().path(), true);
-}
-
 void MainWindow::on_actionViewCatPackFolder_triggered()
 {
     DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path(), true);
@@ -1605,7 +1587,6 @@ void MainWindow::globalSettingsClosed()
     proxymodel->sort(0);
     updateMainToolBar();
     updateLaunchButton();
-    updateThemeMenu();
     updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
     // but Prism Launcher exits abnormally, causing the window state to never be saved:

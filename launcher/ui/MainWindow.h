@@ -92,8 +92,8 @@ class MainWindow : public QMainWindow {
    private:
     void showSanctuaryHome();
     void refreshSanctuaryHome();
-    void testSanctuaryMicrosoft();
-    void launchSanctuary();
+    void connectSanctuaryMicrosoft();
+    void launchSanctuary(bool joinSanctuary);
     QString m_sanctuaryMicrosoftMessage;
     SanctuaryHome* m_sanctuaryHome = nullptr;
     SanctuaryHome* m_sanctuarySetup = nullptr;
@@ -139,7 +139,6 @@ class MainWindow : public QMainWindow {
     void on_actionViewCentralModsFolder_triggered();
 
     void on_actionViewIconThemeFolder_triggered();
-    void on_actionViewWidgetThemeFolder_triggered();
     void on_actionViewCatPackFolder_triggered();
     void on_actionViewIconsFolder_triggered();
     void on_actionViewLogsFolder_triggered();
@@ -205,7 +204,6 @@ class MainWindow : public QMainWindow {
 
     void updateLaunchButton();
 
-    void updateThemeMenu();
 
     void instanceActivated(QModelIndex);
 

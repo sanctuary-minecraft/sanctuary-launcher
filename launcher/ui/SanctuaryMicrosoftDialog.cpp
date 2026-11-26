@@ -109,8 +109,8 @@ SanctuaryMicrosoftDialog::Result SanctuaryMicrosoftDialog::run(QWidget* parent, 
     dialog.exec();
     if (flow->isRunning()) {
         flow->abort();
-        result.message = text("Test de connexion Microsoft annulé.", "Microsoft sign-in test cancelled.");
+        result.message = text("Connexion Microsoft annulée.", "Microsoft sign-in cancelled.");
     }
-    if (result.message.isEmpty()) result.message = text("Test de connexion Microsoft annulé ou code expiré.", "Microsoft sign-in test cancelled or code expired.");
+    if (result.message.isEmpty()) result.message = text("Connexion Microsoft annulée ou code expiré.", "Microsoft sign-in cancelled or code expired.");
     return result;
 }

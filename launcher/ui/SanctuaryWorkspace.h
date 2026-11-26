@@ -31,7 +31,9 @@ public:
 signals:
     void homeRequested();
     void settingsApplied();
+
 private:
+    void applyAppearance();
     QString name(BasePage* page) const;
     QList<BasePage*> m_pages;
     QSet<BasePage*> m_visited;

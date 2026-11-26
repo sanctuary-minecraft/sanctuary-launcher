@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.25) # Required for features like `CMAKE_MSVC_DEBUG_INFORMATION_FORMAT`
 
-project(Launcher LANGUAGES C CXX)
+set(Launcher_RELEASE_VERSION "0.1.6" CACHE STRING "Sanctuary Launcher release version")
+if(NOT Launcher_RELEASE_VERSION MATCHES "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$")
+    message(FATAL_ERROR "Launcher_RELEASE_VERSION must have three numeric components")
+endif()
+project(Launcher VERSION "${Launcher_RELEASE_VERSION}" LANGUAGES C CXX)
 if(APPLE)
     enable_language(OBJC OBJCXX)
 endif()
@@ -179,10 +183,6 @@ set(Launcher_LOGIN_CALLBACK_URL "" CACHE STRING "URL that gets opened when the u
 set(Launcher_LEGACY_FMLLIBS_BASE_URL "https://files.prismlauncher.org/fmllibs/" CACHE STRING "URL for legacy (<=1.5.2) FML Libraries.")
 
 ######## Set version numbers ########
-set(Launcher_VERSION_MAJOR 0)
-set(Launcher_VERSION_MINOR 1)
-set(Launcher_VERSION_PATCH 0)
-
 set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_PATCH}")
 set(Launcher_VERSION_NAME4 "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_PATCH}.0")
 set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_MINOR},${Launcher_VERSION_PATCH},0")
@@ -195,6 +195,15 @@ set(Launcher_UPDATER_GITHUB_REPO "" CACHE STRING "Base github URL for the update
 
 # Name to help updater identify valid artifacts
 set(Launcher_BUILD_ARTIFACT "" CACHE STRING "Artifact name to help the updater identify valid artifacts.")
+
+set(Launcher_SANCTUARY_UPDATE_KEY "" CACHE STRING "Base64 Ed25519 public key for Sanctuary stable updates")
+set(Launcher_WINSPARKLE_DIR "" CACHE PATH "Directory of the x64 WinSparkle SDK")
+if(Launcher_SANCTUARY_UPDATE_KEY)
+    string(LENGTH "${Launcher_SANCTUARY_UPDATE_KEY}" sanctuary_key_length)
+    if(NOT sanctuary_key_length EQUAL 44 OR NOT Launcher_SANCTUARY_UPDATE_KEY MATCHES "^[A-Za-z0-9+/]+=$")
+        message(FATAL_ERROR "Launcher_SANCTUARY_UPDATE_KEY must encode a 32-byte Ed25519 public key")
+    endif()
+endif()
 
 # The metadata server
 set(Launcher_META_URL "https://meta.prismlauncher.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
@@ -289,6 +298,17 @@ set(Launcher_BUILD_TIMESTAMP "${TODAY}")
 if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
     find_package(Qt6 6.4 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml NetworkAuth OpenGL)
+    if(WIN32)
+        include(FetchContent)
+        set(WEBVIEW_BUILD_SHARED_LIBRARY OFF CACHE BOOL "" FORCE)
+        FetchContent_Declare(webview
+            URL https://codeload.github.com/webview/webview/tar.gz/refs/tags/0.12.0
+            URL_HASH SHA256=e2c8d0bed3fcd13e624074448b7d3b1d0b0d03546a15839f17ee0013f2cba1db
+            DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+        FetchContent_MakeAvailable(webview)
+    else()
+        find_package(Qt6 6.4 REQUIRED COMPONENTS Quick WebView)
+    endif()
     find_package(Qt6 COMPONENTS DBus)
     list(APPEND Launcher_QT_DBUS Qt6::DBus)
 else()
@@ -360,12 +380,13 @@ if(NOT (UNIX AND APPLE))
 endif()
 
 if(UNIX AND APPLE)
-    set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
-    set(LIBRARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
-    set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
-    set(FRAMEWORK_DEST_DIR "${Launcher_Name}.app/Contents/Frameworks")
-    set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
-    set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
+    set(MACOS_BUNDLE_CONTENTS "${Launcher_APP_BINARY_NAME}.app/Contents")
+    set(BINARY_DEST_DIR "${MACOS_BUNDLE_CONTENTS}/MacOS")
+    set(LIBRARY_DEST_DIR "${BINARY_DEST_DIR}")
+    set(PLUGIN_DEST_DIR "${BINARY_DEST_DIR}")
+    set(FRAMEWORK_DEST_DIR "${MACOS_BUNDLE_CONTENTS}/Frameworks")
+    set(RESOURCES_DEST_DIR "${MACOS_BUNDLE_CONTENTS}/Resources")
+    set(JARS_DEST_DIR "${RESOURCES_DEST_DIR}/jars")
 
     # Mac bundle settings
     set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")
@@ -378,9 +399,13 @@ if(UNIX AND APPLE)
     set(MACOSX_BUNDLE_COPYRIGHT "${Launcher_Copyright_Mac}")
     set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "" CACHE STRING "Public key for Sparkle update feed")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL "" CACHE STRING "URL for Sparkle update feed")
+    if(Launcher_SANCTUARY_UPDATE_KEY)
+        set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "${Launcher_SANCTUARY_UPDATE_KEY}")
+        set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://sanctuary-minecraft.net/launcher-updates/stable/macos-arm64.xml")
+    endif()
 
-    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.8.0/Sparkle-2.8.0.tar.xz" CACHE STRING "URL to Sparkle release archive")
-    set(MACOSX_SPARKLE_SHA256 "fd5681ee92bf238aaac2d08214ceaf0cc8976e452d7f882d80bac1e61581f3b1" CACHE STRING "SHA256 checksum for Sparkle release archive")
+    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.10.1/Sparkle-2.10.1.tar.xz" CACHE STRING "URL to Sparkle release archive")
+    set(MACOSX_SPARKLE_SHA256 "1a856d2a9edb8e628de88121d7be04cf0e2167f8641650b78fca00b14244cf27" CACHE STRING "SHA256 checksum for Sparkle release archive")
     set(MACOSX_SPARKLE_DIR "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
 
     if(NOT MACOSX_SPARKLE_UPDATE_PUBLIC_KEY STREQUAL "" AND NOT MACOSX_SPARKLE_UPDATE_FEED_URL STREQUAL "")

@@ -13,6 +13,7 @@ class QTextBrowser;
 class QNetworkReply;
 class QNetworkAccessManager;
 class QVBoxLayout;
+class QQuickView;
 class SanctuarySession;
 
 /** Read-only view of existing site routes. Private community feeds keep their Discord session requirement. */
@@ -34,13 +35,16 @@ private:
     QLabel* m_status;
     QPushButton* m_refresh;
     QTextBrowser* m_content = nullptr;
+    QString m_newsHtml;
     QVBoxLayout* m_posts = nullptr;
     QHash<QString, QPixmap> m_faces;
     QJsonArray m_entries;
     QString m_openId;
+    QString m_latestBulletin;
     QHash<QString, QPointer<QWidget>> m_details;
     QHash<QString, QPointer<QLabel>> m_titles;
     void loadPhoto(const QString& id, QLabel* label);
+    void applyAppearance();
     void loadFace(const QString& author, QLabel* label);
     void status(const QString& message, bool attention = false);
     void setContent(const QString& content, bool html = false);
@@ -63,4 +67,45 @@ signals:
     void linkRequested(const QUrl& url);
 private:
     SanctuaryFeed* m_feed;
+};
+
+class SanctuarySitePage : public QWidget, public BasePage {
+    Q_OBJECT
+public:
+    enum class Section { Map, Wiki };
+    SanctuarySitePage(Section section, SanctuarySession* session, QWidget* parent = nullptr);
+    ~SanctuarySitePage() override;
+    QString id() const override;
+    QString displayName() const override;
+    QIcon icon() const override { return QIcon(":/sanctuary/icon.png"); }
+    void setFrench(bool french);
+    void openedImpl() override;
+    void closedImpl() override { m_open = false; }
+
+private slots:
+    void pageReady(const QUrl& url);
+    void pageFailed();
+
+private:
+    void reload();
+    bool createBrowser();
+    void navigate(const QUrl& url);
+    bool evaluate(const QString& script);
+    void setStatus(const QString& message);
+    QString text(const char* fr, const char* en) const;
+    Section m_section;
+    SanctuarySession* m_session;
+    QWidget* m_container = nullptr;
+#ifdef Q_OS_WIN
+    void* m_browser = nullptr;
+#else
+    QQuickView* m_browser = nullptr;
+#endif
+    QUrl m_url;
+    QPushButton *m_connect, *m_reload, *m_back;
+    QLabel* m_status;
+    QPointer<QNetworkReply> m_ticket;
+    bool m_open = false;
+    bool m_loaded = false;
+    bool m_french = true;
 };

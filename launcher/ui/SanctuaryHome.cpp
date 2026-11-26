@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "SanctuaryHome.h"
+#include "SanctuaryAppearance.h"
 #include "SanctuaryFeed.h"
 #include "SanctuaryWordmark.h"
 #include "SanctuarySession.h"
@@ -12,6 +13,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QLocale>
+#include <QMenu>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QStyle>
@@ -69,6 +71,8 @@ struct SanctuaryHome::Ui {
     QLabel *packSummary, *feedback;
     QPushButton* setupToggle;
     QPushButton *reset, *play, *mods, *shaders, *instanceSettings, *tools, *settings, *news, *site, *wiki, *copy, *sponsor;
+    QPushButton* playModes;
+    QAction *playMinecraft, *joinSanctuary;
     QProgressBar* progress;
 };
 
@@ -76,46 +80,7 @@ SanctuaryHome::SanctuaryHome(QWidget* parent, View view) : QWidget(parent), m_ui
 {
     initializeSanctuaryResources();
     setObjectName("sanctuaryHome");
-    setStyleSheet(R"(
-        QWidget#sanctuaryHome, #sanctuaryHome QWidget#surface { background: #fff; color: #1f2328; }
-        #sanctuaryHome { font-family: "SF Pro Text", "Segoe UI", sans-serif; font-size: 14px; }
-        #sanctuaryHome QLabel { color: #1f2328; border: none; background: transparent; }
-        #sanctuaryHome QLabel#heading { font-size: 21px; font-weight: 700; }
-        #sanctuaryHome QLabel#heading[dashboard="true"] { font-size: 23px; font-weight: 600; }
-        #sanctuaryHome QLabel#eyebrow { font-size: 14px; font-weight: 600; color: #57606a; }
-        #sanctuaryHome QLabel#subtitle { font-size: 13px; color: #57606a; }
-        #sanctuaryHome QLabel[communityTitle="true"] { font-size: 14px; font-weight: 600; color: #57606a; }
-        #sanctuaryHome QLabel[muted="true"] { color: #57606a; font-size: 12px; }
-        #sanctuaryHome QFrame#header { border: none; border-bottom: 1px solid #d0d7de; }
-        #sanctuaryHome QFrame#footer { border: none; border-top: 1px solid #d0d7de; }
-        #sanctuaryHome QFrame[communityCard="true"] { border: 1px solid #d0d7de; border-radius: 4px; background: #f6f8fa; }
-        #sanctuaryHome QFrame[communityCard="true"] QWidget { background: transparent; }
-        #sanctuaryHome QFrame#steps { border: 1px solid #d0d7de; border-radius: 6px; background: white; }
-        #sanctuaryHome QFrame[stepRow="true"] { border: none; border-bottom: 1px solid #d8dee4; background: transparent; }
-        #sanctuaryHome QFrame[active="true"] { background: #f6f8fa; }
-        #sanctuaryHome QFrame[waiting="true"] { background: #fff8e5; }
-        #sanctuaryHome QLabel[rowTitle="true"] { font-size: 14px; font-weight: 600; }
-        #sanctuaryHome QLabel[number="true"] { border: 1px solid #8c959f; border-radius: 14px; color: #57606a; font-size: 14px; font-weight: 600; }
-        #sanctuaryHome QLabel[number="true"][kind="complete"] { border-color: #1a7f37; color: #1a7f37; }
-        #sanctuaryHome QLabel[number="true"][kind="current"] { background: #1a7f37; border-color: #1a7f37; color: white; }
-        #sanctuaryHome QLabel[number="true"][kind="waiting"] { border-color: #9a6700; color: #9a6700; }
-        #sanctuaryHome QLabel[badge="true"] { padding: 4px 8px; border: 1px solid #d0d7de; border-radius: 4px; font-size: 12px; }
-        #sanctuaryHome QLabel[badge="true"][kind="complete"] { background: #dafbe1; border-color: #dafbe1; color: #1a7f37; }
-        #sanctuaryHome QLabel[badge="true"][kind="waiting"] { background: #fff1c2; border-color: #fff1c2; color: #7d4e00; }
-        #sanctuaryHome QLabel[badge="true"][kind="error"] { background: #ffebe9; border-color: #ffebe9; color: #a40e26; }
-        #sanctuaryHome QPushButton { color: #24292f; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 5px; padding: 5px 14px; font-size: 13px; font-weight: 500; }
-        #sanctuaryHome QPushButton:hover { background: #eef1f4; border-color: #8c959f; }
-        #sanctuaryHome QPushButton:focus { border: 2px solid #0969da; }
-        #sanctuaryHome QPushButton[primary="true"] { background: #1f883d; color: white; border-color: #1a7f37; font-weight: 600; }
-        #sanctuaryHome QPushButton[primary="true"]:hover { background: #1a7f37; }
-        #sanctuaryHome QPushButton:disabled { background: #eaeef2; color: #6e7781; border-color: #eaeef2; }
-        #sanctuaryHome QPushButton[link="true"] { color: #0969da; background: transparent; border: none; padding: 3px; font-weight: 400; text-align: left; }
-        #sanctuaryHome QPushButton[link="true"]:focus { border: 1px solid #0969da; }
-
-        #sanctuaryHome QComboBox { background: white; color: #24292f; border: 1px solid #d0d7de; border-radius: 4px; padding: 5px 10px; min-height: 22px; }
-        #sanctuaryHome QProgressBar { border: 1px solid #d0d7de; border-radius: 3px; background: white; color: #24292f; text-align: center; }
-        #sanctuaryHome QProgressBar::chunk { background: #dafbe1; }
-    )");
+    new SanctuaryAppearance::PaletteWatcher(this, [this] { applyAppearance(); });
     buildUi();
     if (m_view == View::Dashboard) {
         auto* clock = new QTimer(this);
@@ -135,6 +100,53 @@ SanctuaryHome::SanctuaryHome(QWidget* parent, View view) : QWidget(parent), m_ui
     });
     refresh();
 }
+void SanctuaryHome::applyAppearance()
+{
+    SanctuaryAppearance::apply(this, QStringLiteral(R"(
+        QWidget#sanctuaryHome, #sanctuaryHome QWidget#surface { background: @surface; color: @text; }
+        #sanctuaryHome { font-family: "SF Pro Text", "Segoe UI", sans-serif; font-size: 14px; }
+        #sanctuaryHome QLabel { color: @text; border: none; background: transparent; }
+        #sanctuaryHome QLabel#heading { font-size: 21px; font-weight: 700; }
+        #sanctuaryHome QLabel#heading[dashboard="true"] { font-size: 23px; font-weight: 600; }
+        #sanctuaryHome QLabel#eyebrow { font-size: 14px; font-weight: 600; color: @muted; }
+        #sanctuaryHome QLabel#subtitle { font-size: 13px; color: @muted; }
+        #sanctuaryHome QLabel[communityTitle="true"] { font-size: 14px; font-weight: 600; color: @muted; }
+        #sanctuaryHome QLabel[muted="true"] { color: @muted; font-size: 12px; }
+        #sanctuaryHome QFrame#header { border: none; border-bottom: 1px solid @border; }
+        #sanctuaryHome QFrame#footer { border: none; border-top: 1px solid @border; }
+        #sanctuaryHome QFrame[communityCard="true"] { border: 1px solid @border; border-radius: 4px; background: @panel; }
+        #sanctuaryHome QFrame[communityCard="true"] QWidget { background: transparent; }
+        #sanctuaryHome QFrame#steps { border: 1px solid @border; border-radius: 6px; background: @surface; }
+        #sanctuaryHome QFrame[stepRow="true"] { border: none; border-bottom: 1px solid @border; background: transparent; }
+        #sanctuaryHome QFrame[active="true"] { background: @panel; }
+        #sanctuaryHome QFrame[waiting="true"] { background: @alertRow; }
+        #sanctuaryHome QLabel[rowTitle="true"] { font-size: 14px; font-weight: 600; }
+        #sanctuaryHome QLabel[number="true"] { border: 1px solid @controlBorder; border-radius: 14px; color: @muted; font-size: 14px; font-weight: 600; }
+        #sanctuaryHome QLabel[number="true"][kind="complete"] { border-color: @greenText; color: @greenText; }
+        #sanctuaryHome QLabel[number="true"][kind="current"] { background: @greenButton; border-color: @greenButton; color: white; }
+        #sanctuaryHome QLabel[number="true"][kind="waiting"] { border-color: @alertText; color: @alertText; }
+        #sanctuaryHome QLabel[badge="true"] { padding: 4px 8px; border: 1px solid @border; border-radius: 4px; font-size: 12px; }
+        #sanctuaryHome QLabel[badge="true"][kind="complete"] { background: @greenPanel; border-color: @greenPanel; color: @greenText; }
+        #sanctuaryHome QLabel[badge="true"][kind="waiting"] { background: @alertPanel; border-color: @alertPanel; color: @alertText; }
+        #sanctuaryHome QLabel[badge="true"][kind="error"] { background: @errorPanel; border-color: @errorPanel; color: @errorText; }
+        #sanctuaryHome QPushButton { color: @text; background: @panel; border: 1px solid @border; border-radius: 5px; padding: 5px 14px; font-size: 13px; font-weight: 500; }
+        #sanctuaryHome QPushButton:hover { background: @hover; border-color: @controlBorder; }
+        #sanctuaryHome QPushButton:focus { border: 2px solid @link; }
+        #sanctuaryHome QPushButton[primary="true"] { background: @greenButton; color: white; border-color: @greenButton; font-weight: 600; }
+        #sanctuaryHome QPushButton[primary="true"]:hover { background: @greenButtonHover; }
+        #sanctuaryHome QPushButton:disabled { background: @disabledPanel; color: @disabledText; border-color: @disabledPanel; }
+        #sanctuaryHome QPushButton#play { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+        #sanctuaryHome QPushButton#playModes { border-top-left-radius: 0; border-bottom-left-radius: 0; padding: 0; }
+        #sanctuaryHome QPushButton#playModes::menu-indicator { image: none; }
+        #sanctuaryHome QPushButton[link="true"] { color: @link; background: transparent; border: none; padding: 3px; font-weight: 400; text-align: left; }
+        #sanctuaryHome QPushButton[link="true"]:focus { border: 1px solid @link; }
+
+        #sanctuaryHome QComboBox { background: @surface; color: @text; border: 1px solid @border; border-radius: 4px; padding: 5px 10px; min-height: 22px; }
+        #sanctuaryHome QProgressBar { border: 1px solid @border; border-radius: 3px; background: @surface; color: @text; text-align: center; }
+        #sanctuaryHome QProgressBar::chunk { background: @greenPanel; }
+    )"));
+}
+
 SanctuaryHome::~SanctuaryHome() = default;
 QString SanctuaryHome::text(const char* fr, const char* en) const { return QString::fromUtf8(m_french ? fr : en); }
 
@@ -186,10 +198,10 @@ void SanctuaryHome::setDiscordSession(SanctuarySession* session)
     update();
 }
 
-void SanctuaryHome::setMicrosoftTestState(bool enabled, bool verified, const QString& profile, const QString& message)
+void SanctuaryHome::setMicrosoftSignInState(MicrosoftSignIn mode, bool verified, const QString& profile, const QString& message)
 {
-    m_microsoftDevTest = enabled;
-    m_microsoftVerified = enabled && verified;
+    m_microsoftSignIn = mode;
+    m_microsoftVerified = hasMicrosoftSignIn() && verified;
     m_microsoftProfile = profile;
     m_microsoftMessage = message;
     refresh();
@@ -201,13 +213,23 @@ void SanctuaryHome::setGameBusy(bool busy)
     refresh();
 }
 
+void SanctuaryHome::setJoinOnPlay(bool join)
+{
+    m_joinOnPlay = join;
+    refresh();
+}
+
+bool SanctuaryHome::canPlayMinecraft() const
+{
+    return m_microsoftVerified && m_instanceReady && m_realPack && m_packVerified && !m_packBusy && !m_gameBusy;
+}
+
 bool SanctuaryHome::canLaunchGame() const
 {
     const auto minecraftName = m_discordProfile.value("user").toObject().value("minecraft_username").toString();
-    return m_onlineSession && m_discordConnected && !m_discordBusy && m_microsoftVerified
+    return canPlayMinecraft() && m_onlineSession && m_discordConnected && !m_discordBusy
         && !minecraftName.isEmpty() && minecraftName.compare(m_microsoftProfile, Qt::CaseInsensitive) == 0
-        && m_discordProfile.value("access").toObject().value("status") == "granted"
-        && m_instanceReady && m_realPack && m_packVerified && !m_packBusy && !m_gameBusy;
+        && m_discordProfile.value("access").toObject().value("status") == "granted";
 }
 
 bool SanctuaryHome::communityUnlocked() const
@@ -493,9 +515,23 @@ void SanctuaryHome::buildUi()
     foot->addLayout(info, 1);
     foot->addWidget(u.rows[4].action, 0, Qt::AlignBottom);
     u.play = button(footer, "play");
-    u.play->setMinimumSize(120, 38);
+    u.play->setMinimumSize(88, 38);
     u.play->setProperty("primary", true);
-    foot->addWidget(u.play, 0, Qt::AlignRight | Qt::AlignBottom);
+    u.playModes = button(footer, "playModes");
+    u.playModes->setFixedSize(30, 38);
+    u.playModes->setText(QStringLiteral("▾"));
+    auto* modes = new QMenu(u.playModes);
+    u.playMinecraft = modes->addAction(QString());
+    u.joinSanctuary = modes->addAction(QString());
+    u.playMinecraft->setCheckable(true);
+    u.joinSanctuary->setCheckable(true);
+    u.playModes->setMenu(modes);
+    auto* playGroup = new QHBoxLayout;
+    playGroup->setSpacing(0);
+    playGroup->addWidget(u.play);
+    playGroup->addWidget(u.playModes);
+    foot->addLayout(playGroup);
+    foot->setAlignment(playGroup, Qt::AlignBottom);
     u.help = label(footer, "helpText");
     u.help->setProperty("muted", true);
     info->addWidget(u.help);
@@ -532,7 +568,7 @@ void SanctuaryHome::buildUi()
         else emit linkRequested(QUrl("https://sanctuary-minecraft.net/candidature"));
     });
     connect(u.rows[1].action, &QPushButton::clicked, this, [this] {
-        if (m_microsoftDevTest) { if (!m_gameBusy) emit microsoftTestRequested(); return; }
+        if (hasMicrosoftSignIn()) { if (!m_gameBusy) emit microsoftSignInRequested(); return; }
         if (m_onlineSession) return;
         if (m_localMode) { m_local.microsoft = true; commitLocalChange(); }
         else if (m_microsoftAvailable) emit accountsRequested();
@@ -551,9 +587,15 @@ void SanctuaryHome::buildUi()
             QApplication::clipboard()->setText("DEMO-SANCTUARY");
     });
     connect(u.rows[4].action, &QPushButton::clicked, this, &SanctuaryHome::install);
+    auto selectMode = [this](bool join) {
+        setJoinOnPlay(join);
+        emit playModeChanged(join);
+    };
+    connect(u.playMinecraft, &QAction::triggered, this, [selectMode] { selectMode(false); });
+    connect(u.joinSanctuary, &QAction::triggered, this, [selectMode] { selectMode(true); });
     connect(u.play, &QPushButton::clicked, this, [this] {
-        if (canLaunchGame()) emit playRequested();
-        else if (!m_microsoftDevTest && !m_onlineSession && !m_gameBusy && m_localMode && m_local.discord && m_local.microsoft && m_local.access == Access::Granted && (m_realPack ? m_packVerified && !m_packBusy : m_local.installed))
+        if (m_joinOnPlay ? canLaunchGame() : canPlayMinecraft()) emit playRequested(m_joinOnPlay);
+        else if (!hasMicrosoftSignIn() && !m_onlineSession && !m_gameBusy && m_localMode && m_local.discord && m_local.microsoft && m_local.access == Access::Granted && (m_realPack ? m_packVerified && !m_packBusy : m_local.installed))
             emit localPlayRequested();
     });
     connect(u.tools, &QPushButton::clicked, this, &SanctuaryHome::advancedRequested);
@@ -563,7 +605,7 @@ void SanctuaryHome::buildUi()
     connect(u.instanceSettings, &QPushButton::clicked, this, [this] { emit instanceToolRequested("settings"); });
     connect(u.news, &QPushButton::clicked, this, [this] { emit instanceToolRequested("news"); });
     connect(u.site, &QPushButton::clicked, this, [this] { emit linkRequested(QUrl("https://sanctuary-minecraft.net/")); });
-    connect(u.wiki, &QPushButton::clicked, this, [this] { emit linkRequested(QUrl("https://sanctuary-minecraft.net/wiki")); });
+    connect(u.wiki, &QPushButton::clicked, this, [this] { emit instanceToolRequested("wiki"); });
     connect(u.sponsor, &QPushButton::clicked, this, [this] {
         if (m_localMode) { m_local.access = Access::Granted; commitLocalChange(); }
         else emit linkRequested(QUrl("https://sanctuary-minecraft.net/candidature"));
@@ -629,7 +671,7 @@ int SanctuaryHome::activeStep() const
         return m_microsoftVerified ? 5 : 2;
     }
     if (!m_localMode || !m_local.discord) return 1;
-    if (m_microsoftDevTest ? !m_microsoftVerified : !m_local.microsoft) return 2;
+    if (hasMicrosoftSignIn() ? !m_microsoftVerified : !m_local.microsoft) return 2;
     if (m_local.access != Access::Granted) return 3;
     return m_codeVisible ? 4 : 5;
 }
@@ -649,7 +691,7 @@ void SanctuaryHome::refresh()
         {"synchronizing", Access::Synchronizing}, {"rejected", Access::Rejected}, {"revoked", Access::Revoked}};
     const auto access = m_onlineSession ? accessStates.value(remoteStatus, Access::None) : m_local.access;
     const bool discord = m_onlineSession ? m_discordConnected : m_localMode && m_local.discord;
-    const bool microsoft = m_microsoftDevTest ? m_microsoftVerified : !m_onlineSession && m_localMode && m_local.microsoft;
+    const bool microsoft = hasMicrosoftSignIn() ? m_microsoftVerified : !m_onlineSession && m_localMode && m_local.microsoft;
     const bool admitted = m_onlineSession ? discord && access == Access::Granted : m_localMode && access == Access::Granted;
     const bool installed = m_realPack ? m_packVerified : m_localMode && m_local.installed;
     const bool installing = m_realPack ? m_packBusy : m_installTimer && m_installTimer->isActive();
@@ -746,12 +788,16 @@ void SanctuaryHome::refresh()
             m.action->setToolTip(m.detail->text());
         }
     }
-    if (m_microsoftDevTest) {
+    if (hasMicrosoftSignIn()) {
+        const bool development = m_microsoftSignIn == MicrosoftSignIn::Development;
+        const auto description = development ? text("Test réel Microsoft → Xbox → Minecraft disponible.", "Live Microsoft → Xbox → Minecraft test available.")
+                                             : text("Connectez le compte qui possède Minecraft Java.", "Sign in with the account that owns Minecraft Java.");
         m.detail->setText(m_microsoftMessage.isEmpty()
-            ? (m_microsoftVerified ? m_microsoftProfile : text("Test réel Microsoft → Xbox → Minecraft disponible.", "Live Microsoft → Xbox → Minecraft test available."))
+            ? (m_microsoftVerified ? m_microsoftProfile : description)
             : m_microsoftMessage.section('\n',0,0));
         m.detail->setToolTip(m_microsoftMessage);
-        action(1,m_microsoftVerified ? text("Changer de compte", "Change account") : text("Tester Microsoft · dev", "Test Microsoft · dev"),active == 2);
+        const auto connectLabel = development ? text("Tester Microsoft · dev", "Test Microsoft · dev") : text("Connecter Microsoft", "Connect Microsoft");
+        action(1, m_microsoftVerified ? text("Changer de compte", "Change account") : connectLabel, active == 2);
         m.action->setEnabled(m_microsoftAvailable && !m_gameBusy);
         m.action->setToolTip(text("Connexion réelle par code avec l’application Sanctuary.", "Live device-code sign-in with the Sanctuary application."));
     }
@@ -833,8 +879,16 @@ void SanctuaryHome::refresh()
     for (auto* feed : u.feeds) feed->setFrench(m_french);
     if (ready && !m_communityVisible) for (auto* feed : u.feeds) feed->reload();
     m_communityVisible = ready;
-    u.play->setText(m_gameBusy ? text("Jeu en cours", "Game running") : text("Jouer", "Play"));
-    u.play->setEnabled(canLaunchGame() || (!m_gameBusy && !m_microsoftDevTest && !m_onlineSession && m_localMode && discord && microsoft && admitted && installed && !installing));
+    u.playMinecraft->setText(text("Jouer", "Play"));
+    u.joinSanctuary->setText(text("Rejoindre Sanctuary", "Join Sanctuary"));
+    u.playMinecraft->setChecked(!m_joinOnPlay);
+    u.joinSanctuary->setChecked(m_joinOnPlay);
+    u.playModes->setAccessibleName(text("Mode de lancement", "Launch mode"));
+    u.playModes->setToolTip(u.playModes->accessibleName());
+    u.playModes->setEnabled(!m_gameBusy);
+    const bool canPlay = m_joinOnPlay ? canLaunchGame() : canPlayMinecraft();
+    u.play->setText(m_gameBusy ? text("Jeu en cours", "Game running") : (m_joinOnPlay ? u.joinSanctuary : u.playMinecraft)->text());
+    u.play->setEnabled(canPlay || (!m_gameBusy && !hasMicrosoftSignIn() && !m_onlineSession && m_localMode && discord && microsoft && admitted && installed && !installing));
     u.play->setToolTip(text("En mode local, ce bouton vérifie le parcours sans lancer Minecraft.", "In local mode, this checks the flow without launching Minecraft."));
     if (m_onlineSession) u.play->setToolTip(text("Le lancement attend le raccordement Microsoft/Mojang.", "Game launch awaits Microsoft/Mojang integration."));
     u.help->setText(m_realPack ? text("Comptes et accès locaux. Les essais du jeu et du serveur attendent Mojang.",
@@ -843,7 +897,7 @@ void SanctuaryHome::refresh()
                                                   "Local simulation only. Minecraft, server and character tests await Mojang approval.")
                                     : text("Connexion et accès au serveur en attente du raccordement Microsoft/Mojang.", "Sign-in and server access await Microsoft/Mojang integration."));
     if (m_onlineSession) u.help->setText(text("Discord et accès réels · lancement Minecraft en attente de Microsoft/Mojang.", "Real Discord account and access · Minecraft launch awaits Microsoft/Mojang."));
-    if (m_microsoftDevTest) {
+    if (hasMicrosoftSignIn()) {
         u.help->setText(text("Connectez vos comptes et vérifiez le pack pour rejoindre Sanctuary.", "Connect your accounts and verify the pack to join Sanctuary."));
         u.play->setToolTip(u.help->text());
         if (m_onlineSession && m_microsoftVerified && admitted) {
@@ -853,9 +907,13 @@ void SanctuaryHome::refresh()
             else if (name.compare(m_microsoftProfile, Qt::CaseInsensitive) != 0)
                 u.help->setText(text("Compte Minecraft : %1 · Dossier Sanctuary : %2. Connectez le compte correspondant.", "Minecraft account: %1 · Sanctuary profile: %2. Connect the matching account.").arg(m_microsoftProfile, name));
         }
-        if (canLaunchGame()) {
+        if (m_joinOnPlay && canLaunchGame()) {
             u.help->setText(text("Prêt à rejoindre Sanctuary avec %1.", "Ready to join Sanctuary as %1.").arg(m_microsoftProfile));
             u.play->setToolTip(text("Rejoindre directement le serveur Sanctuary Beta.", "Join the Sanctuary Beta server directly."));
+        }
+        if (!m_joinOnPlay && canPlayMinecraft()) {
+            u.help->setText(text("Minecraft s’ouvrira sur son menu principal.", "Minecraft will open at its main menu."));
+            u.play->setToolTip(u.help->text());
         }
     }
     if (m_gameBusy) {

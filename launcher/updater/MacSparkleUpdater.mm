@@ -98,6 +98,12 @@ MacSparkleUpdater::MacSparkleUpdater() {
     priv->updaterObserver.callback = ^(bool canCheck) {
       emit canCheckForUpdatesChanged(canCheck);
     };
+
+    // Sparkle permits an extra background check before the first run-loop cycle.
+    SPUUpdater* updater = priv->updaterController.updater;
+    if (updater.automaticallyChecksForUpdates) {
+        [updater checkForUpdatesInBackground];
+    }
 }
 
 MacSparkleUpdater::~MacSparkleUpdater() {

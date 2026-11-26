@@ -1158,7 +1158,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         }
     }
 
-    if (targetToJoin && targetToJoin->port == 25565) {
+    if (targetToJoin && !targetToJoin->address.isEmpty() && targetToJoin->port == 25565) {
         // Resolve server address to join on launch
         auto step = makeShared<LookupServerAddress>(pptr);
         step->setLookupAddress(targetToJoin->address);

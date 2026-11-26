@@ -788,6 +788,15 @@ if(APPLE AND Launcher_ENABLE_UPDATER)
 else()
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${PRISM_UPDATE_SOURCES})
 endif()
+if(Launcher_SANCTUARY_UPDATE_KEY AND WIN32)
+    find_path(WINSPARKLE_INCLUDE_DIR winsparkle.h PATHS "${Launcher_WINSPARKLE_DIR}/include" NO_DEFAULT_PATH REQUIRED)
+    find_file(WINSPARKLE_LIBRARY WinSparkle.lib PATHS "${Launcher_WINSPARKLE_DIR}/x64/Release" NO_DEFAULT_PATH REQUIRED)
+    find_file(WINSPARKLE_DLL WinSparkle.dll PATHS "${Launcher_WINSPARKLE_DIR}/x64/Release" NO_DEFAULT_PATH REQUIRED)
+    list(APPEND LOGIC_SOURCES updater/WinSparkleUpdater.cpp updater/WinSparkleUpdater.h)
+elseif(Launcher_SANCTUARY_UPDATE_KEY AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+    list(APPEND LOGIC_SOURCES updater/AppImageUpdater.cpp updater/AppImageUpdater.h)
+endif()
 
 SET(LAUNCHER_SOURCES
     # Application base
@@ -842,6 +851,7 @@ SET(LAUNCHER_SOURCES
     ui/SanctuaryMicrosoftDialog.h
     ui/SanctuaryFeed.cpp
     ui/SanctuaryFeed.h
+    ui/SanctuarySitePage.cpp
     SanctuarySession.cpp
     SanctuarySession.h
     SanctuaryPack.cpp
@@ -1340,6 +1350,27 @@ endif()
 
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+if(WIN32)
+    target_link_libraries(Launcher_logic crypt32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Qt6Keychain QUIET CONFIG)
+    if(TARGET qt6keychain)
+        set_property(SOURCE SanctuarySession.cpp APPEND PROPERTY COMPILE_DEFINITIONS SANCTUARY_QT_KEYCHAIN)
+        set_source_files_properties(SanctuarySession.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+        target_link_libraries(Launcher_logic qt6keychain)
+    endif()
+endif()
+if(Launcher_SANCTUARY_UPDATE_KEY AND WIN32)
+    target_compile_definitions(Launcher_logic PUBLIC SANCTUARY_WINSPARKLE)
+    target_include_directories(Launcher_logic SYSTEM PRIVATE "${WINSPARKLE_INCLUDE_DIR}")
+    target_link_libraries(Launcher_logic "${WINSPARKLE_LIBRARY}")
+    install(FILES "${WINSPARKLE_DLL}" DESTINATION ${BINARY_DEST_DIR})
+    install(FILES "${Launcher_WINSPARKLE_DIR}/COPYING" "${Launcher_WINSPARKLE_DIR}/COPYING.expat"
+        DESTINATION "${BINARY_DEST_DIR}/licenses/WinSparkle")
+elseif(Launcher_SANCTUARY_UPDATE_KEY AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_definitions(Launcher_logic PUBLIC SANCTUARY_APPIMAGE_UPDATER)
+    target_link_libraries(Launcher_logic OpenSSL::Crypto)
+endif()
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 
@@ -1355,6 +1386,12 @@ target_link_libraries(Launcher_logic
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
 )
+if(WIN32)
+    target_link_libraries(Launcher_logic webview::core_static)
+    install(FILES "${webview_SOURCE_DIR}/LICENSE" DESTINATION "${BINARY_DEST_DIR}/licenses/webview")
+else()
+    target_link_libraries(Launcher_logic Qt6::Quick Qt6::WebView)
+endif()
 
 if(TARGET PkgConfig::libqrencode)
     target_link_libraries(Launcher_logic PkgConfig::libqrencode)
@@ -1426,6 +1463,18 @@ if(APPLE)
 endif()
 
 add_executable(${Launcher_Name} MACOSX_BUNDLE WIN32 main.cpp ${LAUNCHER_RCS})
+if(Launcher_SANCTUARY_UPDATE_KEY AND WIN32)
+    add_executable(SanctuaryLauncherStart WIN32 "${CMAKE_SOURCE_DIR}/program_info/sanctuary_start.c" ${LAUNCHER_RCS})
+    set_target_properties(SanctuaryLauncherStart PROPERTIES OUTPUT_NAME "sanctuary-launcher-start")
+    target_link_libraries(SanctuaryLauncherStart shell32 user32)
+    if(MINGW)
+        target_link_options(SanctuaryLauncherStart PRIVATE -municode)
+    endif()
+    install(TARGETS SanctuaryLauncherStart RUNTIME DESTINATION ${BINARY_DEST_DIR})
+    add_custom_command(TARGET ${Launcher_Name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${WINSPARKLE_DLL}" "$<TARGET_FILE_DIR:${Launcher_Name}>"
+        VERBATIM)
+endif()
 
 if(${Launcher_USE_PCH})
     target_precompile_headers(${Launcher_Name} REUSE_FROM Launcher_logic)
@@ -1600,6 +1649,8 @@ endif()
 if(WIN32 OR (UNIX AND APPLE))
     if(WIN32)
         set(QT_DEPLOY_TOOL_OPTIONS "--no-opengl-sw --no-quick-import --no-system-d3d-compiler --no-system-dxc-compiler --skip-plugin-types generic,networkinformation")
+    else()
+        set(QT_DEPLOY_TOOL_OPTIONS "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/resources/sanctuary")
     endif()
 
     qt_generate_deploy_script(
@@ -1695,7 +1746,7 @@ if(WIN32 OR (UNIX AND APPLE))
     # Add qtlogging.ini as a config file
     install(
         FILES "qtlogging.ini"
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}
+        DESTINATION ${RESOURCES_DEST_DIR}
         COMPONENT bundle
     )
 endif()

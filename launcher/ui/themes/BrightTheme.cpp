@@ -48,13 +48,14 @@ QString BrightTheme::name()
 
 QPalette BrightTheme::colorScheme()
 {
-    QPalette brightPalette;
+    QPalette brightPalette(QColor(249, 249, 249), Qt::white);
     brightPalette.setColor(QPalette::Window, QColor(255, 255, 255));
     brightPalette.setColor(QPalette::WindowText, QColor(17, 17, 17));
-    brightPalette.setColor(QPalette::Base, QColor(250, 250, 250));
+    brightPalette.setColor(QPalette::Base, Qt::white);
     brightPalette.setColor(QPalette::AlternateBase, QColor(240, 240, 240));
-    brightPalette.setColor(QPalette::ToolTipBase, QColor(17, 17, 17));
-    brightPalette.setColor(QPalette::ToolTipText, QColor(255, 255, 255));
+    brightPalette.setColor(QPalette::ToolTipBase, Qt::white);
+    brightPalette.setColor(QPalette::ToolTipText, QColor(17, 17, 17));
+    brightPalette.setColor(QPalette::PlaceholderText, QColor(90, 98, 106));
     brightPalette.setColor(QPalette::Text, Qt::black);
     brightPalette.setColor(QPalette::Button, QColor(249, 249, 249));
     brightPalette.setColor(QPalette::ButtonText, Qt::black);

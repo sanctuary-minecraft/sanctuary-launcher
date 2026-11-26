@@ -23,14 +23,10 @@
 #include <QDirIterator>
 #include <QIcon>
 #include <QImageReader>
-#include <QStyle>
-#include <QStyleFactory>
+#include <QStyleHints>
 #include "Exception.h"
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CatPack.h"
-#include "ui/themes/CustomTheme.h"
-#include "ui/themes/DarkTheme.h"
-#include "ui/themes/SystemTheme.h"
 
 #include "Application.h"
 #include "settings/SettingsObject.h"
@@ -40,41 +36,13 @@ ThemeManager::ThemeManager()
     QIcon::setFallbackThemeName(QIcon::themeName());
     QIcon::setThemeSearchPaths(QIcon::themeSearchPaths() << m_iconThemeFolder.path());
 
-    themeDebugLog() << "Determining System Widget Theme...";
-    const auto& style = QApplication::style();
-    m_defaultStyle = style->objectName();
-    themeDebugLog() << "System theme seems to be:" << m_defaultStyle;
-
-    m_defaultPalette = QApplication::palette();
-
-    initializeThemes();
+    initializeIcons();
     initializeCatPacks();
 }
 
 ThemeManager::~ThemeManager()
 {
     stopSettingNewWindowColorsOnMac();
-}
-
-/// @brief Adds the Theme to the list of themes
-/// @param theme The Theme to add
-/// @return Theme ID
-QString ThemeManager::addTheme(std::unique_ptr<ITheme> theme)
-{
-    QString id = theme->id();
-    if (m_themes.find(id) == m_themes.end())
-        m_themes.emplace(id, std::move(theme));
-    else
-        themeWarningLog() << "Theme(" << id << ") not added to prevent id duplication";
-    return id;
-}
-
-/// @brief Gets the Theme from the List via ID
-/// @param themeId Theme ID of theme to fetch
-/// @return Theme at themeId
-ITheme* ThemeManager::getTheme(QString themeId)
-{
-    return m_themes[themeId].get();
 }
 
 QString ThemeManager::addIconTheme(IconTheme theme)
@@ -85,15 +53,6 @@ QString ThemeManager::addIconTheme(IconTheme theme)
     else
         themeWarningLog() << "IconTheme(" << id << ") not added to prevent id duplication";
     return id;
-}
-
-void ThemeManager::initializeThemes()
-{
-    // Icon themes
-    initializeIcons();
-
-    // Initialize widget themes
-    initializeWidgets();
 }
 
 void ThemeManager::initializeIcons()
@@ -131,55 +90,6 @@ void ThemeManager::initializeIcons()
     themeDebugLog() << "<> Icon themes initialized.";
 }
 
-void ThemeManager::initializeWidgets()
-{
-    themeDebugLog() << "<> Initializing Widget Themes";
-    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>(m_defaultStyle, m_defaultPalette, true));
-    auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
-    themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
-    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
-
-    themeDebugLog() << "<> Initializing System Widget Themes";
-    QStringList styles = QStyleFactory::keys();
-    for (auto& st : styles) {
-#ifdef Q_OS_WINDOWS
-        if (QSysInfo::productVersion() != "11" && st == "windows11") {
-            continue;
-        }
-#endif
-        themeDebugLog() << "Loading System Theme:" << addTheme(std::make_unique<SystemTheme>(st, m_defaultPalette, false));
-    }
-
-    // TODO: need some way to differentiate same name themes in different subdirectories
-    //  (maybe smaller grey text next to theme name in dropdown?)
-
-    if (!m_applicationThemeFolder.mkpath("."))
-        themeWarningLog() << "Couldn't create theme folder";
-    themeDebugLog() << "Theme Folder Path:" << m_applicationThemeFolder.absolutePath();
-
-    QDirIterator directoryIterator(m_applicationThemeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
-    while (directoryIterator.hasNext()) {
-        QDir dir(directoryIterator.next());
-        QFileInfo themeJson(dir.absoluteFilePath("theme.json"));
-        if (themeJson.exists()) {
-            // Load "theme.json" based themes
-            themeDebugLog() << "Loading JSON Theme from:" << themeJson.absoluteFilePath();
-            addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), themeJson, true));
-        } else {
-            // Load pure QSS Themes
-            QDirIterator stylesheetFileIterator(dir.absoluteFilePath(""), { "*.qss", "*.css" }, QDir::Files);
-            while (stylesheetFileIterator.hasNext()) {
-                QFile customThemeFile(stylesheetFileIterator.next());
-                QFileInfo customThemeFileInfo(customThemeFile);
-                themeDebugLog() << "Loading QSS Theme from:" << customThemeFileInfo.absoluteFilePath();
-                addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), customThemeFileInfo, false));
-            }
-        }
-    }
-
-    themeDebugLog() << "<> Widget themes initialized.";
-}
-
 #ifndef Q_OS_MACOS
 void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color) {}
 void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color) {}
@@ -192,16 +102,6 @@ QList<IconTheme*> ThemeManager::getValidIconThemes()
     ret.reserve(m_icons.size());
     for (auto&& [id, theme] : m_icons) {
         ret.append(&theme);
-    }
-    return ret;
-}
-
-QList<ITheme*> ThemeManager::getValidApplicationThemes()
-{
-    QList<ITheme*> ret;
-    ret.reserve(m_themes.size());
-    for (auto&& [id, theme] : m_themes) {
-        ret.append(theme.get());
     }
     return ret;
 }
@@ -221,19 +121,9 @@ bool ThemeManager::isValidIconTheme(const QString& id)
     return !id.isEmpty() && m_icons.find(id) != m_icons.end();
 }
 
-bool ThemeManager::isValidApplicationTheme(const QString& id)
-{
-    return !id.isEmpty() && m_themes.find(id) != m_themes.end();
-}
-
 QDir ThemeManager::getIconThemesFolder()
 {
     return m_iconThemeFolder;
-}
-
-QDir ThemeManager::getApplicationThemesFolder()
-{
-    return m_applicationThemeFolder;
 }
 
 QDir ThemeManager::getCatPacksFolder()
@@ -251,33 +141,17 @@ void ThemeManager::setIconTheme(const QString& name)
     QIcon::setThemeName(name);
 }
 
-void ThemeManager::setApplicationTheme(const QString& name, bool initial)
+void ThemeManager::applyAppearance(bool initial)
 {
-    auto systemPalette = qApp->palette();
-    auto themeIter = m_themes.find(name);
-    if (themeIter != m_themes.end()) {
-        auto& theme = themeIter->second;
-        themeDebugLog() << "applying theme" << theme->name();
-        theme->apply(initial);
-        setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color());
-
-        m_logColors = theme->logColorScheme();
-    } else {
-        themeWarningLog() << "Tried to set invalid theme:" << name;
-    }
-}
-
-void ThemeManager::applyCurrentlySelectedTheme(bool initial)
-{
-    auto settings = APPLICATION->settings();
-    setIconTheme(settings->get("IconTheme").toString());
-    themeDebugLog() << "<> Icon theme set.";
-    auto applicationTheme = settings->get("ApplicationTheme").toString();
-    if (applicationTheme == "") {
-        applicationTheme = m_defaultStyle;
-    }
-    setApplicationTheme(applicationTheme, initial);
-    themeDebugLog() << "<> Application theme set.";
+    setIconTheme(APPLICATION->settings()->get("IconTheme").toString());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    QGuiApplication::styleHints()->setColorScheme(Qt::ColorScheme::Light);
+#endif
+    BrightTheme theme;
+    theme.apply(initial);
+    setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color());
+    m_logColors = theme.logColorScheme();
+    themeDebugLog() << "Applied light theme with window color" << qApp->palette().window().color().name();
 }
 
 QString ThemeManager::getCatPack(QString catName)
@@ -354,10 +228,9 @@ void ThemeManager::initializeCatPacks()
 
 void ThemeManager::refresh()
 {
-    m_themes.clear();
     m_icons.clear();
     m_catPacks.clear();
 
-    initializeThemes();
+    initializeIcons();
     initializeCatPacks();
 }

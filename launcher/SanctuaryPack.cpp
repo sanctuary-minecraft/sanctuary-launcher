@@ -52,7 +52,7 @@ QString managedPath(const QString& root, const QString& relative)
     return candidate;
 }
 const QUrl archiveUrl("https://sanctuary-minecraft.net/downloads/sanctuary-prism.zip");
-const QUrl channelUrl("https://git.botsu.net/koka/sanctuary-beta/raw/branch/packwiz/pack.toml");
+const QUrl channelUrl("https://sanctuary-minecraft.net/distribution/packwiz/stable/pack.toml");
 }
 
 SanctuaryPack::SanctuaryPack(QWidget* owner) : QObject(owner), m_owner(owner)
@@ -227,12 +227,14 @@ void SanctuaryPack::synchronize()
     emit changed();
     QNetworkRequest request(channelUrl);
     request.setTransferTimeout(30000);
-    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::SameOriginRedirectPolicy);
     auto* reply = APPLICATION->network()->get(request);
     m_reply = reply;
     connect(reply, &QNetworkReply::finished, this, [this, reply] {
         const auto bytes = reply->readAll();
-        const auto resolved = reply->url();
+        // Le canal stable est réécrit par le proxy sans redirection HTTP.
+        const auto location = reply->rawHeader("Content-Location");
+        const auto resolved = location.isEmpty() ? reply->url() : reply->url().resolved(QUrl::fromEncoded(location, QUrl::StrictMode));
         const auto networkError = reply->error();
         reply->deleteLater();
         if (m_cancelled) { fail(packText("Synchronisation annulée.", "Synchronization cancelled.")); return; }

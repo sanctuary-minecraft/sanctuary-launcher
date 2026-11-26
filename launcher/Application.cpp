@@ -143,7 +143,11 @@
 #include <sys/types.h>
 #endif
 
-#if defined(Q_OS_MAC)
+#if defined(SANCTUARY_WINSPARKLE)
+#include "updater/WinSparkleUpdater.h"
+#elif defined(SANCTUARY_APPIMAGE_UPDATER)
+#include "updater/AppImageUpdater.h"
+#elif defined(Q_OS_MAC)
 #if defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
 #endif
@@ -297,7 +301,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
     setApplicationName(BuildConfig.LAUNCHER_NAME);
-    setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
+    setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.versionString()));
     setApplicationVersion(BuildConfig.printableVersionString() + "\n" + BuildConfig.GIT_COMMIT);
     setDesktopFileName(BuildConfig.LAUNCHER_APPID);
     m_startTime = QDateTime::currentDateTime();
@@ -632,7 +636,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
-        m_settings->registerSetting("ApplicationTheme", QString("dark"));
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
@@ -799,6 +802,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("SanctuaryMicrosoftDevTest", false);
         m_settings->registerSetting("SanctuaryPackVersion", QString());
         m_settings->registerSetting("SanctuaryPackHash", QString());
+        m_settings->registerSetting("SanctuaryJoinOnPlay", false);
 
         // Window state and geometry
         m_settings->registerSetting("MainWindowState", "");
@@ -1186,14 +1190,14 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         return;
     }
 
-    m_themeManager->applyCurrentlySelectedTheme(true);
+    m_themeManager->applyAppearance(true);
     performMainStartupAction();
 }
 
 bool Application::createSetupWizard()
 {
-    // Local UI development uses its own data directory and never needs an account or game runtime.
-    if (settings()->get("SanctuaryLocalMode").toBool())
+    // Sanctuary's welcome page handles Microsoft login and installation in release builds.
+    if (!BuildConfig.SANCTUARY_UPDATE_KEY.isEmpty() || settings()->get("SanctuaryLocalMode").toBool())
         return false;
     bool javaRequired = [this]() {
         if (BuildConfig.JAVA_DOWNLOADER_ENABLED && settings()->get("AutomaticJavaDownload").toBool()) {
@@ -1217,27 +1221,15 @@ bool Application::createSetupWizard()
                    !settings()->get("AutomaticJavaSwitch").toBool() && !settings()->get("UserAskedAboutAutomaticJavaDownload").toBool();
     bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
-    bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
     bool login = !m_accounts->anyAccountIsValid() && capabilities() & Application::SupportsMSA;
-    bool themeInterventionRequired = !validWidgets || !validIcons;
+    bool themeInterventionRequired = !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
         // set default theme after going into theme wizard
         if (!validIcons)
             settings()->set("IconTheme", QString("pe_colored"));
-        if (!validWidgets) {
-#if defined(Q_OS_WIN32) && QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-            const QString style =
-                QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark ? QStringLiteral("dark") : QStringLiteral("bright");
-#else
-            const QString style = QStringLiteral("system");
-#endif
-
-            settings()->set("ApplicationTheme", style);
-        }
-
-        m_themeManager->applyCurrentlySelectedTheme(true);
+        m_themeManager->applyAppearance(true);
 
         m_setupWizard = new SetupWizard(nullptr);
         if (languageRequired) {
@@ -1270,7 +1262,11 @@ bool Application::createSetupWizard()
 
 bool Application::updaterEnabled()
 {
-#if defined(Q_OS_MAC)
+#if defined(SANCTUARY_WINSPARKLE)
+    return !BuildConfig.SANCTUARY_UPDATE_KEY.isEmpty();
+#elif defined(SANCTUARY_APPIMAGE_UPDATER)
+    return !AppImageUpdater::runningImage().isEmpty();
+#elif defined(Q_OS_MAC)
     return BuildConfig.UPDATER_ENABLED;
 #else
     return BuildConfig.UPDATER_ENABLED && QFileInfo(FS::PathCombine(m_rootPath, updaterBinaryName())).isFile();
@@ -1369,7 +1365,11 @@ void Application::performMainStartupAction()
     // initialize the updater
     if (updaterEnabled()) {
         qDebug() << "Initializing updater";
-#ifdef Q_OS_MAC
+#if defined(SANCTUARY_WINSPARKLE)
+        m_updater.reset(new WinSparkleUpdater());
+#elif defined(SANCTUARY_APPIMAGE_UPDATER)
+        m_updater.reset(new AppImageUpdater(m_mainWindow, network(), m_dataPath));
+#elif defined(Q_OS_MAC)
 #if defined(SPARKLE_ENABLED)
         m_updater.reset(new MacSparkleUpdater());
 #endif
@@ -1860,6 +1860,8 @@ QString Application::getJarPath(QString jarFile)
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME),
+#elif defined(Q_OS_MACOS)
+        FS::PathCombine(applicationDirPath(), "..", "Resources", "jars"),
 #endif
         FS::PathCombine(m_rootPath, "jars"), FS::PathCombine(applicationDirPath(), "jars"),
         FS::PathCombine(applicationDirPath(), "..", "jars")  // from inside build dir, for debuging

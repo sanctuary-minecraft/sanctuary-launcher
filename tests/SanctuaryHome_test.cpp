@@ -9,6 +9,10 @@
 #include <QAbstractScrollArea>
 #include <QFrame>
 #include <QMainWindow>
+#include <QMenu>
+#include <QScopeGuard>
+#include <QTextBrowser>
+#include <QTextDocument>
 #include "ui/SanctuaryWorkspace.h"
 #include "ui/SanctuaryFeed.h"
 #include <QJsonArray>
@@ -17,12 +21,75 @@
 #include <QTest>
 #include <QUrl>
 #include "ui/SanctuaryHome.h"
+#include "ui/themes/BrightTheme.h"
 
 class SanctuaryHomeTest : public QObject {
     Q_OBJECT
     static QPushButton* action(SanctuaryHome& home, const char* name) { return home.findChild<QPushButton*>(name); }
     static QLabel* label(SanctuaryHome& home, const char* name) { return home.findChild<QLabel*>(name); }
 private slots:
+    void lightThemeKeepsWhiteSurfacesOnDarkDesktops()
+    {
+        const auto original = QApplication::palette();
+        const auto restore = qScopeGuard([original] { QApplication::setPalette(original); });
+        QApplication::setPalette(QPalette(QColor("#24272b"), QColor("#1c2026")));
+
+        BrightTheme theme;
+        const auto palette = theme.colorScheme();
+        QCOMPARE(palette.color(QPalette::Window), QColor(Qt::white));
+        QCOMPARE(palette.color(QPalette::Base), QColor(Qt::white));
+        QCOMPARE(palette.color(QPalette::ToolTipBase), QColor(Qt::white));
+        QVERIFY(palette.color(QPalette::WindowText).lightness() < 60);
+        QVERIFY(palette.color(QPalette::PlaceholderText).lightness() < 128);
+    }
+
+    void sanctuaryPagesFollowPaletteChanges()
+    {
+        const auto original = QApplication::palette();
+        const auto restore = qScopeGuard([original] { QApplication::setPalette(original); });
+        auto light = original;
+        light.setColor(QPalette::Window, Qt::white);
+        light.setColor(QPalette::WindowText, Qt::black);
+        QApplication::setPalette(light);
+
+        SanctuaryWorkspace workspace;
+        auto* home = new SanctuaryHome(&workspace, SanctuaryHome::View::Setup);
+        home->setEmbedded(true);
+        workspace.setPages({home}, false);
+        QVERIFY(workspace.selectPage("setup"));
+        workspace.resize(1120, 760);
+        workspace.show();
+
+        SanctuaryFeed community("bulletin");
+        community.setEntries({QJsonObject{{"id", "11111111-1111-4111-8111-111111111111"}, {"title", "A bulletin"}, {"body", "Body"}}});
+        auto* title = community.findChild<QLabel*>("postTitle");
+        QVERIFY(title);
+        QVERIFY(title->text().contains("⌄"));
+        SanctuaryFeed news("news");
+        auto* browser = news.findChild<QTextBrowser*>("feedContent-news");
+        QVERIFY(browser);
+        const auto lightPixel = workspace.grab().toImage().pixelColor(5, 5);
+        QVERIFY(lightPixel.lightness() > 220);
+
+        auto dark = original;
+        dark.setColor(QPalette::Window, QColor("#24272b"));
+        dark.setColor(QPalette::WindowText, Qt::white);
+        QApplication::setPalette(dark);
+        QTRY_VERIFY(workspace.grab().toImage().pixelColor(5, 5).lightness() < 60);
+        QVERIFY(home->styleSheet().contains("#1c2026"));
+        QVERIFY(title->text().contains("#ebeff4"));
+        QVERIFY(title->text().contains("⌄"));
+        QVERIFY(browser->document()->defaultStyleSheet().contains("#91c6ff"));
+
+        const auto capture = qEnvironmentVariable("SANCTUARY_CAPTURE_DIR");
+        if (!capture.isEmpty()) QVERIFY(workspace.grab().save(capture + "/launcher-theme-dark.png"));
+
+        QApplication::setPalette(light);
+        QTRY_VERIFY(workspace.grab().toImage().pixelColor(5, 5).lightness() > 220);
+        QVERIFY(home->styleSheet().contains("#ffffff"));
+        QVERIFY(title->text().contains("#1f2328"));
+    }
+
     void localJourneyWithoutAccountsOrNetwork()
     {
         SanctuaryHome home;
@@ -235,6 +302,7 @@ private slots:
                     auto* body = home->findChild<QWidget*>("homeBody");
                     auto* footer = home->findChild<QWidget*>("footer");
                     auto* play = action(*home,"play");
+                    auto* modes = action(*home,"playModes");
                     auto* wordmark = workspace->findChild<QLabel*>("workspaceWordmark");
                     QVERIFY(wordmark);
                     QCOMPARE(header->mapTo(workspace, QPoint()).y(), wordmark->mapTo(workspace, QPoint()).y());
@@ -242,7 +310,8 @@ private slots:
                     QVERIFY(header->geometry().bottom() < body->geometry().top());
                     QVERIFY(body->geometry().bottom() < footer->geometry().top());
                     QCOMPARE(play->parentWidget(), footer);
-                    QVERIFY(play->geometry().right() >= footer->width() - 2);
+                    QCOMPARE(play->geometry().right() + 1, modes->geometry().left());
+                    QVERIFY(modes->geometry().right() >= footer->width() - 2);
                     QVERIFY(play->geometry().bottom() >= footer->height() - 2);
                     const int bottom = footer->mapTo(home, footer->rect().bottomRight()).y();
                     if (footerBottom >= 0) QCOMPARE(bottom, footerBottom);
@@ -362,37 +431,86 @@ private slots:
     void microsoftDevelopmentTestRequestsRealAuthWithoutInventingAdmission()
     {
         SanctuaryHome setup(nullptr,SanctuaryHome::View::Setup);
+        setup.setJoinOnPlay(true);
         setup.setEmbedded(true);
         setup.setState(true,true,true);
         setup.setPackState(true,false,"beta.373","Pack verified");
         const QJsonObject profile{{"version",1},{"user",QJsonObject{{"display_name","Test player"}}},{"access",QJsonObject{{"status","granted"}}}};
         setup.setDiscordState(true,false,profile,"Discord connected");
-        setup.setMicrosoftTestState(true,false);
+        setup.setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Development, false);
         setup.resize(1000,680);
         setup.show();
-        QSignalSpy login(&setup,&SanctuaryHome::microsoftTestRequested);
+        QSignalSpy login(&setup, &SanctuaryHome::microsoftSignInRequested);
         QSignalSpy local(&setup,&SanctuaryHome::localStateChanged);
         QVERIFY(action(setup,"microsoft")->isEnabled());
         QTest::mouseClick(action(setup,"microsoft"),Qt::LeftButton);
         QCOMPARE(login.count(),1);
         QCOMPARE(local.count(),0);
         QCOMPARE(setup.activeStep(),2);
-        setup.setMicrosoftTestState(true,false,{},"Microsoft validated; Minecraft not confirmed.\nService error");
+        setup.setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Development, false, {}, "Microsoft validated; Minecraft not confirmed.\nService error");
         QCOMPARE(setup.activeStep(),2);
         QVERIFY(!action(setup,"play")->isEnabled());
-        setup.setMicrosoftTestState(true,true,"TestPlayer");
+        setup.setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Development, true, "TestPlayer");
         QCOMPARE(setup.activeStep(),5);
         QCOMPARE(label(setup,"detail2")->text(),QString("TestPlayer"));
         QVERIFY(!action(setup,"play")->isEnabled());
         QCOMPARE(action(setup,"microsoft")->text(),QString("Changer de compte"));
         QTest::mouseClick(action(setup,"microsoft"),Qt::LeftButton);
         QCOMPARE(login.count(),2);
-        setup.setMicrosoftTestState(false,false);
+        setup.setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Unavailable, false);
         QVERIFY(!action(setup,"microsoft")->isEnabled());
+    }
+    void playDefaultsToMinecraftAndTheMenuCanSelectSanctuary()
+    {
+        SanctuaryHome home;
+        home.setState(true, true, true);
+        home.setPackState(true, false, "beta.381", "Verified");
+        home.setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Distribution, true, "Tester");
+        QSignalSpy launch(&home, &SanctuaryHome::playRequested);
+        QSignalSpy mode(&home, &SanctuaryHome::playModeChanged);
+        auto* play = action(home, "play");
+        auto* menu = action(home, "playModes")->menu();
+        QCOMPARE(play->text(), QString("Jouer"));
+        QVERIFY(play->isEnabled());
+        play->click();
+        QCOMPARE(launch.count(), 1);
+        QCOMPARE(launch.takeFirst().at(0).toBool(), false);
+
+        menu->actions().at(1)->trigger();
+        QCOMPARE(mode.takeFirst().at(0).toBool(), true);
+        QCOMPARE(play->text(), QString("Rejoindre Sanctuary"));
+        QVERIFY(!play->isEnabled());
+        home.setDiscordState(true, false, QJsonObject{
+            {"version", 1},
+            {"user", QJsonObject{{"display_name", "Tester"}, {"minecraft_username", "tester"}}},
+            {"access", QJsonObject{{"status", "granted"}}},
+        }, QString());
+        QVERIFY(play->isEnabled());
+        play->click();
+        QCOMPARE(launch.count(), 1);
+        QCOMPARE(launch.takeFirst().at(0).toBool(), true);
+        menu->actions().at(0)->trigger();
+        QCOMPARE(play->text(), QString("Jouer"));
+    }
+    void distributionExposesMicrosoftSignInWithoutDevelopmentMode()
+    {
+        SanctuaryHome setup(nullptr, SanctuaryHome::View::Setup);
+        setup.setState(false, true, true);
+        setup.setDiscordState(false, false, {}, {});
+        setup.setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Distribution, false);
+        setup.show();
+        auto* button = action(setup, "microsoft");
+        QCOMPARE(button->text(), QString("Connecter Microsoft"));
+        QVERIFY(button->isEnabled());
+        QSignalSpy login(&setup, &SanctuaryHome::microsoftSignInRequested);
+        QTest::mouseClick(button, Qt::LeftButton);
+        QCOMPARE(login.count(), 1);
+        QVERIFY(!setup.canLaunchGame());
     }
     void onlinePlayRequiresTheAdmittedMinecraftAccountAndAnIdleVerifiedPack()
     {
         SanctuaryHome home(nullptr,SanctuaryHome::View::Setup);
+        home.setJoinOnPlay(true);
         home.setState(true,true,true);
         home.setLocalMode(true);
         home.setLocalScenario("ready");
@@ -400,7 +518,7 @@ private slots:
         QJsonObject profile{{"version",1},{"user",QJsonObject{{"display_name","Test player"},{"minecraft_username","TestPlayer"}}},
             {"access",QJsonObject{{"status","granted"}}}};
         home.setDiscordState(true,false,profile,"Connected");
-        home.setMicrosoftTestState(true,false);
+        home.setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Distribution, false);
         home.show();
         QSignalSpy real(&home,&SanctuaryHome::playRequested);
         QSignalSpy local(&home,&SanctuaryHome::localPlayRequested);
@@ -412,9 +530,9 @@ private slots:
             QCOMPARE(local.count(),0);
         };
         blocked();
-        home.setMicrosoftTestState(true,true,"OtherPlayer");
+        home.setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Distribution, true, "OtherPlayer");
         blocked();
-        home.setMicrosoftTestState(true,true,"testplayer"); // Minecraft names are case insensitive.
+        home.setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Distribution, true, "testplayer"); // Minecraft names are case insensitive.
         QVERIFY(home.canLaunchGame());
         QVERIFY(action(home,"play")->isEnabled());
         home.setGameBusy(true);

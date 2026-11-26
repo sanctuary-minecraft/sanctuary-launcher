@@ -173,8 +173,6 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
-    <addaction name="actionChangeTheme"/>
-    <addaction name="separator"/>
     <addaction name="actionCAT"/>
     <addaction name="actionToggleStatusBar"/>
     <addaction name="actionLockToolbars"/>
@@ -195,7 +193,6 @@
     <addaction name="actionViewJavaFolder"/>
     <addaction name="separator"/>
     <addaction name="actionViewIconThemeFolder"/>
-    <addaction name="actionViewWidgetThemeFolder"/>
     <addaction name="actionViewCatPackFolder"/>
     <addaction name="actionViewIconsFolder"/>
     <addaction name="separator"/>
@@ -589,11 +586,6 @@
     <string>Open the logs folder in a file browser.</string>
    </property>
   </action>
-  <action name="actionChangeTheme">
-   <property name="text">
-    <string>Themes</string>
-   </property>
-  </action>
   <action name="actionReportBug">
    <property name="icon">
     <iconset theme="bug"/>
@@ -725,17 +717,6 @@
    </property>
    <property name="toolTip">
     <string>Open the %1 wiki</string>
-   </property>
-  </action>
-  <action name="actionViewWidgetThemeFolder">
-   <property name="icon">
-    <iconset theme="viewfolder"/>
-   </property>
-   <property name="text">
-    <string>&amp;Widget Themes</string>
-   </property>
-   <property name="toolTip">
-    <string>Open the widget themes folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewIconThemeFolder">

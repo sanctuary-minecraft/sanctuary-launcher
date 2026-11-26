@@ -75,14 +75,11 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
     connect(m_ui->consoleFont, &QFontComboBox::currentFontChanged, this, &AppearanceWidget::updateConsolePreview);
 
     connect(m_ui->iconsComboBox, &QComboBox::currentIndexChanged, this, &AppearanceWidget::applyIconTheme);
-    connect(m_ui->widgetStyleComboBox, &QComboBox::currentIndexChanged, this, &AppearanceWidget::applyWidgetTheme);
     connect(m_ui->catPackComboBox, &QComboBox::currentIndexChanged, this, &AppearanceWidget::applyCatTheme);
     connect(m_ui->catOpacitySlider, &QAbstractSlider::valueChanged, this, &AppearanceWidget::updateCatPreview);
 
     connect(m_ui->iconsFolder, &QPushButton::clicked, this,
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getIconThemesFolder().path()); });
-    connect(m_ui->widgetStyleFolder, &QPushButton::clicked, this,
-            [] { DesktopServices::openPath(APPLICATION->themeManager()->getApplicationThemesFolder().path()); });
     connect(m_ui->catPackFolder, &QPushButton::clicked, this,
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path()); });
     connect(m_ui->reloadThemesButton, &QPushButton::pressed, this, &AppearanceWidget::loadThemeSettings);
@@ -136,21 +133,8 @@ void AppearanceWidget::applyIconTheme(int index)
     auto newIconTheme = m_ui->iconsComboBox->itemData(index).toString();
     if (originalIconTheme != newIconTheme) {
         settings->set("IconTheme", newIconTheme);
-        APPLICATION->themeManager()->applyCurrentlySelectedTheme();
+        APPLICATION->themeManager()->setIconTheme(newIconTheme);
     }
-}
-
-void AppearanceWidget::applyWidgetTheme(int index)
-{
-    auto settings = APPLICATION->settings();
-    auto originalAppTheme = settings->get("ApplicationTheme").toString();
-    auto newAppTheme = m_ui->widgetStyleComboBox->itemData(index).toString();
-    if (originalAppTheme != newAppTheme) {
-        settings->set("ApplicationTheme", newAppTheme);
-        APPLICATION->themeManager()->applyCurrentlySelectedTheme();
-    }
-
-    updateConsolePreview();
 }
 
 void AppearanceWidget::applyCatTheme(int index)
@@ -171,11 +155,9 @@ void AppearanceWidget::loadThemeSettings()
     APPLICATION->themeManager()->refresh();
 
     m_ui->iconsComboBox->blockSignals(true);
-    m_ui->widgetStyleComboBox->blockSignals(true);
     m_ui->catPackComboBox->blockSignals(true);
 
     m_ui->iconsComboBox->clear();
-    m_ui->widgetStyleComboBox->clear();
     m_ui->catPackComboBox->clear();
 
     SettingsObject* settings = APPLICATION->settings();
@@ -193,20 +175,6 @@ void AppearanceWidget::loadThemeSettings()
             m_ui->iconsComboBox->setCurrentIndex(i);
     }
 
-    const QString currentTheme = settings->get("ApplicationTheme").toString();
-    auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
-    for (int i = 0; i < themes.count(); ++i) {
-        ITheme* theme = themes[i];
-
-        m_ui->widgetStyleComboBox->addItem(theme->name(), theme->id());
-
-        if (!theme->tooltip().isEmpty())
-            m_ui->widgetStyleComboBox->setItemData(i, theme->tooltip(), Qt::ToolTipRole);
-
-        if (currentTheme == theme->id())
-            m_ui->widgetStyleComboBox->setCurrentIndex(i);
-    }
-
     if (!m_themesOnly) {
         const QString currentCat = settings->get("BackgroundCat").toString();
         const auto cats = APPLICATION->themeManager()->getValidCatPacks();
@@ -222,7 +190,6 @@ void AppearanceWidget::loadThemeSettings()
     }
 
     m_ui->iconsComboBox->blockSignals(false);
-    m_ui->widgetStyleComboBox->blockSignals(false);
     m_ui->catPackComboBox->blockSignals(false);
 }
 

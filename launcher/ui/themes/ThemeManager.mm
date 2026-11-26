@@ -35,6 +35,7 @@ void ThemeManager::setTitlebarColorOnMac(WId windowId, QColor color)
 
 void ThemeManager::setTitlebarColorOfAllWindowsOnMac(QColor color)
 {
+    NSApp.appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
     NSArray<NSWindow*>* windows = [NSApp windows];
     for (NSWindow* window : windows) {
         setTitlebarColorOnMac((WId)window.contentView, color);

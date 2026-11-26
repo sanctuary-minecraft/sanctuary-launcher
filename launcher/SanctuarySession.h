@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QUrl>
 #include <QElapsedTimer>
+#include <functional>
 class QNetworkAccessManager;
 class QNetworkReply;
 
@@ -25,6 +26,7 @@ public:
     QJsonObject profile() const { return m_profile; }
     QNetworkReply* feed(const QString& kind, bool french);
     QNetworkReply* photo(const QString& id);
+    QNetworkReply* mapTicket();
     static bool validProfile(const QJsonObject& value);
 signals:
     void changed();
@@ -35,7 +37,8 @@ private:
     void poll();
     void finish(const QString& message);
     void clearCredentials();
-    void saveToken();
+    void restoreToken(const QByteArray& token);
+    void saveToken(std::function<void()> finished = {});
     QString text(const char* fr, const char* en) const;
     QNetworkAccessManager* m_network;
     QPointer<QNetworkReply> m_reply;

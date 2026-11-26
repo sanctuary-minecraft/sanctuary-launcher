@@ -15,6 +15,7 @@ class SanctuaryHome : public QWidget, public BasePage {
     Q_OBJECT
 public:
     enum class View { Adaptive, Dashboard, Setup };
+    enum class MicrosoftSignIn { Unavailable, Development, Distribution };
     explicit SanctuaryHome(QWidget* parent = nullptr, View view = View::Adaptive);
     ~SanctuaryHome() override;
     void setState(bool instanceReady, bool microsoftAvailable, bool french);
@@ -33,13 +34,16 @@ public:
     bool communityUnlocked() const;
     void setDiscordSession(SanctuarySession* session);
     void setDiscordState(bool connected, bool busy, const QJsonObject& profile, const QString& message);
-    void setMicrosoftTestState(bool enabled, bool verified, const QString& profile = {}, const QString& message = {});
+    void setMicrosoftSignInState(MicrosoftSignIn mode, bool verified, const QString& profile = {}, const QString& message = {});
     void setGameBusy(bool busy);
+    void setJoinOnPlay(bool join);
+    bool canPlayMinecraft() const;
     bool canLaunchGame() const;
 
 signals:
     void installRequested();
-    void playRequested();
+    void playRequested(bool joinSanctuary);
+    void playModeChanged(bool joinSanctuary);
     void accountsRequested();
     void settingsRequested();
     void advancedRequested();
@@ -50,9 +54,11 @@ signals:
     void discordRequested();
     void discordDisconnectRequested();
     void discordRefreshRequested();
-    void microsoftTestRequested();
+    void microsoftSignInRequested();
+
 
 private:
+    void applyAppearance();
     enum class Access { None, Pending, Synchronizing, Granted, Rejected, Revoked };
     struct LocalState {
         bool discord = false;
@@ -79,14 +85,17 @@ private:
     bool m_onlineSession = false, m_discordConnected = false, m_discordBusy = false;
     QJsonObject m_discordProfile;
     QString m_discordMessage;
-    bool m_microsoftDevTest = false, m_microsoftVerified = false;
+    MicrosoftSignIn m_microsoftSignIn = MicrosoftSignIn::Unavailable;
+    bool m_microsoftVerified = false;
     bool m_gameBusy = false;
+    bool m_joinOnPlay = false;
     QString m_microsoftProfile, m_microsoftMessage;
     void buildUi();
     void refresh();
     void refreshClock();
     void commitLocalChange();
     void install();
+    bool hasMicrosoftSignIn() const { return m_microsoftSignIn != MicrosoftSignIn::Unavailable; }
     QString text(const char* french, const char* english) const;
     bool m_instanceReady = false;
     bool m_microsoftAvailable = false;

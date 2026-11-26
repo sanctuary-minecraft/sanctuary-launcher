@@ -230,6 +230,13 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0" alignment="Qt::AlignmentFlag::AlignLeft">
+           <widget class="QPushButton" name="checkLauncherUpdateButton">
+            <property name="text">
+             <string>Check for launcher updates</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

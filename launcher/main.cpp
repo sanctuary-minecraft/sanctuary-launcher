@@ -36,6 +36,9 @@
 #include <iostream>
 
 #include "Application.h"
+#if !defined(Q_OS_WIN)
+#include <QtWebView/QtWebView>
+#endif
 
 #if defined Q_OS_WIN32
 #include "console/WindowsConsole.h"
@@ -49,6 +52,9 @@ int main(int argc, char* argv[])
 #endif
 
     // initialize Qt
+#if !defined(Q_OS_WIN)
+    QtWebView::initialize();
+#endif
     Application app(argc, argv);
     switch (app.status()) {
         case Application::StartingUp:

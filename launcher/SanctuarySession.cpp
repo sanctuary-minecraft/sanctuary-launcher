@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "SanctuarySession.h"
+#include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QJsonDocument>
 #include <QNetworkAccessManager>
@@ -9,9 +10,18 @@
 #include <QUrlQuery>
 #ifdef Q_OS_MACOS
 #include <Security/Security.h>
+#elif defined(Q_OS_WIN)
+#include <QDir>
+#include <QFile>
+#include <QSaveFile>
+#include <windows.h>
+#include <dpapi.h>
+#elif defined(SANCTUARY_QT_KEYCHAIN)
+#include <qt6keychain/keychain.h>
 #endif
 namespace {
 const QString origin = "https://sanctuary-minecraft.net";
+const QRegularExpression tokenPattern(QStringLiteral("^[a-f0-9]{64}$"));
 #ifdef Q_OS_MACOS
 QByteArray keychain(const QString& account, const QByteArray* value = nullptr)
 {
@@ -47,6 +57,36 @@ QByteArray keychain(const QString& account, const QByteArray* value = nullptr)
     CFRelease(query); CFRelease(key);
     return result;
 }
+#elif defined(Q_OS_WIN)
+QByteArray readWindowsToken(const QString& path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly) || file.size() <= 0 || file.size() > 64 * 1024) return {};
+    auto encrypted = file.readAll();
+    DATA_BLOB input{static_cast<DWORD>(encrypted.size()), reinterpret_cast<BYTE*>(encrypted.data())};
+    DATA_BLOB decrypted{};
+    if (!CryptUnprotectData(&input, nullptr, nullptr, nullptr, nullptr, CRYPTPROTECT_UI_FORBIDDEN, &decrypted)) return {};
+    const QByteArray token(reinterpret_cast<const char*>(decrypted.pbData), decrypted.cbData);
+    SecureZeroMemory(decrypted.pbData, decrypted.cbData);
+    LocalFree(decrypted.pbData);
+    return token;
+}
+
+bool saveWindowsToken(const QString& path, QByteArray token)
+{
+    if (token.isEmpty()) return QFile::remove(path) || !QFile::exists(path);
+    DATA_BLOB input{static_cast<DWORD>(token.size()), reinterpret_cast<BYTE*>(token.data())};
+    DATA_BLOB encrypted{};
+    if (!CryptProtectData(&input, L"Sanctuary Launcher", nullptr, nullptr, nullptr, CRYPTPROTECT_UI_FORBIDDEN, &encrypted)) return false;
+    QSaveFile file(path);
+    const bool saved = file.open(QIODevice::WriteOnly)
+        && file.write(reinterpret_cast<const char*>(encrypted.pbData), encrypted.cbData) == encrypted.cbData
+        && file.commit();
+    LocalFree(encrypted.pbData);
+    return saved;
+}
+#elif defined(SANCTUARY_QT_KEYCHAIN)
+const QString keychainService = QStringLiteral("net.sanctuary-minecraft.launcher.web");
 #endif
 QJsonObject json(QNetworkReply* reply)
 {
@@ -64,18 +104,74 @@ SanctuarySession::SanctuarySession(QNetworkAccessManager* network, QObject* pare
 QString SanctuarySession::text(const char* fr, const char* en) const { return QString::fromUtf8(m_french ? fr : en); }
 void SanctuarySession::restore(const QString& profile)
 {
+#ifdef Q_OS_WIN
+    m_store = QDir(profile).filePath(QStringLiteral("discord-session.dpapi"));
+#else
     m_store = QString::fromLatin1(QCryptographicHash::hash(profile.toUtf8(), QCryptographicHash::Sha256).toHex());
-#ifdef Q_OS_MACOS
-    const auto saved = keychain(m_store);
-    if (QRegularExpression("^[a-f0-9]{64}$").match(QString::fromLatin1(saved)).hasMatch()) m_token = QString::fromLatin1(saved);
 #endif
-    if (connected()) { emit credentialsChanged(); refresh(); }
+#if defined(Q_OS_MACOS)
+    restoreToken(keychain(m_store));
+#elif defined(Q_OS_WIN)
+    restoreToken(readWindowsToken(m_store));
+#elif defined(SANCTUARY_QT_KEYCHAIN)
+    const int generation = m_generation;
+    auto* job = new QKeychain::ReadPasswordJob(keychainService, this);
+    job->setKey(m_store);
+    job->setInsecureFallback(false);
+    connect(job, &QKeychain::Job::finished, this, [this, job, generation] {
+        if (generation == m_generation)
+            restoreToken(job->error() == QKeychain::NoError ? job->binaryData() : QByteArray{});
+    });
+    m_busy = true;
+    m_message = text("Vérification de la session Discord…", "Checking your Discord session…");
+    emit changed();
+    job->start();
+#endif
 }
-void SanctuarySession::saveToken()
+
+void SanctuarySession::restoreToken(const QByteArray& token)
 {
-#ifdef Q_OS_MACOS
-    if (!m_store.isEmpty()) { const auto token = m_token.toLatin1(); keychain(m_store, &token); }
+    m_busy = false;
+    m_message.clear();
+    if (tokenPattern.match(QString::fromLatin1(token)).hasMatch()) {
+        m_token = QString::fromLatin1(token);
+        emit credentialsChanged();
+        refresh();
+    } else {
+        emit changed();
+    }
+}
+
+void SanctuarySession::saveToken(std::function<void()> finished)
+{
+    if (m_store.isEmpty()) {
+        if (finished) finished();
+        return;
+    }
+#if defined(Q_OS_MACOS)
+    const auto token = m_token.toLatin1();
+    keychain(m_store, &token);
+#elif defined(Q_OS_WIN)
+    if (!saveWindowsToken(m_store, m_token.toLatin1()))
+        qWarning() << "Couldn't update the protected Sanctuary session on Windows";
+#elif defined(SANCTUARY_QT_KEYCHAIN)
+    auto* job = [&]() -> QKeychain::Job* {
+        if (m_token.isEmpty()) return new QKeychain::DeletePasswordJob(keychainService, QCoreApplication::instance());
+        auto* write = new QKeychain::WritePasswordJob(keychainService, QCoreApplication::instance());
+        write->setBinaryData(m_token.toLatin1());
+        return write;
+    }();
+    job->setKey(m_store);
+    job->setInsecureFallback(false);
+    connect(job, &QKeychain::Job::finished, this, [job, finished = std::move(finished)] {
+        if (job->error() != QKeychain::NoError && job->error() != QKeychain::EntryNotFound)
+            qWarning() << "Couldn't update the Sanctuary session in the desktop keyring";
+        if (finished) finished();
+    });
+    job->start();
+    return;
 #endif
+    if (finished) finished();
 }
 QNetworkReply* SanctuarySession::request(const QString& path, const QJsonObject& body, bool post)
 {
@@ -130,8 +226,16 @@ void SanctuarySession::poll()
             m_poll.start(m_interval); return;
         }
         const auto token = data.value("access_token").toString();
-        if (status == 200 && QRegularExpression("^[a-f0-9]{64}$").match(token).hasMatch()) {
-            m_token = token; m_device.clear(); m_busy = false; saveToken(); emit credentialsChanged(); refresh(); return;
+        if (status == 200 && tokenPattern.match(token).hasMatch()) {
+            m_token = token;
+            m_device.clear();
+            saveToken([this, generation] {
+                if (generation != m_generation) return;
+                m_busy = false;
+                emit credentialsChanged();
+                refresh();
+            });
+            return;
         }
         if (status == 0 || status >= 500 || status == 429) { m_poll.start(qMax(10000, m_interval)); return; }
         m_device.clear(); finish(error == "access_denied" ? text("Connexion annulée dans le navigateur.", "Sign-in cancelled in the browser.")
@@ -178,4 +282,9 @@ QNetworkReply* SanctuarySession::photo(const QString& id)
 {
     if (!connected() || !QRegularExpression("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$").match(id).hasMatch()) return nullptr;
     return request("posts/" + id + "/photo");
+}
+
+QNetworkReply* SanctuarySession::mapTicket()
+{
+    return connected() ? request("map/ticket", {}, true) : nullptr;
 }

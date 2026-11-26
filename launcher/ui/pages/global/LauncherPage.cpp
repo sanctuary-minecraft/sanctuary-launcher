@@ -75,6 +75,11 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
     loadSettings();
 
     ui->updateSettingsBox->setHidden(!APPLICATION->updater());
+    if (APPLICATION->settings()->get("Language").toString().startsWith("fr"))
+        ui->checkLauncherUpdateButton->setText(QStringLiteral("Vérifier les mises à jour du launcher"));
+    ui->checkLauncherUpdateButton->setEnabled(APPLICATION->updatesAreAllowed());
+    connect(ui->checkLauncherUpdateButton, &QPushButton::clicked, APPLICATION, &Application::triggerUpdateCheck);
+    connect(APPLICATION, &Application::updateAllowedChanged, ui->checkLauncherUpdateButton, &QPushButton::setEnabled);
 }
 
 LauncherPage::~LauncherPage()

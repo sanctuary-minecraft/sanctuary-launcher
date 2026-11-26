@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "SanctuaryWorkspace.h"
+#include "SanctuaryAppearance.h"
+#include "SanctuaryFeed.h"
 #include "SanctuaryWordmark.h"
 #include "ui/pages/BasePage.h"
 #include <QFrame>
@@ -16,24 +18,7 @@ SanctuaryWorkspace::SanctuaryWorkspace(QWidget* parent) : QWidget(parent)
 {
     initializeWorkspaceResources();
     setObjectName("sanctuaryWorkspace");
-    setStyleSheet(R"(
-        #sanctuaryWorkspace, #sanctuaryWorkspace QWidget { background: #fff; color: #1f2328; font-size: 13px; }
-        #sanctuaryWorkspace QLabel { background: transparent; border: none; }
-        #sanctuaryWorkspace QLabel#workspaceTitle { font-size: 23px; font-weight: 600; }
-        #sanctuaryWorkspace QLabel#workspaceFeedback { color: #a40e26; }
-        #sanctuaryWorkspace QPushButton, #sanctuaryWorkspace QToolButton { border: 1px solid #d0d7de; border-radius: 4px; padding: 5px 10px; background: #f6f8fa; }
-        #sanctuaryWorkspace QPushButton:hover, #sanctuaryWorkspace QToolButton:hover { background: #eef1f4; }
-        #sanctuaryWorkspace QPushButton:focus { border: 2px solid #0969da; }
-        #sanctuaryWorkspace QPushButton:disabled { color: #8c959f; }
-        #sanctuaryWorkspace QPushButton[nav="true"] { border: none; text-align: left; background: transparent; min-height: 23px; }
-        #sanctuaryWorkspace QPushButton[nav="true"]:checked { color: #1a7f37; background: #dafbe1; font-weight: 600; }
-        #sanctuaryWorkspace QLineEdit, #sanctuaryWorkspace QTextEdit, #sanctuaryWorkspace QPlainTextEdit, #sanctuaryWorkspace QComboBox, #sanctuaryWorkspace QSpinBox { border: 1px solid #d0d7de; border-radius: 4px; padding: 4px; background: white; color: #1f2328; }
-        #sanctuaryWorkspace QTreeView, #sanctuaryWorkspace QListView, #sanctuaryWorkspace QTableView { background: white; alternate-background-color: #f6f8fa; border: 1px solid #d0d7de; selection-background-color: #ddf4ff; selection-color: #1f2328; }
-        #sanctuaryWorkspace QHeaderView::section { background: #f6f8fa; color: #57606a; border: none; border-bottom: 1px solid #d0d7de; padding: 5px; }
-        #sanctuaryWorkspace QScrollArea { border: none; }
-        #sanctuaryWorkspace QGroupBox { border: 1px solid #d0d7de; border-radius: 4px; margin-top: 12px; padding-top: 12px; }
-        #sanctuaryWorkspace QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
-    )");
+    new SanctuaryAppearance::PaletteWatcher(this, [this] { applyAppearance(); });
     auto* body = new QHBoxLayout(this);
     body->setContentsMargins(22, 18, 22, 18);
     auto* sidebar = new QVBoxLayout;
@@ -76,6 +61,28 @@ SanctuaryWorkspace::SanctuaryWorkspace(QWidget* parent) : QWidget(parent)
     connect(m_home, &QPushButton::clicked, this, [this] { requestClose(); });
     connect(m_save, &QPushButton::clicked, this, [this] { if (saveAll()) emit settingsApplied(); });
     setFrench(true);
+}
+
+void SanctuaryWorkspace::applyAppearance()
+{
+    SanctuaryAppearance::apply(this, QStringLiteral(R"(
+        #sanctuaryWorkspace, #sanctuaryWorkspace QWidget { background: @surface; color: @text; font-size: 13px; }
+        #sanctuaryWorkspace QLabel { background: transparent; border: none; }
+        #sanctuaryWorkspace QLabel#workspaceTitle { font-size: 23px; font-weight: 600; }
+        #sanctuaryWorkspace QLabel#workspaceFeedback { color: @errorText; }
+        #sanctuaryWorkspace QPushButton, #sanctuaryWorkspace QToolButton { border: 1px solid @border; border-radius: 4px; padding: 5px 10px; background: @panel; }
+        #sanctuaryWorkspace QPushButton:hover, #sanctuaryWorkspace QToolButton:hover { background: @hover; }
+        #sanctuaryWorkspace QPushButton:focus { border: 2px solid @link; }
+        #sanctuaryWorkspace QPushButton:disabled { color: @disabledText; }
+        #sanctuaryWorkspace QPushButton[nav="true"] { border: none; text-align: left; background: transparent; min-height: 23px; }
+        #sanctuaryWorkspace QPushButton[nav="true"]:checked { color: @greenText; background: @greenPanel; font-weight: 600; }
+        #sanctuaryWorkspace QLineEdit, #sanctuaryWorkspace QTextEdit, #sanctuaryWorkspace QPlainTextEdit, #sanctuaryWorkspace QComboBox, #sanctuaryWorkspace QSpinBox { border: 1px solid @border; border-radius: 4px; padding: 4px; background: @surface; color: @text; }
+        #sanctuaryWorkspace QTreeView, #sanctuaryWorkspace QListView, #sanctuaryWorkspace QTableView { background: @surface; alternate-background-color: @panel; border: 1px solid @border; selection-background-color: @selected; selection-color: @text; }
+        #sanctuaryWorkspace QHeaderView::section { background: @panel; color: @muted; border: none; border-bottom: 1px solid @border; padding: 5px; }
+        #sanctuaryWorkspace QScrollArea { border: none; }
+        #sanctuaryWorkspace QGroupBox { border: 1px solid @border; border-radius: 4px; margin-top: 12px; padding-top: 12px; }
+        #sanctuaryWorkspace QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
+    )"));
 }
 
 SanctuaryWorkspace::~SanctuaryWorkspace()
@@ -140,7 +147,10 @@ void SanctuaryWorkspace::setFrench(bool french)
     m_home->setText(french ? "Accueil" : "Home");
     m_save->setText(french ? "Enregistrer" : "Save");
     m_home->setVisible(m_global || !getPage("home"));
-    for (auto* page : m_pages) m_navigation.value(page->id())->setText(name(page));
+    for (auto* page : m_pages) {
+        if (auto* site = dynamic_cast<SanctuarySitePage*>(page)) site->setFrench(french);
+        m_navigation.value(page->id())->setText(name(page));
+    }
     if (m_current) m_title->setText(name(m_current));
 }
 
@@ -170,7 +180,7 @@ bool SanctuaryWorkspace::selectPage(QString id)
     m_title->setText(name(next));
     m_title->setVisible(id != "home" && id != "setup"); // Home owns the current-step header.
     m_toolbar->setVisible(id != "home" && id != "setup");
-    m_save->setVisible(id != "home" && id != "news");
+    m_save->setVisible(id != "home" && id != "news" && id != "map" && id != "wiki");
     m_feedback->clear();
     m_feedback->hide();
     next->opened();

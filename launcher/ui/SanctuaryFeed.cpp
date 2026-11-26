@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "SanctuaryFeed.h"
+#include "SanctuaryAppearance.h"
 #include "Application.h"
 #include "SanctuarySession.h"
+#include <QDesktopServices>
 #include <QJsonArray>
 #include <QImage>
 #include <QImageReader>
@@ -17,10 +19,18 @@
 #include <QTextBrowser>
 #include <QTextDocument>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QResizeEvent>
 #include <QUrlQuery>
 #include <QVBoxLayout>
 #include <QUuid>
+
+static void setPostTitle(QLabel* title, bool expanded)
+{
+    const auto link = SanctuaryAppearance::colors(QStringLiteral("<a style='color:@text;text-decoration:none' href='toggle'>%1 %2</a>"));
+    title->setText(link.arg(expanded ? QStringLiteral("⌄") : QStringLiteral("›"),
+                            title->property("heading").toString().toHtmlEscaped()));
+}
 
 // Keep the original image in memory and fit it to the reading column.
 class SanctuaryPostPhoto : public QLabel {
@@ -55,6 +65,7 @@ SanctuaryFeed::SanctuaryFeed(const QString& kind, QWidget* parent, QNetworkAcces
     layout->setContentsMargins(0, 0, 0, 0);
     auto* top = new QHBoxLayout;
     m_status = new QLabel(this);
+    m_status->setObjectName("feedStatus");
     m_status->setWordWrap(true);
     top->addWidget(m_status, 1);
     m_refresh = new QPushButton(this);
@@ -67,14 +78,12 @@ SanctuaryFeed::SanctuaryFeed(const QString& kind, QWidget* parent, QNetworkAcces
         m_content->setOpenLinks(false);
         m_content->setMinimumHeight(260);
         m_content->document()->setBaseUrl(QUrl("https://sanctuary-minecraft.net/"));
-        m_content->document()->setDefaultStyleSheet("body {color:#1f2328; font-size:14px;} h2,h3 {font-size:18px;} a {color:#0969da;} p {margin-bottom:12px;}");
         layout->addWidget(m_content, 1);
         connect(m_content, &QTextBrowser::anchorClicked, this, [this](const QUrl& link) {
             const auto url = QUrl("https://sanctuary-minecraft.net/").resolved(link);
             if (url.scheme() == "https" && url.host() == "sanctuary-minecraft.net") emit linkRequested(url);
         });
     } else {
-        m_status->setStyleSheet("color:#57606a; font-size:12px;");
         auto* scroll = new QScrollArea(this);
         scroll->setObjectName("postScroll");
         scroll->setFrameShape(QFrame::NoFrame);
@@ -92,7 +101,31 @@ SanctuaryFeed::SanctuaryFeed(const QString& kind, QWidget* parent, QNetworkAcces
         m_refresh->hide();
     }
     connect(m_refresh, &QPushButton::clicked, this, &SanctuaryFeed::reload);
+    new SanctuaryAppearance::PaletteWatcher(this, [this] { applyAppearance(); });
     setFrench(true);
+}
+
+void SanctuaryFeed::applyAppearance()
+{
+    const auto style = SanctuaryAppearance::colors(QStringLiteral(
+        "QLabel#feedStatus, QLabel#postAuthor {color:@muted; font-size:12px;}"
+        "QTextBrowser {background:@surface; color:@text;}"
+    ));
+    if (styleSheet() == style) return;
+    setStyleSheet(style);
+    for (auto title = m_titles.cbegin(); title != m_titles.cend(); ++title) {
+        if (title.value()) setPostTitle(title.value(), title.key() == m_openId);
+    }
+    if (m_content) {
+        m_content->document()->setDefaultStyleSheet(SanctuaryAppearance::colors(QStringLiteral(
+            "body {color:@text; font-size:14px;} h2,h3 {font-size:18px;} a {color:@link;} p {margin-bottom:12px;}"
+        )));
+        if (!m_newsHtml.isEmpty()) {
+            const int scroll = m_content->verticalScrollBar()->value();
+            m_content->setHtml(m_newsHtml);
+            m_content->verticalScrollBar()->setValue(scroll);
+        }
+    }
 }
 
 void SanctuaryFeed::setFrench(bool french)
@@ -121,6 +154,7 @@ void SanctuaryFeed::status(const QString& message, bool attention)
 void SanctuaryFeed::setContent(const QString& content, bool html)
 {
     if (m_content) {
+        m_newsHtml = html ? content : QString();
         if (html) m_content->setHtml(content);
         else m_content->setPlainText(content);
     } else {
@@ -208,6 +242,7 @@ void SanctuaryFeed::loadPhoto(const QString& id, QLabel* label)
 void SanctuaryFeed::setEntries(const QJsonArray& entries)
 {
     if (!m_posts || (m_entries == entries && m_posts->count() > 0)) return;
+    if (entries.isEmpty()) m_latestBulletin.clear();
     m_entries = entries;
     ++m_generation;
     m_details.clear();
@@ -257,7 +292,7 @@ void SanctuaryFeed::setEntries(const QJsonArray& entries)
         const auto heading = entry.value("title").toString().isEmpty() ? author : entry.value("title").toString();
         title->setProperty("heading",heading);
         title->setAccessibleName(heading);
-        title->setText("<a style='color:#1f2328;text-decoration:none' href='toggle'>› " + heading.toHtmlEscaped() + "</a>");
+        setPostTitle(title, false);
         row->addWidget(title,1);
         column->addLayout(row);
         auto* details = new QWidget(post);
@@ -268,7 +303,6 @@ void SanctuaryFeed::setEntries(const QJsonArray& entries)
         auto* byline = new QLabel(author,details);
         byline->setObjectName("postAuthor");
         byline->setTextFormat(Qt::PlainText);
-        byline->setStyleSheet("color:#57606a; font-size:12px;");
         content->addWidget(byline);
         QLabel* photo = nullptr;
         if (m_kind == "article" && entry.value("has_photo").toBool()) {
@@ -299,17 +333,19 @@ void SanctuaryFeed::setEntries(const QJsonArray& entries)
             for (auto it = m_details.begin(); it != m_details.end(); ++it) {
                 if (it.value()) it.value()->hide();
                 auto* summary = m_titles.value(it.key()).data();
-                if (summary) summary->setText("<a style='color:#1f2328;text-decoration:none' href='toggle'>› " + summary->property("heading").toString().toHtmlEscaped() + "</a>");
+                if (summary) setPostTitle(summary, false);
             }
             m_openId = expand ? id : QString();
             if (expand) {
-                title->setText("<a style='color:#1f2328;text-decoration:none' href='toggle'>⌄ " + title->property("heading").toString().toHtmlEscaped() + "</a>");
+                setPostTitle(title, true);
                 details->show();
                 if (photo) loadPhoto(id,photo);
             }
         });
         m_posts->addWidget(post);
-        if (previousOpen == id) emit title->linkActivated("toggle");
+        const bool newBulletin = m_kind == "bulletin" && m_latestBulletin != id;
+        if (newBulletin) m_latestBulletin = id;
+        if (newBulletin || previousOpen == id) emit title->linkActivated("toggle");
     }
     status(entries.isEmpty() ? (m_french ? "Aucune publication" : "No posts") : QString());
 }

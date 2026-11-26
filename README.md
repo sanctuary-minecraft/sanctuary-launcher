@@ -2,7 +2,9 @@
 
 Fork natif de **Prism Launcher 11.1.1**, avec une fenêtre Sanctuary blanche,
 les outils du jeu intégrés et une seule installation officielle Sanctuary Beta.
-La version **0.1.0 de développement** fonctionne localement sur macOS Apple Silicon.
+La version **0.1.6** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
+
+[Téléchargements Sanctuary](https://sanctuary-minecraft.net/telechargements) · [Sources publiques et releases GitHub](https://github.com/sanctuary-minecraft/sanctuary-launcher-public)
 
 ## Interface actuelle
 
@@ -61,10 +63,10 @@ Journaux du jeu ; les éditions du pack et les mises à jour sont suspendues
 pendant le lancement et la partie. Voir [la recette de lancement](docs/implementation/play-server-20261113.md).
 
 La session du launcher est limitée à la lecture et expire après sept jours.
-Sur macOS, le jeton est conservé dans le Trousseau, séparément pour chaque
-profil du launcher ; aucun jeton Discord ou mot de passe n'est embarqué.
-La déconnexion révoque la session et vide les contenus affichés. Les autres
-plateformes gardent la session en mémoire pour ce lot.
+Le jeton Sanctuary est protégé par Windows (DPAPI), le Trousseau macOS ou
+le coffre de la session Linux s'il est disponible. Chaque profil dispose
+de sa propre session. La déconnexion efface la copie locale, révoque la
+session et vide les contenus affichés.
 
 Le code SGA reste facultatif et masqué. Le badge des joueurs historiques de
 la bêta est prévu ; son exemple local ne constitue pas une admission réelle.

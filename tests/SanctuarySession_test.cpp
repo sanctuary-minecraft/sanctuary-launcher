@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include <QTest>
 #include <QSignalSpy>
+#include <QTemporaryDir>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QJsonDocument>
@@ -49,6 +50,37 @@ protected:
 class SanctuarySessionTest : public QObject {
     Q_OBJECT
 private slots:
+    void storedSessionIsRestoredAndRemovedOnLogout()
+    {
+        if (!qEnvironmentVariableIsSet("SANCTUARY_TEST_SESSION_STORE"))
+            QSKIP("Run with an unlocked credential store");
+        QTemporaryDir profile;
+        QVERIFY(profile.isValid());
+        {
+            FakeWebsite website;
+            SanctuarySession session(&website);
+            session.restore(profile.path());
+            QTRY_VERIFY(!session.busy());
+            session.start();
+            QTRY_VERIFY_WITH_TIMEOUT(!session.profile().isEmpty(), 12000);
+        }
+        {
+            FakeWebsite website;
+            SanctuarySession session(&website);
+            session.restore(profile.path());
+            QTRY_VERIFY(!session.profile().isEmpty());
+            QCOMPARE(website.requests.size(), 1);
+            QCOMPARE(website.requests.front().url().path(), QStringLiteral("/api/launcher/v1/profile"));
+            session.disconnectAccount();
+        }
+        FakeWebsite website;
+        SanctuarySession session(&website);
+        session.restore(profile.path());
+        QTRY_VERIFY(!session.busy());
+        QVERIFY(!session.connected());
+        QVERIFY(website.requests.isEmpty());
+    }
+
     void browserApprovalProducesReadOnlyRequestsAndLogoutClearsIdentity()
     {
         FakeWebsite website;
