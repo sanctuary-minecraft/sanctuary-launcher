@@ -65,6 +65,7 @@ case "$platform" in
         export MSYS2_ARG_CONV_EXCL='*'
         options+=(
             -DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG"
+            "-DCMAKE_INSTALL_PREFIX=$(cygpath -m "$build_dir/install")"
             "-DLauncher_WINSPARKLE_DIR=$(cygpath -m "$build_dir/WinSparkle-0.9.4")"
             "-DJava_JAVA_EXECUTABLE=$JAVA_HOME/bin/java.exe"
             "-DJava_JAVAC_EXECUTABLE=$JAVA_HOME/bin/javac.exe"
@@ -103,12 +104,20 @@ case "$platform" in
     windows-x64)
         stage="$build_dir/install"
         cmake --install "$build_dir" --config Release --prefix "$stage"
+        test -s "$stage/sanctuary-launcher.exe"
+        test -s "$stage/platforms/qwindows.dll"
+        test -s "$stage/WinSparkle.dll"
         cp LICENSE COPYING.md "$export_dir/"
         makensis "-DVERSION=$version" "-DPAYLOAD=$(cygpath -w "$stage")" \
             "-DOUTPUT=$(cygpath -w "$export_dir/Sanctuary-Launcher-windows-x64.exe")" \
             "$(cygpath -w program_info/sanctuary_install.nsi)"
-        (cd "$export_dir" && zip -q "$dist/$archive" Sanctuary-Launcher-windows-x64.exe LICENSE COPYING.md)
+        unset MSYS2_ARG_CONV_EXCL
+        (cd "$export_dir" && /usr/bin/zip -q "$dist/$archive" Sanctuary-Launcher-windows-x64.exe LICENSE COPYING.md)
         ;;
 esac
-unzip -tq "$dist/$archive"
+if [[ "$platform" == windows-x64 ]]; then
+    /usr/bin/unzip -tq "$dist/$archive"
+else
+    unzip -tq "$dist/$archive"
+fi
 (cd "$dist" && sha256 "$archive" | tee "$archive.sha256")

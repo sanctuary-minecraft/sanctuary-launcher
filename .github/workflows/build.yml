@@ -27,7 +27,7 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends \
             build-essential ca-certificates cmake curl file git ninja-build pkg-config unzip zip \
-            extra-cmake-modules gamemode-dev cmark libcmark-dev libarchive-dev libqrencode-dev \
+            extra-cmake-modules gamemode-dev libgamemode0 cmark libcmark-dev libarchive-dev libqrencode-dev \
             libssl-dev libtomlplusplus-dev zlib1g-dev libsecret-1-0 qtkeychain-qt6-dev \
             qt6-base-dev qt6-base-private-dev qt6-declarative-dev qt6-networkauth-dev \
             qt6-svg-dev qt6-svg-plugins qt6-image-formats-plugins qt6-qpa-plugins qt6-webview-dev \
