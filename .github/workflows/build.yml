@@ -1,6 +1,9 @@
 name: Build Sanctuary Launcher
 
 on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
     inputs:
       platform:
@@ -12,9 +15,50 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: launcher-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
+  sources:
+    if: github.event_name == 'push' && github.event.created
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Check release version and archive sources
+        shell: bash
+        run: |
+          version=$(sed -nE 's/^set\(Launcher_RELEASE_VERSION "([0-9]+\.[0-9]+\.[0-9]+)" CACHE STRING.*$/\1/p' CMakeLists.txt)
+          if [[ -z "$version" || "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "::error::The release tag must match Launcher_RELEASE_VERSION ($version)."
+            exit 1
+          fi
+
+          root=$(mktemp -d)
+          export SOURCE_TREE="$root/sanctuary-launcher-$version"
+          mkdir -p "$SOURCE_TREE"
+          git archive HEAD | tar -x -C "$SOURCE_TREE"
+          git submodule foreach --quiet --recursive '
+            mkdir -p "$SOURCE_TREE/$displaypath" &&
+              git archive HEAD | tar -x -C "$SOURCE_TREE/$displaypath"
+          '
+          tar -czf Sanctuary-Launcher-sources.tar.gz -C "$root" "sanctuary-launcher-$version"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Sanctuary-Launcher-sources
+          path: Sanctuary-Launcher-sources.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+
   linux:
-    if: inputs.platform == 'all' || inputs.platform == 'linux'
+    needs: sources
+    if: |
+      !cancelled() && (needs.sources.result == 'success' ||
+        (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'linux')))
     runs-on: ubuntu-24.04
     container: debian:13-slim
     timeout-minutes: 45
@@ -49,7 +93,10 @@ jobs:
           compression-level: 0
 
   macos:
-    if: inputs.platform == 'all' || inputs.platform == 'macos'
+    needs: sources
+    if: |
+      !cancelled() && (needs.sources.result == 'success' ||
+        (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'macos')))
     runs-on: macos-26
     timeout-minutes: 60
     steps:
@@ -76,7 +123,10 @@ jobs:
           compression-level: 0
 
   windows:
-    if: inputs.platform == 'all' || inputs.platform == 'windows'
+    needs: sources
+    if: |
+      !cancelled() && (needs.sources.result == 'success' ||
+        (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'windows')))
     runs-on: windows-2025
     timeout-minutes: 60
     steps:
@@ -105,3 +155,62 @@ jobs:
           path: dist/*
           if-no-files-found: error
           compression-level: 0
+
+  release:
+    needs: [linux, macos, windows]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: Sanctuary-Launcher-*
+          merge-multiple: true
+          path: release
+      - name: Publish the verified release assets
+        working-directory: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          tag="$GITHUB_REF_NAME"
+          assets=(
+            Sanctuary-Launcher-windows-x64.zip
+            Sanctuary-Launcher-macos-arm64.zip
+            Sanctuary-Launcher-linux-x64.zip
+          )
+          for zip in "${assets[@]}"; do
+            read -r digest _ < "$zip.sha256"
+            printf '%s  %s\n' "$digest" "$zip" | sha256sum --check --strict
+            unzip -tq "$zip"
+          done
+          assets+=(Sanctuary-Launcher-sources.tar.gz)
+          sha256sum "${assets[@]}" > SHA256SUMS
+          assets+=(SHA256SUMS)
+
+          if ! release=$(gh release view "$tag" --json isDraft,assets); then
+            gh release create "$tag" --verify-tag --draft --generate-notes \
+              --title "Sanctuary Launcher ${tag#v}" \
+              --notes "Archives compilées par GitHub Actions. Les empreintes SHA-256 figurent dans SHA256SUMS."
+            release=$(gh release view "$tag" --json isDraft,assets)
+          fi
+
+          missing=()
+          for asset in "${assets[@]}"; do
+            existing=$(jq -r --arg name "$asset" '.assets[] | select(.name == $name) | .digest // "unavailable"' <<< "$release")
+            if [[ -z "$existing" ]]; then
+              missing+=("$asset")
+            elif [[ "$existing" != "sha256:$(sha256sum "$asset" | cut -d ' ' -f1)" ]]; then
+              echo "::error::The release already contains a different $asset."
+              exit 1
+            fi
+          done
+          if (( ${#missing[@]} )); then
+            gh release upload "$tag" "${missing[@]}"
+          fi
+          if [[ $(jq -r '.isDraft' <<< "$release") == true ]]; then
+            gh release edit "$tag" --verify-tag --draft=false
+          fi

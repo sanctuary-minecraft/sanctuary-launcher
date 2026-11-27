@@ -9,15 +9,23 @@ correspondantes, avec les sous-modules épinglés et les fichiers de build.
 
 Le [dépôt public du launcher](https://github.com/sanctuary-minecraft/sanctuary-launcher)
 contient les sources de la distribution et les builds GitHub Actions.
-Le tag `v0.1.6` correspond à l’archive source distribuée avec la version 0.1.6.
-Le workflow public utilise les runners standard pour compiler et tester les
-trois plateformes. Les archives de compilation et leurs SHA-256 sont
-disponibles dans les artefacts de chaque run.
+Pour publier une version GitHub, mettre à jour `Launcher_RELEASE_VERSION`
+dans `CMakeLists.txt`, puis pousser un nouveau tag `vMAJEUR.MINEUR.CORRECTIF`
+sur le commit à livrer, par exemple `v0.1.7` pour la version `0.1.7`.
 
-La release publique relaie les fichiers validés du site avec leurs empreintes
-et signatures Ed25519. La clé privée reste sur le poste de publication.
-La distribution GitHub et le canal de mise à jour HTTPS partagent le même
-numéro de version et les mêmes fichiers pour chaque release publiée.
+Le workflow **Build Sanctuary Launcher** vérifie que le tag correspond à la
+version du code. Il compile et teste Windows x64, macOS 26 sur Apple Silicon
+et Linux x64. Après réussite des trois builds, il prépare la release en
+brouillon, ajoute les trois ZIP, l'archive source avec les sous-modules et
+`SHA256SUMS`, puis publie la release. Une relance peut compléter un brouillon
+avec les mêmes artefacts. Tout fichier déjà présent avec une autre empreinte
+fait échouer la publication. Les lancements manuels par plateforme produisent
+des artefacts de compilation dans Actions.
+
+La release historique `v0.1.6` contient les fichiers signés distribués sur le
+site. Pour chaque nouvelle version, la mise à jour automatique des installations
+passe par la procédure de signature du canal HTTPS ci-dessous. La clé privée
+Ed25519 reste sur le poste de publication.
 
 ## Construire les exports
 

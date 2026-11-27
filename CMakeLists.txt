@@ -282,7 +282,7 @@ set(Launcher_COMPILER_TARGET_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR})
 
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
-git_get_exact_tag(Launcher_GIT_TAG)
+git_get_exact_tag(Launcher_GIT_TAG --tags --match "v${Launcher_RELEASE_VERSION}" --match "${Launcher_RELEASE_VERSION}")
 get_git_head_revision(Launcher_GIT_REFSPEC Launcher_GIT_COMMIT)
 
 message(STATUS "Git commit: ${Launcher_GIT_COMMIT}")
