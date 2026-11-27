@@ -9,6 +9,7 @@
 #include <QNetworkReply>
 #include <QPushButton>
 #ifdef Q_OS_WIN
+#include <qt_windows.h>
 #include <webview/webview.h>
 #else
 #include <QQuickItem>
@@ -16,6 +17,46 @@
 #endif
 #include <QRegularExpression>
 #include <QVBoxLayout>
+
+#ifdef Q_OS_WIN
+namespace {
+
+class WebViewHost final : public QWidget {
+public:
+    explicit WebViewHost(QWidget* parent) : QWidget(parent)
+    {
+        setAttribute(Qt::WA_NativeWindow);
+    }
+
+    void attach(webview_t browser)
+    {
+        m_widget = static_cast<HWND>(webview_get_native_handle(browser, WEBVIEW_NATIVE_HANDLE_KIND_UI_WIDGET));
+        fitToClientArea();
+    }
+
+protected:
+    void resizeEvent(QResizeEvent* event) override
+    {
+        QWidget::resizeEvent(event);
+        fitToClientArea();
+    }
+
+private:
+    void fitToClientArea()
+    {
+        // The webview backend only sizes its child automatically when it owns the host window.
+        RECT bounds{};
+        if (m_widget && GetClientRect(reinterpret_cast<HWND>(winId()), &bounds)) {
+            SetWindowPos(m_widget, nullptr, 0, 0, bounds.right - bounds.left, bounds.bottom - bounds.top,
+                         SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+    }
+
+    HWND m_widget = nullptr;
+};
+
+} // namespace
+#endif
 
 SanctuarySitePage::SanctuarySitePage(Section section, SanctuarySession* session, QWidget* parent)
     : QWidget(parent), m_section(section), m_session(session), m_connect(new QPushButton(this)),
@@ -80,12 +121,12 @@ bool SanctuarySitePage::createBrowser()
 {
 #ifdef Q_OS_WIN
     if (!m_container) {
-        m_container = new QWidget(this);
-        m_container->setAttribute(Qt::WA_NativeWindow);
+        m_container = new WebViewHost(this);
         static_cast<QVBoxLayout*>(layout())->insertWidget(2, m_container, 1);
     }
     m_browser = webview_create(0, reinterpret_cast<void*>(m_container->winId()));
     if (!m_browser) return false;
+    static_cast<WebViewHost*>(m_container)->attach(m_browser);
     webview_bind(m_browser, "sanctuaryPageLoaded", [](const char* ref, const char* args, void* context) {
         auto* self = static_cast<SanctuarySitePage*>(context);
         const auto data = QJsonDocument::fromJson(QByteArray(args)).array();

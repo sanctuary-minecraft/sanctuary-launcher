@@ -165,3 +165,11 @@ Les 25 suites CTest passent sur chaque plateforme. Le Mac de Koka a télécharg�
 la 0.1.5 depuis le flux public et l’a installée via Sparkle. La fenêtre montre
 la 0.1.5, le bundle installé passe la vérification de signature et l’heure
 de vérification a avancé dès la relance.
+
+## Version 0.1.7
+
+Sous Windows, la carte et le wiki redimensionnent la fenêtre enfant WebView2
+avec leur panneau Qt. La 0.1.6 la laissait à 0 × 0 dans le wiki. Sur le PC
+Windows de Koka, la fenêtre enfant corrigée mesure 860 × 652 à l'ouverture
+et 1 030 × 730 après agrandissement, comme son panneau. Les 25 tests CTest
+Windows passent.
