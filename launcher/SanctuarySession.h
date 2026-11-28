@@ -27,6 +27,7 @@ public:
     QNetworkReply* feed(const QString& kind, bool french);
     QNetworkReply* photo(const QString& id);
     QNetworkReply* mapTicket();
+    QNetworkReply* residents();
     static bool validProfile(const QJsonObject& value);
 signals:
     void changed();

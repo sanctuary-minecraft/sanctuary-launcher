@@ -26,6 +26,7 @@ public:
     void setSession(SanctuarySession* session);
     void setEntries(const QJsonArray& entries);
     static QUrl playerFaceUrl(const QString& name);
+    static QPixmap decodePlayerFace(const QByteArray& bytes);
     static QString publicNewsArticles(const QString& html);
 signals:
     void linkRequested(const QUrl& url);

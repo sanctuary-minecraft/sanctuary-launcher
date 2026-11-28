@@ -127,6 +127,8 @@
 #include "KonamiCode.h"
 #include "SanctuaryHome.h"
 #include "SanctuaryWorkspace.h"
+#include "SanctuaryResidents.h"
+#include <QVBoxLayout>
 #include "SanctuaryMicrosoftDialog.h"
 #include "SanctuaryFeed.h"
 #include "SanctuaryPack.h"
@@ -479,7 +481,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(m_sanctuaryNews, &SanctuaryNewsPage::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
     m_sanctuaryStack->addWidget(m_sanctuaryWorkspace);
     m_sanctuaryStack->addWidget(legacy); // Never selected by Sanctuary navigation; no existing instance data is removed.
-    setCentralWidget(m_sanctuaryStack);
+    auto* shell = new QWidget(this);
+    auto* layout = new QVBoxLayout(shell);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    m_sanctuaryResidents = new SanctuaryResidents(discord, APPLICATION->network(), shell);
+    layout->addWidget(m_sanctuaryResidents);
+    layout->addWidget(m_sanctuaryStack, 1);
+    setCentralWidget(shell);
     setMinimumSize(1000, 680);
     resize(1120, 760);
     auto* home = m_sanctuaryHome;
@@ -549,6 +558,7 @@ void MainWindow::refreshSanctuaryHome()
         m_sanctuaryWorkspace->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
     }
     if (m_sanctuaryNews) m_sanctuaryNews->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+    if (m_sanctuaryResidents) m_sanctuaryResidents->setFrench(APPLICATION->settings()->get("Language").toString().startsWith("fr"));
 }
 
 void MainWindow::launchSanctuary(bool joinSanctuary)

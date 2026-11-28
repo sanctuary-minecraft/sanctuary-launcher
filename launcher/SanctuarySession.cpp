@@ -288,3 +288,8 @@ QNetworkReply* SanctuarySession::mapTicket()
 {
     return connected() ? request("map/ticket", {}, true) : nullptr;
 }
+
+QNetworkReply* SanctuarySession::residents()
+{
+    return connected() ? request("residents") : nullptr;
+}

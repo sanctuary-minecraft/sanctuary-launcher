@@ -852,6 +852,8 @@ SET(LAUNCHER_SOURCES
     ui/SanctuaryFeed.cpp
     ui/SanctuaryFeed.h
     ui/SanctuarySitePage.cpp
+    ui/SanctuaryResidents.cpp
+    ui/SanctuaryResidents.h
     SanctuarySession.cpp
     SanctuarySession.h
     SanctuaryPack.cpp

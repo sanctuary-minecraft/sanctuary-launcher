@@ -70,6 +70,7 @@ class MainWindow;
 class SanctuaryPack;
 class SanctuaryWorkspace;
 class SanctuaryNewsPage;
+class SanctuaryResidents;
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -101,6 +102,7 @@ class MainWindow : public QMainWindow {
     SanctuaryWorkspace* m_sanctuaryWorkspace = nullptr;
     SanctuaryWorkspace* m_sanctuarySettings = nullptr;
     SanctuaryNewsPage* m_sanctuaryNews = nullptr;
+    SanctuaryResidents* m_sanctuaryResidents = nullptr;
     bool m_sanctuaryInstancePagesLoaded = false;
     void ensureSanctuaryPages();
     void showSanctuaryTools(const QString& page);

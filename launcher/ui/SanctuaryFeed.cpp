@@ -173,6 +173,20 @@ QUrl SanctuaryFeed::playerFaceUrl(const QString& name)
     return QUrl("https://mc-api.io/render/FACE/" + name + "/JAVA?size=64");
 }
 
+QPixmap SanctuaryFeed::decodePlayerFace(const QByteArray& bytes)
+{
+    if (bytes.size() > 256 * 1024) return {};
+    QBuffer buffer;
+    buffer.setData(bytes);
+    buffer.open(QIODevice::ReadOnly);
+    QImageReader reader(&buffer);
+    const auto format = reader.format().toLower();
+    const auto size = reader.size();
+    if ((format != "png" && format != "webp") || size.isEmpty() || size.width() > 512 || size.height() > 512) return {};
+    const auto image = reader.read();
+    return image.isNull() ? QPixmap{} : QPixmap::fromImage(image.scaled(32, 32, Qt::KeepAspectRatio, Qt::FastTransformation));
+}
+
 void SanctuaryFeed::loadFace(const QString& author, QLabel* face)
 {
     if (m_faces.contains(author)) { face->setPixmap(m_faces.value(author)); return; }
@@ -191,17 +205,9 @@ void SanctuaryFeed::loadFace(const QString& author, QLabel* face)
         const auto bytes = reply->readAll();
         const auto code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         reply->deleteLater();
-        if (generation != m_generation || code != 200 || bytes.size() > 256 * 1024) return;
-        QBuffer buffer;
-        buffer.setData(bytes);
-        buffer.open(QIODevice::ReadOnly);
-        QImageReader reader(&buffer);
-        const auto format = reader.format().toLower();
-        const auto size = reader.size();
-        if ((format != "png" && format != "webp") || size.isEmpty() || size.width() > 512 || size.height() > 512) return;
-        const auto image = reader.read();
-        if (image.isNull()) return;
-        const auto pixmap = QPixmap::fromImage(image.scaled(32,32,Qt::KeepAspectRatio,Qt::FastTransformation));
+        if (generation != m_generation || code != 200) return;
+        const auto pixmap = decodePlayerFace(bytes);
+        if (pixmap.isNull()) return;
         if (m_faces.size() >= 64) m_faces.clear();
         m_faces.insert(author,pixmap);
         if (target) target->setPixmap(pixmap);
