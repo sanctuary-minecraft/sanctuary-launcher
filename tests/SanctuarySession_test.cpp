@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include <QTest>
+#include <QBuffer>
+#include <QLabel>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QNetworkAccessManager>
@@ -7,10 +9,11 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include "SanctuarySession.h"
+#include "ui/SanctuaryResidents.h"
 
 class MemoryReply : public QNetworkReply {
 public:
-    MemoryReply(const QNetworkRequest& request, const QJsonObject& data, QObject* parent) : QNetworkReply(parent), m_data(QJsonDocument(data).toJson())
+    MemoryReply(const QNetworkRequest& request, const QByteArray& data, QObject* parent) : QNetworkReply(parent), m_data(data)
     {
         setRequest(request); setUrl(request.url()); setAttribute(QNetworkRequest::HttpStatusCodeAttribute,200);
         open(QIODevice::ReadOnly);
@@ -37,14 +40,25 @@ protected:
     {
         Q_UNUSED(op); Q_UNUSED(body);
         requests.append(req);
+        if (req.url().host() == "mc-api.io") {
+            QImage face(16, 16, QImage::Format_ARGB32);
+            face.fill(Qt::red);
+            QByteArray bytes;
+            QBuffer buffer(&bytes);
+            buffer.open(QIODevice::WriteOnly);
+            face.save(&buffer, "PNG");
+            return new MemoryReply(req, bytes, this);
+        }
         QJsonObject response;
         const auto path=req.url().path();
         if (path.endsWith("/device")) response={{"device_code",QString(64,'a')},{"user_code","AB12CD34EF"},{"verification_uri_complete",invalidBrowser ? "https://untrusted.example/launcher/connect?code=AB12CD34EF" : "https://sanctuary-minecraft.net/launcher/connect?code=AB12CD34EF"}};
         else if (path.endsWith("/token")) response={{"access_token",QString(64,'b')}};
         else if (path.endsWith("/profile")) response={{"version",1},{"user",QJsonObject{{"display_name","Example player"}}},{"access",QJsonObject{{"status","granted"}}}};
         else if (path.endsWith("/revoke")) response={{"revoked",true}};
+        else if (path.endsWith("/residents")) response={{"version",1},{"residents",QJsonArray{
+            QJsonObject{{"name","alex"},{"online",true}}, QJsonObject{{"name","sleepy"},{"online",false}}}}};
         else response={{"version",1},{"entries",QJsonArray{}}};
-        return new MemoryReply(req,response,this);
+        return new MemoryReply(req,QJsonDocument(response).toJson(),this);
     }
 };
 class SanctuarySessionTest : public QObject {
@@ -103,11 +117,33 @@ private slots:
         QCOMPARE(website.requests.last().url(),QUrl("https://sanctuary-minecraft.net/api/launcher/v1/posts/11111111-1111-4111-8111-111111111111/photo"));
         QCOMPARE(website.requests.last().rawHeader("Authorization"),QByteArray("Bearer ")+QByteArray(64,'b'));
         QVERIFY(!session.photo("../../outside?token=test"));
+
+        SanctuaryResidents roster(&session, &website);
+        const auto face = [&roster](const QString& name) -> QLabel* {
+            for (auto* label : roster.findChildren<QLabel*>()) {
+                if (label->toolTip().startsWith(name + " ·")) return label;
+            }
+            return nullptr;
+        };
+        QTRY_VERIFY(face("alex") && !face("alex")->pixmap().isNull());
+        QTRY_VERIFY(face("sleepy") && !face("sleepy")->pixmap().isNull());
+        QCOMPARE(face("alex")->pixmap().toImage().pixelColor(0, 0), QColor(Qt::red));
+        const auto offline = face("sleepy")->pixmap().toImage().pixelColor(0, 0);
+        QCOMPARE(offline.red(), offline.green());
+        QCOMPARE(offline.green(), offline.blue());
+        for (const auto& request : website.requests) {
+            if (request.url().path().endsWith("/residents"))
+                QCOMPARE(request.rawHeader("Authorization"), QByteArray("Bearer ") + QByteArray(64, 'b'));
+            if (request.url().host() == "mc-api.io") QVERIFY(!request.hasRawHeader("Authorization"));
+        }
+
         session.disconnectAccount();
         QVERIFY(!session.connected());
         QVERIFY(!session.photo("11111111-1111-4111-8111-111111111111"));
         QVERIFY(session.profile().isEmpty());
         QVERIFY(!session.busy());
+        QVERIFY(!face("alex"));
+        QVERIFY(!face("sleepy"));
         QVERIFY(website.requests.last().url().path().endsWith("/revoke"));
     }
     void untrustedVerificationPagesAreNeverOpened()

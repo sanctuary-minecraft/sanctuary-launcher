@@ -184,3 +184,15 @@ Jouer reste grisé et le lancement attend la fin des étapes obligatoires.
 Le build de développement a démarré sur macOS avec un profil vierge.
 Les 25 tests CTest passent, dont le parcours de connexion en français
 et en anglais avec des états de recette et le changement d’onglet au clavier.
+
+## Version 0.2.0
+
+Le bandeau des habitants est commun aux pages du launcher. Il consulte le
+point d’accès authentifié `/api/launcher/v1/residents` toutes les 15 secondes.
+Le site associe la whitelist du serveur à sa liste de connexions Minecraft.
+Chaque visage est affiché en couleur en ligne et en niveaux de gris hors ligne.
+Une réponse indisponible est signalée dans le bandeau.
+
+Le test Qt vérifie les deux rendus et la suppression des visages à la
+déconnexion du compte. Le jeton de session est réservé aux requêtes
+Sanctuary. Les requêtes de visages restent publiques.
