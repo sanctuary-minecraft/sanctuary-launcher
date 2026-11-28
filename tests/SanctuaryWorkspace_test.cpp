@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include <QMainWindow>
+#include <QFrame>
 #include <QLabel>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -120,23 +121,43 @@ private slots:
         workspace.setFrench(false);
         QCOMPARE(workspace.findChild<QPushButton*>("workspaceHome")->text(),QString("Home"));
     }
-    void homeIsAboveTheGameLogsAndNavigationIsAccessible()
+    void sidebarGroupsHaveSpaceAndShareOneAccessibleSelection()
     {
         SanctuaryWorkspace workspace;
         auto* home = new SamplePage("home");
         auto* news = new SamplePage("news");
+        auto* map = new SamplePage("map");
+        auto* wiki = new SamplePage("wiki");
         auto* logs = new SamplePage("console");
-        workspace.setPages({home,news});
-        workspace.appendPages({logs});
+        auto* mods = new SamplePage("mods");
+        workspace.setPages({home,news,map,wiki});
+        auto* connection = new QPushButton("Connect Discord");
+        workspace.setConnectionButton(connection);
+        auto* gameGroup = workspace.findChild<QFrame*>("gameGroup");
+        QVERIFY(gameGroup->isHidden());
+        workspace.appendPages({logs,mods});
+        workspace.resize(1120, 760);
         workspace.show();
         QApplication::processEvents();
         auto* homeNav=workspace.findChild<QPushButton*>("nav-home");
         auto* logsNav=workspace.findChild<QPushButton*>("nav-console");
-        QVERIFY(homeNav->y() < logsNav->y());
+        auto* communityGroup = workspace.findChild<QFrame*>("communityGroup");
+        auto* playGroup = workspace.findChild<QFrame*>("playGroup");
+        QCOMPARE(homeNav->parentWidget(), playGroup);
+        for (const auto* name : {"nav-news", "nav-map", "nav-wiki"})
+            QCOMPARE(workspace.findChild<QPushButton*>(name)->parentWidget(), communityGroup);
+        QCOMPARE(logsNav->parentWidget(), gameGroup);
+        QCOMPARE(workspace.findChild<QPushButton*>("nav-mods")->parentWidget(), gameGroup);
+        QVERIFY(connection->geometry().bottom() < playGroup->y());
+        QVERIFY(playGroup->geometry().bottom() < communityGroup->y());
+        QVERIFY(communityGroup->geometry().bottom() < gameGroup->y());
         logsNav->setChecked(true); // Accessibility toggles the selection without synthesizing a mouse click.
         QCOMPARE(workspace.selectedPage(),static_cast<BasePage*>(logs));
-        homeNav->setChecked(true);
+        QVERIFY(!homeNav->isChecked());
+        homeNav->setFocus();
+        QTest::keyClick(homeNav, Qt::Key_Space);
         QCOMPARE(workspace.selectedPage(),static_cast<BasePage*>(home));
+        QVERIFY(!logsNav->isChecked());
     }
     void newsUsesPublishedArticlesRatherThanTheWholeLoginPage()
     {

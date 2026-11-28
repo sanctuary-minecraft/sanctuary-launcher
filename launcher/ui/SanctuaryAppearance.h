@@ -60,6 +60,13 @@ inline QString colors(QString style)
         {"@alertText", "#7d4e00", "#f0ca82"},
         {"@errorPanel", "#ffebe9", "#482731"},
         {"@errorText", "#a40e26", "#ffa8ba"},
+        {"@navErrorBorder", "#eab9bf", "#95505e"},
+        {"@navErrorHover", "#ffdde1", "#633240"},
+        {"@navPendingBorder", "#e2c983", "#876a35"},
+        {"@navGreenBorder", "#a6d5b2", "#437859"},
+        {"@navGreenHover", "#c8f1d1", "#2b503a"},
+        {"@navCommunityBorder", "#b8d2ea", "#45647e"},
+        {"@navGameHover", "#f2eaf9", "#463751"},
         {"@disabledPanel", "#eaeef2", "#303741"},
         {"@disabledText", "#6e7781", "#92a0ae"},
     };

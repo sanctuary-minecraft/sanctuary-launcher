@@ -7,6 +7,7 @@
 #include "ui/pages/BasePageContainer.h"
 
 class BasePage;
+class QButtonGroup;
 class QLabel;
 class QPushButton;
 class QStackedWidget;
@@ -20,6 +21,7 @@ public:
     ~SanctuaryWorkspace() override;
     void setPages(const QList<BasePage*>& pages, bool global = false);
     void appendPages(const QList<BasePage*>& pages);
+    void setConnectionButton(QPushButton* button);
     void setGameBusy(bool synchronizing, bool running = false);
     void setFrench(bool french);
     bool saveAll();
@@ -38,6 +40,8 @@ private:
     QList<BasePage*> m_pages;
     QSet<BasePage*> m_visited;
     QHash<QString, QPushButton*> m_navigation;
+    QHash<QString, QVBoxLayout*> m_navGroups;
+    QButtonGroup* m_navSelection;
     BasePage* m_current = nullptr;
     QStackedWidget* m_stack;
     QVBoxLayout* m_navLayout;

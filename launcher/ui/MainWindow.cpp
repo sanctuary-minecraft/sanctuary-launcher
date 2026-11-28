@@ -455,8 +455,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     auto* legacy = takeCentralWidget();
     m_sanctuaryStack = new QStackedWidget(this);
     m_sanctuaryHome = new SanctuaryHome(m_sanctuaryStack, SanctuaryHome::View::Dashboard);
-    m_sanctuarySetup = new SanctuaryHome(m_sanctuaryStack, SanctuaryHome::View::Setup);
-    m_sanctuarySetup->setEmbedded(true);
     m_sanctuaryHome->setLocalMode(APPLICATION->settings()->get("SanctuaryLocalMode").toBool(),
         QJsonDocument::fromJson(APPLICATION->settings()->get("SanctuaryLocalState").toString().toUtf8()).object());
     m_sanctuaryPack = new SanctuaryPack(this);
@@ -472,7 +470,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_sanctuaryWorkspace = new SanctuaryWorkspace(m_sanctuaryStack);
     m_sanctuaryNews = new SanctuaryNewsPage;
     auto* discord = new SanctuarySession(APPLICATION->network(), this);
-    m_sanctuaryWorkspace->setPages({m_sanctuarySetup, m_sanctuaryHome, m_sanctuaryNews,
+    m_sanctuaryWorkspace->setConnectionButton(m_sanctuaryHome->createConnectionButton());
+    m_sanctuaryWorkspace->setPages({m_sanctuaryHome, m_sanctuaryNews,
         new SanctuarySitePage(SanctuarySitePage::Section::Map, discord), new SanctuarySitePage(SanctuarySitePage::Section::Wiki, discord)});
     connect(m_sanctuaryWorkspace, &SanctuaryWorkspace::homeRequested, this, &MainWindow::showSanctuaryHome);
     connect(m_sanctuaryNews, &SanctuaryNewsPage::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
@@ -481,30 +480,27 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     setCentralWidget(m_sanctuaryStack);
     setMinimumSize(1000, 680);
     resize(1120, 760);
-    for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
-        page->setJoinOnPlay(APPLICATION->settings()->get("SanctuaryJoinOnPlay").toBool());
-        connect(page, &SanctuaryHome::playRequested, this, &MainWindow::launchSanctuary);
-        connect(page, &SanctuaryHome::playModeChanged, this, [this](bool join) {
-            APPLICATION->settings()->set("SanctuaryJoinOnPlay", join);
-            m_sanctuaryHome->setJoinOnPlay(join);
-            m_sanctuarySetup->setJoinOnPlay(join);
-        });
-        connect(page, &SanctuaryHome::microsoftSignInRequested, this, &MainWindow::connectSanctuaryMicrosoft);
-        connect(page, &SanctuaryHome::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
-        connect(page, &SanctuaryHome::settingsRequested, this, [this] { showSanctuarySettings(); });
-        connect(page, &SanctuaryHome::accountsRequested, this, [this] { showSanctuarySettings("accounts"); });
-        connect(page, &SanctuaryHome::advancedRequested, this, [this] { showSanctuaryTools("mods"); });
-        connect(page, &SanctuaryHome::instanceToolRequested, this, &MainWindow::showSanctuaryTools);
-        connect(page, &SanctuaryHome::installRequested, this, [this] {
-            if (!APPLICATION->updatesAreAllowed()) return;
-            if (m_sanctuaryPack->busy()) m_sanctuaryPack->cancel();
-            else m_sanctuaryPack->installOrUpdate();
-        });
-        page->setDiscordSession(discord);
-        connect(page, &SanctuaryHome::discordRequested, discord, &SanctuarySession::start);
-        connect(page, &SanctuaryHome::discordDisconnectRequested, discord, &SanctuarySession::disconnectAccount);
-        connect(page, &SanctuaryHome::discordRefreshRequested, discord, &SanctuarySession::refresh);
-    }
+    auto* home = m_sanctuaryHome;
+    home->setJoinOnPlay(APPLICATION->settings()->get("SanctuaryJoinOnPlay").toBool());
+    connect(home, &SanctuaryHome::playRequested, this, &MainWindow::launchSanctuary);
+    connect(home, &SanctuaryHome::playModeChanged, this, [](bool join) {
+        APPLICATION->settings()->set("SanctuaryJoinOnPlay", join);
+    });
+    connect(home, &SanctuaryHome::microsoftSignInRequested, this, &MainWindow::connectSanctuaryMicrosoft);
+    connect(home, &SanctuaryHome::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
+    connect(home, &SanctuaryHome::settingsRequested, this, [this] { showSanctuarySettings(); });
+    connect(home, &SanctuaryHome::accountsRequested, this, [this] { showSanctuarySettings("accounts"); });
+    connect(home, &SanctuaryHome::advancedRequested, this, [this] { showSanctuaryTools("mods"); });
+    connect(home, &SanctuaryHome::instanceToolRequested, this, &MainWindow::showSanctuaryTools);
+    connect(home, &SanctuaryHome::installRequested, this, [this] {
+        if (!APPLICATION->updatesAreAllowed()) return;
+        if (m_sanctuaryPack->busy()) m_sanctuaryPack->cancel();
+        else m_sanctuaryPack->installOrUpdate();
+    });
+    home->setDiscordSession(discord);
+    connect(home, &SanctuaryHome::discordRequested, discord, &SanctuarySession::start);
+    connect(home, &SanctuaryHome::discordDisconnectRequested, discord, &SanctuarySession::disconnectAccount);
+    connect(home, &SanctuaryHome::discordRefreshRequested, discord, &SanctuarySession::refresh);
     connect(discord, &SanctuarySession::browserRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
     connect(APPLICATION->accounts(), &AccountList::listChanged, this, &MainWindow::refreshSanctuaryHome);
     connect(APPLICATION->accounts(), &AccountList::listActivityChanged, this, &MainWindow::refreshSanctuaryHome);
@@ -524,10 +520,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
                             "actionChangeInstGroup", "actionLaunchInstance", "actionLaunchInstanceOffline"}) {
         if (auto* action = findChild<QAction*>(name)) { action->setVisible(false); action->setEnabled(false); }
     }
-    QTimer::singleShot(0, this, [this,discord] {
-        showSanctuaryHome();
-        if (!discord->connected() || !m_sanctuaryPack->verified()) showSanctuaryTools("setup");
-    });
+    QTimer::singleShot(0, this, &MainWindow::showSanctuaryHome);
 }
 
 void MainWindow::refreshSanctuaryHome()
@@ -540,16 +533,14 @@ void MainWindow::refreshSanctuaryHome()
         && account->ownsMinecraft() && account->hasProfile()
         && account->accountState() == AccountState::Online && account->accountData()->msaClientID == APPLICATION->getMSAClientID())
         verifiedAccount = account;
-    for (auto* page : {m_sanctuaryHome, m_sanctuarySetup}) {
-        page->setState(m_sanctuaryPack->instance() != nullptr,
-            APPLICATION->capabilities() & Application::SupportsMSA,
-            APPLICATION->settings()->get("Language").toString().startsWith("fr"));
-        page->setMicrosoftSignInState(signInMode, bool(verifiedAccount), verifiedAccount ? verifiedAccount->profileName() : QString(),
-                                      m_sanctuaryMicrosoftMessage);
-        page->setPackState(m_sanctuaryPack->verified(), m_sanctuaryPack->busy(),
-            m_sanctuaryPack->version(), m_sanctuaryPack->message(), m_sanctuaryPack->progress());
-        page->setGameBusy(!APPLICATION->updatesAreAllowed());
-    }
+    m_sanctuaryHome->setState(m_sanctuaryPack->instance() != nullptr,
+        APPLICATION->capabilities() & Application::SupportsMSA,
+        APPLICATION->settings()->get("Language").toString().startsWith("fr"));
+    m_sanctuaryHome->setMicrosoftSignInState(signInMode, bool(verifiedAccount),
+        verifiedAccount ? verifiedAccount->profileName() : QString(), m_sanctuaryMicrosoftMessage);
+    m_sanctuaryHome->setPackState(m_sanctuaryPack->verified(), m_sanctuaryPack->busy(),
+        m_sanctuaryPack->version(), m_sanctuaryPack->message(), m_sanctuaryPack->progress());
+    m_sanctuaryHome->setGameBusy(!APPLICATION->updatesAreAllowed());
     ensureSanctuaryPages();
     if (m_sanctuaryWorkspace) {
         m_sanctuaryWorkspace->setGameBusy(m_sanctuaryPack->busy(), !APPLICATION->updatesAreAllowed());
@@ -563,7 +554,7 @@ void MainWindow::launchSanctuary(bool joinSanctuary)
     if (!m_sanctuaryWorkspace->saveAll() || (m_sanctuarySettings && !m_sanctuarySettings->saveAll())) return;
     refreshSanctuaryHome();
     if (joinSanctuary ? !m_sanctuaryHome->canLaunchGame() : !m_sanctuaryHome->canPlayMinecraft()) {
-        showSanctuaryTools("setup");
+        showSanctuaryHome();
         return;
     }
     auto* instance = m_sanctuaryPack->instance();
@@ -600,7 +591,7 @@ bool MainWindow::showSanctuaryInstance(BaseInstance* instance, const QString& pa
 void MainWindow::connectSanctuaryMicrosoft()
 {
     if (microsoftSignInMode() == SanctuaryHome::MicrosoftSignIn::Unavailable || !APPLICATION->updatesAreAllowed()) return;
-    showSanctuaryTools("setup");
+    showSanctuaryHome();
     const auto result = SanctuaryMicrosoftDialog::run(this, APPLICATION->settings()->get("Language").toString().startsWith("fr"));
     if (result.account) {
         APPLICATION->accounts()->addAccount(result.account);
@@ -608,7 +599,7 @@ void MainWindow::connectSanctuaryMicrosoft()
     }
     m_sanctuaryMicrosoftMessage = result.message;
     refreshSanctuaryHome();
-    m_sanctuarySetup->showFeedback(result.message);
+    m_sanctuaryHome->showFeedback(result.message);
 }
 
 void MainWindow::showSanctuaryHome()
@@ -627,7 +618,7 @@ void MainWindow::showSanctuaryHome()
 void MainWindow::showSanctuaryTools(const QString& page)
 {
     const bool fr = APPLICATION->settings()->get("Language").toString().startsWith("fr");
-    if (page == "home" || page == "news" || page == "setup" || page == "wiki" || page == "map") {
+    if (page == "home" || page == "news" || page == "wiki" || page == "map") {
         m_sanctuaryWorkspace->selectPage(page);
         m_sanctuaryStack->setCurrentWidget(m_sanctuaryWorkspace);
         return;

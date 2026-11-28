@@ -2,16 +2,15 @@
 
 Fork natif de **Prism Launcher 11.1.1**, avec une fenêtre Sanctuary blanche,
 les outils du jeu intégrés et une seule installation officielle Sanctuary Beta.
-La version **0.1.7** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
+La version **0.1.8** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
 
 [Téléchargements Sanctuary](https://sanctuary-minecraft.net/telechargements) · [Sources publiques et releases GitHub](https://github.com/sanctuary-minecraft/sanctuary-launcher)
 
 ## Interface actuelle
 
-**Accueil** reprend le titre et la typographie des autres pages. La date et
+**Jouer** ouvre le tableau de bord dès le démarrage. La date et
 l’heure locales apparaissent juste en dessous et s’actualisent automatiquement.
-Accueil et Bien démarrer utilisent les mêmes bords de contenu que les pages
-natives, sans marge latérale ou largeur maximale supplémentaire dans la fenêtre.
+Le tableau de bord partage les bords de contenu des pages natives.
 Les trois flux sont encadrés sur un fond gris très léger, identique au gris
 des tableaux natifs. L’Intendance reste en haut sur toute la largeur, la Gazette
 à gauche et le Tableau à droite en dessous. Chaque cadre affiche son titre :
@@ -22,14 +21,17 @@ de leur auteur près du titre ; l’Intendance reste sans visage.
 Un clic déplie le texte complet et les photos de la Gazette, comme sur le site.
 Chaque flux peut défiler dans le body ; Jouer reste fixé en bas à droite.
 
-**Bien démarrer** est le premier onglet, permanent dans la même fenêtre. Il conserve
-les cinq étapes : Discord, Microsoft, accès Sanctuary, code SGA facultatif et
-installation. Il reste accessible après la connexion Discord, avec l'étape
-Microsoft visible. Dans le profil de développement, Tester Microsoft · dev
-utilise la vraie application Sanctuary ; ailleurs la connexion reste en attente. Une première
-arrivée sans session Discord ou sans pack vérifié ouvre cette page. Un joueur
-ayant une session et le pack retrouve l'accueil, avec un lien vers le tutoriel.
-Les deux pages partagent la même session et la même installation.
+Le bouton de connexion dans la barre latérale indique l’étape suivante.
+Il ouvre Discord, la connexion Microsoft, la vérification de l’accès Sanctuary
+ou l’installation du pack. Son infobulle décrit la procédure. Il est rouge
+au départ, jaune pendant la configuration et vert une fois les étapes
+obligatoires terminées. **Connecté** donne accès aux actions de compte et au
+dossier Sanctuary, qui contient aussi le code de personnage facultatif.
+
+La barre latérale espace **Jouer**, le groupe **Actualités**, **Carte** et
+**Wiki**, puis les outils de l’instance. Les pages Sanctuary prennent un
+accent bleu au survol. Les outils sont neutres au repos et prennent un
+accent violet.
 
 **Actualités** consulte l'historique des publications du site dans un onglet
 séparé. Le logo PNG original occupe seul le haut de la barre latérale ; il est
@@ -43,7 +45,7 @@ ou admission créée automatiquement. Les trois panneaux utilisent les vraies
 publications privées, après récupération d'un accès confirmé. Koka confirme
 la connexion réelle et leur affichage le 8 novembre 2026.
 
-**La connexion Microsoft est testable en développement** depuis Bien démarrer.
+**La connexion Microsoft est testable en développement** depuis la barre latérale.
 Le parcours par code réutilise le moteur Prism : Microsoft, Xbox, services
 Minecraft, licence et profil. Le dialogue indique si Microsoft réussit alors
 que la vérification Minecraft échoue. Un compte est ajouté uniquement si la

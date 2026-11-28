@@ -368,11 +368,9 @@ private slots:
         window.resize(1000,680);
         window.show();
         QApplication::processEvents();
-        QVERIFY(workspace->findChild<QPushButton*>("nav-setup")->mapTo(workspace,QPoint()).y()
-            < workspace->findChild<QPushButton*>("nav-home")->mapTo(workspace,QPoint()).y());
         QVERIFY(home->communityUnlocked());
         QVERIFY(home->findChild<QWidget*>("homeHeader")->isVisible());
-        QCOMPARE(home->findChild<QLabel*>("heading")->text(),QString("Accueil"));
+        QCOMPARE(home->findChild<QLabel*>("heading")->text(),QString("Jouer"));
         QVERIFY(QRegularExpression("[0-9]{4} · [0-9]{2}:[0-9]{2}$").match(home->findChild<QLabel*>("subtitle")->text()).hasMatch());
         QVERIFY(home->findChild<QLabel*>("eyebrow")->isHidden());
         QVERIFY(home->findChild<QLabel*>("subtitle")->isVisible());
@@ -427,6 +425,73 @@ private slots:
         QApplication::processEvents();
         const auto capture=qEnvironmentVariable("SANCTUARY_CAPTURE_DIR");
         if (!capture.isEmpty()) QVERIFY(window.grab().save(capture+"/getting-started-fr.png"));
+    }
+    void sidebarConnectionRunsEachRequiredStepOnThePlayPage()
+    {
+        SanctuaryWorkspace workspace;
+        auto* playPage = new SanctuaryHome(nullptr, SanctuaryHome::View::Dashboard);
+        playPage->setEmbedded(true);
+        workspace.setPages({playPage, new SanctuaryNewsPage});
+        auto* connection = playPage->createConnectionButton();
+        workspace.setConnectionButton(connection);
+        playPage->setState(false, true, true);
+        playPage->setDiscordState(false, false, {}, {});
+        playPage->setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Distribution, false);
+        workspace.resize(1120, 760);
+        workspace.show();
+
+        QCOMPARE(workspace.selectedPage(), static_cast<BasePage*>(playPage));
+        QVERIFY(!workspace.getPage("setup"));
+        QVERIFY(!connection->isCheckable());
+        QCOMPARE(connection->property("progress").toString(), QString("start"));
+        QCOMPARE(connection->text(), QString("Connecter Discord"));
+        QVERIFY(connection->toolTip().contains("navigateur"));
+        QVERIFY(action(*playPage, "startSetup")->isHidden());
+        QVERIFY(action(*playPage, "setupToggle")->isHidden());
+        const auto capture = qEnvironmentVariable("SANCTUARY_CAPTURE_DIR");
+        if (!capture.isEmpty()) QVERIFY(workspace.grab().save(capture + "/sidebar-connection.png"));
+
+        QSignalSpy discord(playPage, &SanctuaryHome::discordRequested);
+        connection->click();
+        QCOMPARE(discord.count(), 1);
+        QJsonObject profile{{"version", 1}, {"user", QJsonObject{{"display_name", "Example player"}}},
+                            {"access", QJsonObject{{"status", "pending"}}}};
+        playPage->setDiscordState(true, false, profile, {});
+        QCOMPARE(connection->text(), QString("Connecter Microsoft"));
+        QCOMPARE(connection->property("progress").toString(), QString("partial"));
+        QSignalSpy microsoft(playPage, &SanctuaryHome::microsoftSignInRequested);
+        connection->click();
+        QCOMPARE(microsoft.count(), 1);
+        playPage->setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Distribution, true, "ExamplePlayer");
+        QCOMPARE(connection->text(), QString("Actualiser mon accès"));
+        QVERIFY(connection->toolTip().contains("en cours d'examen"));
+        QSignalSpy refresh(playPage, &SanctuaryHome::discordRefreshRequested);
+        connection->click();
+        QCOMPARE(refresh.count(), 1);
+
+        profile["access"] = QJsonObject{{"status", "granted"}};
+        playPage->setDiscordState(true, false, profile, {});
+        playPage->setPackState(false, false, {}, {});
+        QCOMPARE(connection->text(), QString("Installer Sanctuary"));
+        QVERIFY(action(*playPage, "install")->isHidden());
+        QSignalSpy install(playPage, &SanctuaryHome::installRequested);
+        connection->click();
+        QCOMPARE(install.count(), 1);
+        playPage->setPackState(true, false, "beta.387", {});
+        QCOMPARE(connection->text(), QString("Connecté"));
+        QCOMPARE(connection->property("progress").toString(), QString("complete"));
+        QVERIFY(connection->menu());
+        QCOMPARE(workspace.selectedPage(), static_cast<BasePage*>(playPage));
+        if (!capture.isEmpty()) QVERIFY(workspace.grab().save(capture + "/sidebar-connected.png"));
+
+        playPage->setState(true, true, false);
+        workspace.setFrench(false);
+        QCOMPARE(connection->text(), QString("Connected"));
+        QCOMPARE(workspace.findChild<QPushButton*>("nav-home")->text(), QString("Play"));
+        playPage->setDiscordState(false, false, {}, {});
+        QCOMPARE(connection->text(), QString("Connect Discord"));
+        QCOMPARE(connection->property("progress").toString(), QString("partial"));
+        QVERIFY(!connection->menu());
     }
     void microsoftDevelopmentTestRequestsRealAuthWithoutInventingAdmission()
     {

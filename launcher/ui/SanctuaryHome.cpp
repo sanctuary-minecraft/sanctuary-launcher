@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QLocale>
 #include <QMenu>
+#include <QPointer>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QStyle>
@@ -53,6 +54,11 @@ const QStringList scenarios{"start", "microsoft", "apply", "pending", "pending-r
 
 struct SanctuaryHome::Ui {
     struct Row { QFrame* frame; QLabel *number, *title, *detail, *status; QPushButton* action; };
+    QPointer<QPushButton> connection;
+    QPushButton* nextConnectionAction = nullptr;
+    QMenu* connectionMenu = nullptr;
+    QAction *refreshAccess = nullptr, *openProfile = nullptr, *changeMicrosoft = nullptr;
+    QAction *disconnectDiscord = nullptr, *managePack = nullptr;
     std::array<Row, 5> rows;
     QLabel *eyebrow, *heading, *subtitle, *server, *notice, *historical, *help, *footer, *code, *codeHelp;
     QWidget *previewControls, *codePanel, *setupPanel, *community, *readyCodePanel, *toolsPanel, *dashboardEmpty;
@@ -217,6 +223,91 @@ void SanctuaryHome::setJoinOnPlay(bool join)
 {
     m_joinOnPlay = join;
     refresh();
+}
+
+QPushButton* SanctuaryHome::createConnectionButton()
+{
+    auto& u = *m_ui;
+    Q_ASSERT(!u.connection);
+    u.connection = button(this, "nav-connection");
+    u.connectionMenu = new QMenu(u.connection);
+    u.refreshAccess = u.connectionMenu->addAction(QString(), u.discordRefresh, &QPushButton::click);
+    u.openProfile = u.connectionMenu->addAction(QString(), u.rows[2].action, &QPushButton::click);
+    u.changeMicrosoft = u.connectionMenu->addAction(QString(), u.rows[1].action, &QPushButton::click);
+    u.disconnectDiscord = u.connectionMenu->addAction(QString(), this, &SanctuaryHome::discordDisconnectRequested);
+    u.connectionMenu->addSeparator();
+    u.managePack = u.connectionMenu->addAction(QString(), u.rows[4].action, &QPushButton::click);
+    u.connection->addActions(u.connectionMenu->actions());
+    u.connection->setContextMenuPolicy(Qt::ActionsContextMenu);
+    connect(u.connection, &QPushButton::clicked, this, [this] {
+        if (m_ui->nextConnectionAction) m_ui->nextConnectionAction->click();
+    });
+    refresh();
+    return u.connection;
+}
+
+void SanctuaryHome::refreshConnectionButton(int step, bool started, bool complete)
+{
+    auto& u = *m_ui;
+    if (!u.connection) return;
+
+    u.refreshAccess->setText(text("Actualiser mon accès", "Refresh my access"));
+    u.openProfile->setText(text("Ouvrir mon dossier Sanctuary", "Open my Sanctuary profile"));
+    u.changeMicrosoft->setText(text("Changer de compte Microsoft", "Change Microsoft account"));
+    u.disconnectDiscord->setText(text("Déconnecter Discord", "Disconnect Discord"));
+    u.managePack->setText(m_packVerified && !m_packBusy ? text("Mettre à jour le pack", "Update the pack") : u.rows[4].action->text());
+    u.refreshAccess->setEnabled(m_discordConnected && !m_discordBusy);
+    u.openProfile->setEnabled(m_discordConnected);
+    u.changeMicrosoft->setEnabled(m_microsoftVerified && u.rows[1].action->isEnabled());
+    u.disconnectDiscord->setEnabled(m_discordConnected);
+    u.managePack->setEnabled(m_realPack && u.rows[4].action->isEnabled());
+
+    const auto progress = complete ? "complete" : started ? "partial" : "start";
+    if (u.connection->property("progress").toString() != progress)
+        setRole(u.connection, "progress", progress);
+    auto* menu = complete ? u.connectionMenu : nullptr;
+    if (u.connection->menu() != menu) u.connection->setMenu(menu);
+    u.nextConnectionAction = nullptr;
+    QString title, instructions;
+    if (complete) {
+        title = text("Connecté", "Connected");
+        instructions = text("Cliquez pour gérer vos comptes ou vérifier le pack.",
+                            "Click to manage your accounts or verify the pack.");
+    } else if (step == 1) {
+        u.nextConnectionAction = m_onlineSession ? u.discordConnect : u.rows[0].action;
+        title = m_discordBusy ? text("Annuler la connexion", "Cancel sign-in") : text("Connecter Discord", "Connect Discord");
+        instructions = text("Validez la connexion Discord dans le navigateur, puis revenez au launcher.",
+                            "Confirm Discord sign-in in your browser, then return to the launcher.");
+        if (!m_discordMessage.isEmpty()) instructions.prepend(m_discordMessage + '\n');
+    } else if (step == 2) {
+        u.nextConnectionAction = u.rows[1].action;
+        title = text("Connecter Microsoft", "Connect Microsoft");
+        instructions = hasMicrosoftSignIn()
+            ? text("Suivez les instructions du code Microsoft avec le compte qui possède Minecraft Java.",
+                   "Follow the Microsoft code instructions using the account that owns Minecraft Java.")
+            : u.rows[1].detail->text();
+    } else if (step == 3) {
+        const auto status = m_discordProfile.value("access").toObject().value("status").toString();
+        const bool refreshAccess = m_onlineSession && (status.isEmpty() || status == "pending" || status == "synchronizing");
+        u.nextConnectionAction = refreshAccess ? u.discordRefresh : u.rows[2].action;
+        title = refreshAccess ? text("Actualiser mon accès", "Refresh my access")
+            : status == "guild_required" ? text("Rejoindre le Discord", "Join the Discord")
+            : m_onlineSession ? text("Ouvrir mon dossier", "Open my profile") : u.rows[2].action->text();
+        instructions = u.rows[2].detail->text();
+        if (refreshAccess) instructions += text("\nCliquez pour vérifier votre accès.", "\nClick to check your access.");
+    } else {
+        u.nextConnectionAction = u.rows[4].action;
+        title = u.rows[4].action->text();
+        instructions = m_packBusy
+            ? text("Le pack est en cours de préparation. Cliquez pour interrompre la synchronisation.",
+                   "The pack is being prepared. Click to cancel synchronization.")
+            : text("Installez ou vérifiez le pack officiel avant de lancer Minecraft.",
+                   "Install or verify the official pack before launching Minecraft.");
+    }
+    u.connection->setText(title);
+    u.connection->setToolTip(instructions);
+    u.connection->setAccessibleDescription(instructions);
+    u.connection->setEnabled(complete || (u.nextConnectionAction && u.nextConnectionAction->isEnabled()));
 }
 
 bool SanctuaryHome::canPlayMinecraft() const
@@ -749,7 +840,7 @@ void SanctuaryHome::refresh()
     if (m_onlineSession && discord && m_discordProfile.isEmpty()) heading = text("Vérifier votre accès Sanctuary", "Verify your Sanctuary access");
     if (m_onlineSession && remoteStatus == "guild_required") heading = text("Rejoindre le Discord Sanctuary", "Join the Sanctuary Discord");
     u.heading->setText(communityUnlocked() ? (m_onlineSession ? text("Connexion Microsoft en attente", "Microsoft sign-in pending") : text("Sanctuary", "Sanctuary")) : heading);
-    if (m_view == View::Dashboard) u.heading->setText(text("Accueil", "Home"));
+    if (m_view == View::Dashboard) u.heading->setText(displayName());
     u.subtitle->setText(m_onlineSession && communityUnlocked() ? text("Accès Sanctuary confirmé. Vos publications sont disponibles ; le jeu attend Microsoft.", "Sanctuary access confirmed. Your posts are available; the game awaits Microsoft.") : communityUnlocked() ? text("Les nouvelles de votre communauté.", "The latest from your community.") : subtitle);
     u.eyebrow->setVisible(m_view != View::Dashboard && !communityUnlocked());
     refreshClock();
@@ -865,9 +956,13 @@ void SanctuaryHome::refresh()
     u.packSummary->setToolTip(u.packSummary->text());
     const bool ready = communityUnlocked();
     u.body->setCurrentWidget(ready ? u.community : m_view == View::Dashboard ? u.dashboardEmpty : u.setupPanel);
-    u.dashboardMessage->setText(text("Retrouvez votre accès et les publications de Sanctuary dans Bien démarrer.", "Find your Sanctuary access and posts in Getting started."));
+    u.dashboardMessage->setText(u.connection
+        ? text("Suivez l’étape indiquée dans la barre latérale pour préparer Sanctuary.",
+               "Follow the step shown in the sidebar to set up Sanctuary.")
+        : text("Retrouvez votre accès et les publications de Sanctuary dans Bien démarrer.", "Find your Sanctuary access and posts in Getting started."));
     u.startSetup->setText(text("Bien démarrer", "Getting started"));
-    u.setupToggle->setVisible(ready || m_view != View::Adaptive);
+    u.startSetup->setVisible(!u.connection);
+    u.setupToggle->setVisible(!u.connection && (ready || m_view != View::Adaptive));
     u.setupToggle->setText(m_view == View::Dashboard ? text("Bien démarrer", "Getting started") : m_view == View::Setup ? text("Voir l’accueil", "View home") : text("Mes comptes", "My accounts"));
     u.readyCodeToggle->setVisible(ready && m_view == View::Adaptive);
     u.readyCodeToggle->setText(m_codeVisible ? text("Masquer le code SGA", "Hide SGA code") : text("Code SGA · facultatif", "SGA code · optional"));
@@ -921,6 +1016,7 @@ void SanctuaryHome::refresh()
         u.play->setToolTip(u.help->text());
     }
     if (m_gameBusy) u.rows[4].action->setEnabled(false);
+    if (u.connection) u.rows[4].action->hide();
     u.mods->setText("Mods");
     u.shaders->setText("Shaders");
     u.instanceSettings->setText(text("Réglages", "Settings"));
@@ -936,4 +1032,6 @@ void SanctuaryHome::refresh()
     u.site->setText("Site Sanctuary");
     u.wiki->setText(text("Aide", "Help"));
     u.footer->setText(m_localMode ? text("Mode local · aucune connexion serveur", "Local mode · no server connection") : "Sanctuary · Prism 11.1.1");
+    const int connectionStep = !discord ? 1 : !microsoft ? 2 : !admitted ? 3 : 5;
+    refreshConnectionButton(connectionStep, discord || microsoft || admitted || installed, discord && microsoft && admitted && installed);
 }

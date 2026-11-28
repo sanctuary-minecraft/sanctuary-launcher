@@ -7,6 +7,7 @@
 #include "ui/pages/BasePage.h"
 
 class QTimer;
+class QPushButton;
 class SanctuarySession;
 class QUrl;
 
@@ -28,7 +29,7 @@ public:
     void showFeedback(const QString& message);
     void setEmbedded(bool embedded);
     QString id() const override { return m_view == View::Setup ? "setup" : "home"; }
-    QString displayName() const override { return m_view == View::Setup ? (m_french ? "Bien démarrer" : "Getting started") : (m_french ? "Accueil" : "Home"); }
+    QString displayName() const override { return m_view == View::Setup ? (m_french ? "Bien démarrer" : "Getting started") : (m_french ? "Jouer" : "Play"); }
     QIcon icon() const override { return QIcon(":/sanctuary/icon.png"); }
     void openedImpl() override;
     bool communityUnlocked() const;
@@ -39,6 +40,7 @@ public:
     void setJoinOnPlay(bool join);
     bool canPlayMinecraft() const;
     bool canLaunchGame() const;
+    QPushButton* createConnectionButton();
 
 signals:
     void installRequested();
@@ -92,6 +94,7 @@ private:
     QString m_microsoftProfile, m_microsoftMessage;
     void buildUi();
     void refresh();
+    void refreshConnectionButton(int step, bool started, bool complete);
     void refreshClock();
     void commitLocalChange();
     void install();
