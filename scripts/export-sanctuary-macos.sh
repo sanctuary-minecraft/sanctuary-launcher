@@ -24,7 +24,10 @@ test "$(lipo -archs "$binary")" = arm64
 for helper in JavaCheck NewLaunch NewLaunchLegacy; do
     cmp "$build_dir/jars/$helper.jar" "$app/Contents/Resources/jars/$helper.jar"
 done
-test -f "$app/Contents/Resources/SanctuaryLauncher.icns"
+icon_name=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' "$app/Contents/Info.plist")
+test "$icon_name" = SanctuaryLauncher.icns
+cmp "$source_dir/program_info/sanctuary-launcher.icns" "$app/Contents/Resources/$icon_name"
+test ! -e "$app/Contents/Resources/Assets.car"
 test -f "$app/Contents/Resources/qtlogging.ini"
 # CMake and macdeployqt can rewrite libraries after copying their original signatures.
 for library in "$app"/Contents/Frameworks/*.dylib "$app"/Contents/PlugIns/*/*.dylib; do

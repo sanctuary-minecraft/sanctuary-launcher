@@ -53,8 +53,6 @@ Il s'agit d'une illustration, pas d'une capture du monde Sanctuary.
 Les anciens conteneurs d'icône à favicon 32 × 32 du premier lot sont
 remplacés par les tailles ci-dessus, issues de l'icône fournie par Koka.
 
-Les sources et variantes graphiques héritées de Prism restent dans
-l'historique et dans certains fichiers `program_info/`. Le branding des
-installateurs et paquets non macOS, ainsi que l'Icon Composer de macOS 26,
-doit être finalisé avant distribution. Le présent lot valide l'accueil Qt
-et le bundle local construit avec l'icône ICNS Sanctuary.
+Le bundle macOS déclare directement `SanctuaryLauncher.icns`. L’export
+compare ce fichier à la source. Les couches historiques d’Icon Composer
+héritées de Prism restent dans `program_info/`.

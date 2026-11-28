@@ -209,10 +209,14 @@ La barre latérale regroupe Jouer, Actualités, Carte et Wiki. Le lien Jouer
 utilise un style neutre et garde son état grisé pendant la configuration.
 Le test Qt vérifie l’ordre des liens et le rendu du lien Jouer.
 
-## Version 0.2.4
+## Version 0.2.5
 
 Le fond de Jouer dans la barre latérale parcourt les couleurs de
 l’arc-en-ciel au survol, une fois la configuration terminée.
 Des icônes monochromes accompagnent les entrées de la barre latérale.
 Le test Qt vérifie le rendu des icônes, le défilement et le retour au fond
 neutre.
+
+Le bundle macOS désigne explicitement le fichier ICNS Sanctuary. L’export
+compare ce fichier à la source officielle et vérifie l’absence du catalogue
+d’icônes hérité de Prism.
