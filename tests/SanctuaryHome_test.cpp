@@ -434,6 +434,9 @@ private slots:
         workspace.setPages({playPage, new SanctuaryNewsPage});
         auto* connection = playPage->createConnectionButton();
         workspace.setConnectionButton(connection);
+        workspace.setPlayReady(playPage->setupComplete());
+        connect(playPage, &SanctuaryHome::setupCompletionChanged, &workspace, &SanctuaryWorkspace::setPlayReady);
+        auto* playNav = workspace.findChild<QPushButton*>("nav-home");
         playPage->setState(false, true, true);
         playPage->setDiscordState(false, false, {}, {});
         playPage->setMicrosoftSignInState(SanctuaryHome::MicrosoftSignIn::Distribution, false);
@@ -445,6 +448,9 @@ private slots:
         QVERIFY(!connection->isCheckable());
         QCOMPARE(connection->property("progress").toString(), QString("start"));
         QCOMPARE(connection->text(), QString("Connecter Discord"));
+        QCOMPARE(playNav->property("playReady"), QVariant(false));
+        QVERIFY(playNav->isEnabled());
+        QVERIFY(!action(*playPage, "play")->isEnabled());
         QVERIFY(connection->toolTip().contains("navigateur"));
         QVERIFY(action(*playPage, "startSetup")->isHidden());
         QVERIFY(action(*playPage, "setupToggle")->isHidden());
@@ -478,9 +484,12 @@ private slots:
         connection->click();
         QCOMPARE(install.count(), 1);
         playPage->setPackState(true, false, "beta.387", {});
+        playPage->setState(true, true, true);
         QCOMPARE(connection->text(), QString("Connecté"));
         QCOMPARE(connection->property("progress").toString(), QString("complete"));
         QVERIFY(connection->menu());
+        QCOMPARE(playNav->property("playReady"), QVariant(true));
+        QVERIFY(action(*playPage, "play")->isEnabled());
         QCOMPARE(workspace.selectedPage(), static_cast<BasePage*>(playPage));
         if (!capture.isEmpty()) QVERIFY(workspace.grab().save(capture + "/sidebar-connected.png"));
 
@@ -491,6 +500,9 @@ private slots:
         playPage->setDiscordState(false, false, {}, {});
         QCOMPARE(connection->text(), QString("Connect Discord"));
         QCOMPARE(connection->property("progress").toString(), QString("partial"));
+        QCOMPARE(playNav->property("playReady"), QVariant(false));
+        QVERIFY(!action(*playPage, "play")->isEnabled());
+        QVERIFY(!playPage->canPlayMinecraft());
         QVERIFY(!connection->menu());
     }
     void microsoftDevelopmentTestRequestsRealAuthWithoutInventingAdmission()

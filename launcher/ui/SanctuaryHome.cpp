@@ -312,7 +312,8 @@ void SanctuaryHome::refreshConnectionButton(int step, bool started, bool complet
 
 bool SanctuaryHome::canPlayMinecraft() const
 {
-    return m_microsoftVerified && m_instanceReady && m_realPack && m_packVerified && !m_packBusy && !m_gameBusy;
+    return (!m_ui->connection || m_setupComplete)
+        && m_microsoftVerified && m_instanceReady && m_realPack && m_packVerified && !m_packBusy && !m_gameBusy;
 }
 
 bool SanctuaryHome::canLaunchGame() const
@@ -785,6 +786,11 @@ void SanctuaryHome::refresh()
     const bool microsoft = hasMicrosoftSignIn() ? m_microsoftVerified : !m_onlineSession && m_localMode && m_local.microsoft;
     const bool admitted = m_onlineSession ? discord && access == Access::Granted : m_localMode && access == Access::Granted;
     const bool installed = m_realPack ? m_packVerified : m_localMode && m_local.installed;
+    const bool setupComplete = discord && microsoft && admitted && installed;
+    if (m_setupComplete != setupComplete) {
+        m_setupComplete = setupComplete;
+        emit setupCompletionChanged(setupComplete);
+    }
     const bool installing = m_realPack ? m_packBusy : m_installTimer && m_installTimer->isActive();
     const int active = activeStep();
     const bool waiting = (m_onlineSession || m_localMode) && (access == Access::Pending || access == Access::Synchronizing);
@@ -980,7 +986,7 @@ void SanctuaryHome::refresh()
     u.joinSanctuary->setChecked(m_joinOnPlay);
     u.playModes->setAccessibleName(text("Mode de lancement", "Launch mode"));
     u.playModes->setToolTip(u.playModes->accessibleName());
-    u.playModes->setEnabled(!m_gameBusy);
+    u.playModes->setEnabled(!m_gameBusy && (!u.connection || m_setupComplete));
     const bool canPlay = m_joinOnPlay ? canLaunchGame() : canPlayMinecraft();
     u.play->setText(m_gameBusy ? text("Jeu en cours", "Game running") : (m_joinOnPlay ? u.joinSanctuary : u.playMinecraft)->text());
     u.play->setEnabled(canPlay || (!m_gameBusy && !hasMicrosoftSignIn() && !m_onlineSession && m_localMode && discord && microsoft && admitted && installed && !installing));
@@ -1033,5 +1039,5 @@ void SanctuaryHome::refresh()
     u.wiki->setText(text("Aide", "Help"));
     u.footer->setText(m_localMode ? text("Mode local · aucune connexion serveur", "Local mode · no server connection") : "Sanctuary · Prism 11.1.1");
     const int connectionStep = !discord ? 1 : !microsoft ? 2 : !admitted ? 3 : 5;
-    refreshConnectionButton(connectionStep, discord || microsoft || admitted || installed, discord && microsoft && admitted && installed);
+    refreshConnectionButton(connectionStep, discord || microsoft || admitted || installed, m_setupComplete);
 }

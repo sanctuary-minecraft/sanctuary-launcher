@@ -40,6 +40,7 @@ public:
     void setJoinOnPlay(bool join);
     bool canPlayMinecraft() const;
     bool canLaunchGame() const;
+    bool setupComplete() const { return m_setupComplete; }
     QPushButton* createConnectionButton();
 
 signals:
@@ -57,6 +58,7 @@ signals:
     void discordDisconnectRequested();
     void discordRefreshRequested();
     void microsoftSignInRequested();
+    void setupCompletionChanged(bool complete);
 
 
 private:
@@ -89,6 +91,7 @@ private:
     QString m_discordMessage;
     MicrosoftSignIn m_microsoftSignIn = MicrosoftSignIn::Unavailable;
     bool m_microsoftVerified = false;
+    bool m_setupComplete = false;
     bool m_gameBusy = false;
     bool m_joinOnPlay = false;
     QString m_microsoftProfile, m_microsoftMessage;

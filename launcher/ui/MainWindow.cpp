@@ -473,6 +473,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_sanctuaryWorkspace->setConnectionButton(m_sanctuaryHome->createConnectionButton());
     m_sanctuaryWorkspace->setPages({m_sanctuaryHome, m_sanctuaryNews,
         new SanctuarySitePage(SanctuarySitePage::Section::Map, discord), new SanctuarySitePage(SanctuarySitePage::Section::Wiki, discord)});
+    m_sanctuaryWorkspace->setPlayReady(m_sanctuaryHome->setupComplete());
+    connect(m_sanctuaryHome, &SanctuaryHome::setupCompletionChanged, m_sanctuaryWorkspace, &SanctuaryWorkspace::setPlayReady);
     connect(m_sanctuaryWorkspace, &SanctuaryWorkspace::homeRequested, this, &MainWindow::showSanctuaryHome);
     connect(m_sanctuaryNews, &SanctuaryNewsPage::linkRequested, this, [](const QUrl& url) { QDesktopServices::openUrl(url); });
     m_sanctuaryStack->addWidget(m_sanctuaryWorkspace);

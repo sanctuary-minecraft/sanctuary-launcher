@@ -22,6 +22,7 @@ public:
     void setPages(const QList<BasePage*>& pages, bool global = false);
     void appendPages(const QList<BasePage*>& pages);
     void setConnectionButton(QPushButton* button);
+    void setPlayReady(bool ready);
     void setGameBusy(bool synchronizing, bool running = false);
     void setFrench(bool french);
     bool saveAll();

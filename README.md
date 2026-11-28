@@ -2,7 +2,7 @@
 
 Fork natif de **Prism Launcher 11.1.1**, avec une fenêtre Sanctuary blanche,
 les outils du jeu intégrés et une seule installation officielle Sanctuary Beta.
-La version **0.1.8** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
+La version **0.1.9** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
 
 [Téléchargements Sanctuary](https://sanctuary-minecraft.net/telechargements) · [Sources publiques et releases GitHub](https://github.com/sanctuary-minecraft/sanctuary-launcher)
 
@@ -11,6 +11,8 @@ La version **0.1.8** est distribuée pour Windows x64, macOS Apple Silicon et Li
 **Jouer** ouvre le tableau de bord dès le démarrage. La date et
 l’heure locales apparaissent juste en dessous et s’actualisent automatiquement.
 Le tableau de bord partage les bords de contenu des pages natives.
+**Jouer** est grisé pendant la configuration et devient vert lorsque la
+connexion, l’accès Sanctuary et le pack sont prêts.
 Les trois flux sont encadrés sur un fond gris très léger, identique au gris
 des tableaux natifs. L’Intendance reste en haut sur toute la largeur, la Gazette
 à gauche et le Tableau à droite en dessous. Chaque cadre affiche son titre :

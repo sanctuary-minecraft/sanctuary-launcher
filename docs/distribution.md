@@ -174,11 +174,12 @@ Windows de Koka, la fenêtre enfant corrigée mesure 860 × 652 à l'ouverture
 et 1 030 × 730 après agrandissement, comme son panneau. Les 25 tests CTest
 Windows passent.
 
-## Version 0.1.8
+## Version 0.1.9
 
 Jouer devient la page d’ouverture. Le bouton de connexion de la barre
 latérale ouvre l’étape suivante et explique la procédure en infobulle.
 Les pages Sanctuary et les outils du jeu ont chacun leur groupe.
+Jouer reste grisé et le lancement attend la fin des étapes obligatoires.
 
 Le build de développement a démarré sur macOS avec un profil vierge.
 Les 25 tests CTest passent, dont le parcours de connexion en français

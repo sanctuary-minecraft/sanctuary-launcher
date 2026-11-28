@@ -100,6 +100,10 @@ void SanctuaryWorkspace::applyAppearance()
         #sanctuaryWorkspace QPushButton[navGroup="play"]:hover,
         #sanctuaryWorkspace QPushButton[progress="complete"]:hover { background: @navGreenHover; }
         #sanctuaryWorkspace QPushButton[navGroup="play"] { min-height: 28px; font-size: 15px; }
+        #sanctuaryWorkspace QFrame[navGroup="play"][playReady="false"] { border-color: @border; }
+        #sanctuaryWorkspace QPushButton[navGroup="play"][playReady="false"],
+        #sanctuaryWorkspace QPushButton[navGroup="play"][playReady="false"]:checked,
+        #sanctuaryWorkspace QPushButton[navGroup="play"][playReady="false"]:hover { background: @disabledPanel; color: @muted; }
         #sanctuaryWorkspace QPushButton[navGroup="connection"] { text-align: left; border-radius: 7px; padding: 6px 12px; }
         #sanctuaryWorkspace QPushButton[progress="complete"] { border-color: @navGreenBorder; }
         #sanctuaryWorkspace QPushButton[progress="start"] { border-color: @navErrorBorder; }
@@ -167,6 +171,19 @@ void SanctuaryWorkspace::setConnectionButton(QPushButton* button)
 {
     button->setProperty("navGroup", "connection");
     m_navLayout->insertWidget(0, button);
+}
+
+void SanctuaryWorkspace::setPlayReady(bool ready)
+{
+    auto* button = m_navigation.value("home");
+    if (!button) return;
+    for (auto* widget : {static_cast<QWidget*>(button), button->parentWidget()}) {
+        if (widget->property("playReady") == QVariant(ready)) continue;
+        widget->setProperty("playReady", ready);
+        widget->style()->unpolish(widget);
+        widget->style()->polish(widget);
+        widget->update();
+    }
 }
 
 void SanctuaryWorkspace::appendPages(const QList<BasePage*>& pages)
