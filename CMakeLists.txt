@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25) # Required for features like `CMAKE_MSVC_DEBUG_INFORMATION_FORMAT`
 
-set(Launcher_RELEASE_VERSION "0.2.0" CACHE STRING "Sanctuary Launcher release version")
+set(Launcher_RELEASE_VERSION "0.2.1" CACHE STRING "Sanctuary Launcher release version")
 if(NOT Launcher_RELEASE_VERSION MATCHES "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$")
     message(FATAL_ERROR "Launcher_RELEASE_VERSION must have three numeric components")
 endif()

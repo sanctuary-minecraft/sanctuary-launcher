@@ -469,7 +469,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
                                        : "Local flow ready. Game launch and server connection await Mojang approval.");
     });
     m_sanctuaryHome->setEmbedded(true);
-    m_sanctuaryWorkspace = new SanctuaryWorkspace(m_sanctuaryStack);
+    m_sanctuaryWorkspace = new SanctuaryWorkspace(m_sanctuaryStack, /*showWordmark=*/false);
     m_sanctuaryNews = new SanctuaryNewsPage;
     auto* discord = new SanctuarySession(APPLICATION->network(), this);
     m_sanctuaryWorkspace->setConnectionButton(m_sanctuaryHome->createConnectionButton());
@@ -667,7 +667,7 @@ void MainWindow::showSanctuarySettings(const QString& page)
 {
     if (!m_sanctuaryStack) return;
     if (!m_sanctuarySettings) {
-        m_sanctuarySettings = new SanctuaryWorkspace(m_sanctuaryStack);
+        m_sanctuarySettings = new SanctuaryWorkspace(m_sanctuaryStack, /*showWordmark=*/false);
         m_sanctuarySettings->setPages(APPLICATION->createSanctuarySettingsPages(), true);
         m_sanctuaryStack->addWidget(m_sanctuarySettings);
         connect(m_sanctuarySettings, &SanctuaryWorkspace::homeRequested, this, &MainWindow::showSanctuaryHome);

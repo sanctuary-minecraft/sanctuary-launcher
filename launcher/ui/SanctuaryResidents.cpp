@@ -3,6 +3,7 @@
 #include "SanctuaryAppearance.h"
 #include "SanctuaryFeed.h"
 #include "SanctuarySession.h"
+#include "SanctuaryWordmark.h"
 
 #include <QHBoxLayout>
 #include <QImage>
@@ -20,9 +21,13 @@ SanctuaryResidents::SanctuaryResidents(SanctuarySession* session, QNetworkAccess
 {
     setObjectName("sanctuaryResidents");
     auto* row = new QHBoxLayout(this);
-    row->setContentsMargins(22, 5, 22, 3);
+    row->setContentsMargins(22, 18, 22, 0);
     row->setSpacing(12);
-    row->addWidget(m_summary);
+    auto* wordmark = new SanctuaryWordmark(this);
+    wordmark->setObjectName("workspaceWordmark");
+    row->addWidget(wordmark, 0, Qt::AlignVCenter);
+    m_summary->setObjectName("residentSummary");
+    row->addWidget(m_summary, 0, Qt::AlignVCenter);
 
     auto* scroll = new QScrollArea(this);
     auto* faces = new QWidget(scroll);
@@ -39,7 +44,7 @@ SanctuaryResidents::SanctuaryResidents(SanctuarySession* session, QNetworkAccess
 
     new SanctuaryAppearance::PaletteWatcher(this, [this] {
         SanctuaryAppearance::apply(this, QStringLiteral(R"(
-            #sanctuaryResidents { background: @surface; border-bottom: 1px solid @border; }
+            #sanctuaryResidents { background: @surface; }
             #sanctuaryResidents QLabel { color: @muted; font-size: 12px; }
             #sanctuaryResidents QScrollArea { border: none; background: @surface; }
             #sanctuaryResidents QLabel[residentFace="true"] { background: @panel; border: 1px solid @border; border-radius: 4px; }

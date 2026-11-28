@@ -2,14 +2,14 @@
 
 Fork natif de **Prism Launcher 11.1.1**, avec une fenêtre Sanctuary blanche,
 les outils du jeu intégrés et une seule installation officielle Sanctuary Beta.
-La version **0.2.0** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
+La version **0.2.1** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
 
 [Téléchargements Sanctuary](https://sanctuary-minecraft.net/telechargements) · [Sources publiques et releases GitHub](https://github.com/sanctuary-minecraft/sanctuary-launcher)
 
 ## Interface actuelle
 
-Le bandeau des habitants est visible dans toutes les pages et les réglages du
-launcher. Après connexion Discord, il affiche les visages Minecraft des joueurs
+Le bandeau des habitants est aligné à droite du logo Sanctuary dans toutes les
+pages et les réglages. Après connexion Discord, il affiche les visages Minecraft des joueurs
 autorisés, avec leur statut en infobulle. Les joueurs en ligne apparaissent en
 couleur et les joueurs déconnectés en gris.
 

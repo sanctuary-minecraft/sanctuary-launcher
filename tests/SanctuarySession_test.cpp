@@ -119,6 +119,8 @@ private slots:
         QVERIFY(!session.photo("../../outside?token=test"));
 
         SanctuaryResidents roster(&session, &website);
+        roster.resize(760, 70);
+        roster.show();
         const auto face = [&roster](const QString& name) -> QLabel* {
             for (auto* label : roster.findChildren<QLabel*>()) {
                 if (label->toolTip().startsWith(name + " ·")) return label;
@@ -127,6 +129,14 @@ private slots:
         };
         QTRY_VERIFY(face("alex") && !face("alex")->pixmap().isNull());
         QTRY_VERIFY(face("sleepy") && !face("sleepy")->pixmap().isNull());
+        const auto* logo = roster.findChild<QLabel*>("workspaceWordmark");
+        const auto* summary = roster.findChild<QLabel*>("residentSummary");
+        QVERIFY(logo && summary);
+        QVERIFY(summary->x() > logo->geometry().right());
+        QVERIFY(qAbs(logo->geometry().center().y() - summary->geometry().center().y()) <= 1);
+        const auto firstFace = face("alex")->mapTo(&roster, face("alex")->rect().center());
+        QVERIFY(firstFace.x() > summary->geometry().right());
+        QVERIFY(qAbs(logo->geometry().center().y() - firstFace.y()) <= 1);
         QCOMPARE(face("alex")->pixmap().toImage().pixelColor(0, 0), QColor(Qt::red));
         const auto offline = face("sleepy")->pixmap().toImage().pixelColor(0, 0);
         QCOMPARE(offline.red(), offline.green());

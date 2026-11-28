@@ -17,7 +17,7 @@ class QVBoxLayout;
 class SanctuaryWorkspace : public QWidget, public BasePageContainer {
     Q_OBJECT
 public:
-    explicit SanctuaryWorkspace(QWidget* parent = nullptr);
+    explicit SanctuaryWorkspace(QWidget* parent = nullptr, bool showWordmark = true);
     ~SanctuaryWorkspace() override;
     void setPages(const QList<BasePage*>& pages, bool global = false);
     void appendPages(const QList<BasePage*>& pages);

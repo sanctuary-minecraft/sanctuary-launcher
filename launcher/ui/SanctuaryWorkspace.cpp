@@ -22,17 +22,19 @@ static QString navigationGroup(const QString& page)
     return QStringLiteral("game");
 }
 
-SanctuaryWorkspace::SanctuaryWorkspace(QWidget* parent) : QWidget(parent), m_navSelection(new QButtonGroup(this))
+SanctuaryWorkspace::SanctuaryWorkspace(QWidget* parent, bool showWordmark) : QWidget(parent), m_navSelection(new QButtonGroup(this))
 {
     initializeWorkspaceResources();
     setObjectName("sanctuaryWorkspace");
     new SanctuaryAppearance::PaletteWatcher(this, [this] { applyAppearance(); });
     auto* body = new QHBoxLayout(this);
-    body->setContentsMargins(22, 18, 22, 18);
+    body->setContentsMargins(22, showWordmark ? 18 : 6, 22, 18);
     auto* sidebar = new QVBoxLayout;
-    auto* wordmark = new SanctuaryWordmark(this);
-    wordmark->setObjectName("workspaceWordmark");
-    sidebar->addWidget(wordmark, 0, Qt::AlignLeft | Qt::AlignTop);
+    if (showWordmark) {
+        auto* wordmark = new SanctuaryWordmark(this);
+        wordmark->setObjectName("workspaceWordmark");
+        sidebar->addWidget(wordmark, 0, Qt::AlignLeft | Qt::AlignTop);
+    }
     auto* navScroll = new QScrollArea(this);
     navScroll->setWidgetResizable(true);
     navScroll->setFixedWidth(210);

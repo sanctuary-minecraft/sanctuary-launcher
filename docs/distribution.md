@@ -196,3 +196,9 @@ Une réponse indisponible est signalée dans le bandeau.
 Le test Qt vérifie les deux rendus et la suppression des visages à la
 déconnexion du compte. Le jeton de session est réservé aux requêtes
 Sanctuary. Les requêtes de visages restent publiques.
+
+## Version 0.2.1
+
+Le logo Sanctuary et le bandeau Habitants partagent la même ligne au-dessus
+des pages et des réglages. Le test Qt vérifie l’alignement du logo, du libellé
+et du premier visage.
