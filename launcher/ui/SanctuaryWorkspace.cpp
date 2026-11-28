@@ -17,8 +17,7 @@ static void initializeWorkspaceResources() { Q_INIT_RESOURCE(sanctuary); }
 
 static QString navigationGroup(const QString& page)
 {
-    if (page == "home") return QStringLiteral("play");
-    if (page == "news" || page == "map" || page == "wiki") return QStringLiteral("community");
+    if (page == "home" || page == "news" || page == "map" || page == "wiki") return QStringLiteral("community");
     return QStringLiteral("game");
 }
 
@@ -88,7 +87,6 @@ void SanctuaryWorkspace::applyAppearance()
         #sanctuaryWorkspace QPushButton[nav="true"]:checked { color: @greenText; background: @greenPanel; font-weight: 600; }
         #sanctuaryWorkspace QFrame[navGroup] { border: 1px solid @border; border-radius: 7px; }
         #sanctuaryWorkspace QFrame[navGroup="community"] { border-color: @navCommunityBorder; }
-        #sanctuaryWorkspace QFrame[navGroup="play"] { border-color: @navGreenBorder; }
         #sanctuaryWorkspace QPushButton[navGroup] {
             border: 1px solid transparent; border-radius: 4px; min-height: 21px; padding: 4px 8px;
         }
@@ -97,15 +95,10 @@ void SanctuaryWorkspace::applyAppearance()
         #sanctuaryWorkspace QPushButton[navGroup="game"]:checked { background: @panel; color: @text; }
         #sanctuaryWorkspace QPushButton[navGroup="community"]:hover { background: @selected; }
         #sanctuaryWorkspace QPushButton[navGroup="game"]:hover { background: @navGameHover; }
-        #sanctuaryWorkspace QPushButton[navGroup="play"],
+        #sanctuaryWorkspace QPushButton#nav-home:hover { background: @hover; }
+        #sanctuaryWorkspace QPushButton#nav-home[playReady="false"] { background: @disabledPanel; color: @muted; }
         #sanctuaryWorkspace QPushButton[progress="complete"] { background: @greenPanel; color: @greenText; font-weight: 600; }
-        #sanctuaryWorkspace QPushButton[navGroup="play"]:hover,
         #sanctuaryWorkspace QPushButton[progress="complete"]:hover { background: @navGreenHover; }
-        #sanctuaryWorkspace QPushButton[navGroup="play"] { min-height: 28px; font-size: 15px; }
-        #sanctuaryWorkspace QFrame[navGroup="play"][playReady="false"] { border-color: @border; }
-        #sanctuaryWorkspace QPushButton[navGroup="play"][playReady="false"],
-        #sanctuaryWorkspace QPushButton[navGroup="play"][playReady="false"]:checked,
-        #sanctuaryWorkspace QPushButton[navGroup="play"][playReady="false"]:hover { background: @disabledPanel; color: @muted; }
         #sanctuaryWorkspace QPushButton[navGroup="connection"] { text-align: left; border-radius: 7px; padding: 6px 12px; }
         #sanctuaryWorkspace QPushButton[progress="complete"] { border-color: @navGreenBorder; }
         #sanctuaryWorkspace QPushButton[progress="start"] { border-color: @navErrorBorder; }
@@ -155,7 +148,7 @@ void SanctuaryWorkspace::setPages(const QList<BasePage*>& pages, bool global)
     m_global = global;
     if (!m_global) {
         m_navLayout->setSpacing(10);
-        for (const QString& group : {QStringLiteral("play"), QStringLiteral("community"), QStringLiteral("game")}) {
+        for (const QString& group : {QStringLiteral("community"), QStringLiteral("game")}) {
             auto* frame = new QFrame(m_navLayout->parentWidget());
             frame->setObjectName(group + "Group");
             frame->setProperty("navGroup", group);
@@ -178,14 +171,11 @@ void SanctuaryWorkspace::setConnectionButton(QPushButton* button)
 void SanctuaryWorkspace::setPlayReady(bool ready)
 {
     auto* button = m_navigation.value("home");
-    if (!button) return;
-    for (auto* widget : {static_cast<QWidget*>(button), button->parentWidget()}) {
-        if (widget->property("playReady") == QVariant(ready)) continue;
-        widget->setProperty("playReady", ready);
-        widget->style()->unpolish(widget);
-        widget->style()->polish(widget);
-        widget->update();
-    }
+    if (!button || button->property("playReady") == QVariant(ready)) return;
+    button->setProperty("playReady", ready);
+    button->style()->unpolish(button);
+    button->style()->polish(button);
+    button->update();
 }
 
 void SanctuaryWorkspace::appendPages(const QList<BasePage*>& pages)

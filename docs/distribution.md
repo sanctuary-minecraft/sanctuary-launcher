@@ -202,3 +202,9 @@ Sanctuary. Les requêtes de visages restent publiques.
 Le logo Sanctuary et le bandeau Habitants partagent la même ligne au-dessus
 des pages et des réglages. Le test Qt vérifie l’alignement du logo, du libellé
 et du premier visage.
+
+## Version 0.2.2
+
+La barre latérale regroupe Jouer, Actualités, Carte et Wiki. Le lien Jouer
+utilise un style neutre et garde son état grisé pendant la configuration.
+Le test Qt vérifie l’ordre des liens et le rendu du lien Jouer.

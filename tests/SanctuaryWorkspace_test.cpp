@@ -13,6 +13,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTimer>
+#include "ui/SanctuaryAppearance.h"
 #include "ui/SanctuaryWorkspace.h"
 #include "ui/SanctuaryFeed.h"
 #include "ui/pages/BasePage.h"
@@ -142,15 +143,26 @@ private slots:
         auto* homeNav=workspace.findChild<QPushButton*>("nav-home");
         auto* logsNav=workspace.findChild<QPushButton*>("nav-console");
         auto* communityGroup = workspace.findChild<QFrame*>("communityGroup");
-        auto* playGroup = workspace.findChild<QFrame*>("playGroup");
-        QCOMPARE(homeNav->parentWidget(), playGroup);
-        for (const auto* name : {"nav-news", "nav-map", "nav-wiki"})
-            QCOMPARE(workspace.findChild<QPushButton*>(name)->parentWidget(), communityGroup);
+        int previousBottom = -1;
+        for (const auto* name : {"nav-home", "nav-news", "nav-map", "nav-wiki"}) {
+            auto* button = workspace.findChild<QPushButton*>(name);
+            QCOMPARE(button->parentWidget(), communityGroup);
+            QVERIFY(button->y() > previousBottom);
+            previousBottom = button->geometry().bottom();
+        }
         QCOMPARE(logsNav->parentWidget(), gameGroup);
         QCOMPARE(workspace.findChild<QPushButton*>("nav-mods")->parentWidget(), gameGroup);
-        QVERIFY(connection->geometry().bottom() < playGroup->y());
-        QVERIFY(playGroup->geometry().bottom() < communityGroup->y());
+        QVERIFY(connection->geometry().bottom() < communityGroup->y());
         QVERIFY(communityGroup->geometry().bottom() < gameGroup->y());
+        QTest::mouseMove(&workspace, QPoint(workspace.width() - 20, 20));
+        const auto homeBackground = [homeNav] {
+            const auto image = homeNav->grab().toImage();
+            return image.pixelColor(image.width() - 12, image.height() / 2);
+        };
+        workspace.setPlayReady(false);
+        QCOMPARE(homeBackground(), QColor(SanctuaryAppearance::colors("@disabledPanel;").chopped(1)));
+        workspace.setPlayReady(true);
+        QCOMPARE(homeBackground(), QColor(SanctuaryAppearance::colors("@panel;").chopped(1)));
         logsNav->setChecked(true); // Accessibility toggles the selection without synthesizing a mouse click.
         QCOMPARE(workspace.selectedPage(),static_cast<BasePage*>(logs));
         QVERIFY(!homeNav->isChecked());

@@ -2,7 +2,7 @@
 
 Fork natif de **Prism Launcher 11.1.1**, avec une fenêtre Sanctuary blanche,
 les outils du jeu intégrés et une seule installation officielle Sanctuary Beta.
-La version **0.2.1** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
+La version **0.2.2** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
 
 [Téléchargements Sanctuary](https://sanctuary-minecraft.net/telechargements) · [Sources publiques et releases GitHub](https://github.com/sanctuary-minecraft/sanctuary-launcher)
 
@@ -16,8 +16,9 @@ couleur et les joueurs déconnectés en gris.
 **Jouer** ouvre le tableau de bord dès le démarrage. La date et
 l’heure locales apparaissent juste en dessous et s’actualisent automatiquement.
 Le tableau de bord partage les bords de contenu des pages natives.
-**Jouer** est grisé pendant la configuration et devient vert lorsque la
-connexion, l’accès Sanctuary et le pack sont prêts.
+Le bouton de lancement en bas du tableau de bord est grisé pendant la
+configuration et devient vert lorsque la connexion, l’accès Sanctuary et
+le pack sont prêts.
 Les trois flux sont encadrés sur un fond gris très léger, identique au gris
 des tableaux natifs. L’Intendance reste en haut sur toute la largeur, la Gazette
 à gauche et le Tableau à droite en dessous. Chaque cadre affiche son titre :
@@ -35,10 +36,10 @@ au départ, jaune pendant la configuration et vert une fois les étapes
 obligatoires terminées. **Connecté** donne accès aux actions de compte et au
 dossier Sanctuary, qui contient aussi le code de personnage facultatif.
 
-La barre latérale espace **Jouer**, le groupe **Actualités**, **Carte** et
-**Wiki**, puis les outils de l’instance. Les pages Sanctuary prennent un
-accent bleu au survol. Les outils sont neutres au repos et prennent un
-accent violet.
+La barre latérale regroupe **Jouer**, **Actualités**, **Carte** et **Wiki**,
+puis les outils de l’instance dans un cadre séparé. **Jouer** garde un style
+neutre. Les trois autres pages du groupe prennent un accent bleu au survol.
+Les outils sont neutres au repos et prennent un accent violet.
 
 **Actualités** consulte l'historique des publications du site dans un onglet
 séparé. Le logo PNG original occupe seul le haut de la barre latérale ; il est
