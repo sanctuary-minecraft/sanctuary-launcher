@@ -154,15 +154,28 @@ private slots:
         QCOMPARE(workspace.findChild<QPushButton*>("nav-mods")->parentWidget(), gameGroup);
         QVERIFY(connection->geometry().bottom() < communityGroup->y());
         QVERIFY(communityGroup->geometry().bottom() < gameGroup->y());
-        QTest::mouseMove(&workspace, QPoint(workspace.width() - 20, 20));
+        const QPoint awayFromSidebar(workspace.width() - 20, 20);
+        QTest::mouseMove(&workspace, awayFromSidebar);
         const auto homeBackground = [homeNav] {
             const auto image = homeNav->grab().toImage();
             return image.pixelColor(image.width() - 12, image.height() / 2);
         };
+        const QColor unavailable(SanctuaryAppearance::colors("@disabledPanel;").chopped(1));
+        const QColor selected(SanctuaryAppearance::colors("@panel;").chopped(1));
         workspace.setPlayReady(false);
-        QCOMPARE(homeBackground(), QColor(SanctuaryAppearance::colors("@disabledPanel;").chopped(1)));
+        QCOMPARE(homeBackground(), unavailable);
         workspace.setPlayReady(true);
-        QCOMPARE(homeBackground(), QColor(SanctuaryAppearance::colors("@panel;").chopped(1)));
+        QCOMPARE(homeBackground(), selected);
+        QTest::mouseMove(homeNav, homeNav->rect().center());
+        QTRY_VERIFY(homeBackground().hslSaturation() > 80);
+        const auto startColor = homeBackground();
+        QTRY_VERIFY(homeBackground() != startColor && homeBackground().hslSaturation() > 80);
+        workspace.setPlayReady(false);
+        QCOMPARE(homeBackground(), unavailable);
+        workspace.setPlayReady(true);
+        QTRY_VERIFY(homeBackground().hslSaturation() > 80);
+        QTest::mouseMove(&workspace, awayFromSidebar);
+        QTRY_COMPARE(homeBackground(), selected);
         logsNav->setChecked(true); // Accessibility toggles the selection without synthesizing a mouse click.
         QCOMPARE(workspace.selectedPage(),static_cast<BasePage*>(logs));
         QVERIFY(!homeNav->isChecked());

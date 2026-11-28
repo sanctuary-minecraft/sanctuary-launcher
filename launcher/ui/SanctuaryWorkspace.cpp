@@ -7,13 +7,83 @@
 #include <QButtonGroup>
 #include <QFrame>
 #include <QLabel>
+#include <QPainter>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QStackedWidget>
 #include <QStyle>
+#include <QVariantAnimation>
 #include <QVBoxLayout>
 
 static void initializeWorkspaceResources() { Q_INIT_RESOURCE(sanctuary); }
+
+namespace {
+class PlayPageButton final : public QPushButton {
+public:
+    PlayPageButton(const QString& text, QWidget* parent) : QPushButton(text, parent)
+    {
+        m_rainbow.setDuration(4200);
+        m_rainbow.setStartValue(0);
+        m_rainbow.setEndValue(360);
+        m_rainbow.setLoopCount(-1);
+        connect(&m_rainbow, &QVariantAnimation::valueChanged, this, [this] { update(); });
+    }
+
+    void setReady(bool ready)
+    {
+        if (property("playReady") == QVariant(ready)) return;
+        setProperty("playReady", ready);
+        style()->unpolish(this);
+        style()->polish(this);
+        updateRainbow(underMouse());
+    }
+
+protected:
+    bool event(QEvent* event) override
+    {
+        switch (event->type()) {
+        case QEvent::Enter: updateRainbow(true); break;
+        case QEvent::Leave:
+        case QEvent::Hide: updateRainbow(false); break;
+        case QEvent::EnabledChange: updateRainbow(underMouse()); break;
+        default: break;
+        }
+        return QPushButton::event(event);
+    }
+
+    void paintEvent(QPaintEvent* event) override
+    {
+        if (m_rainbow.state() == QAbstractAnimation::Running) {
+            const auto fill = QRectF(rect()).adjusted(1, 1, -1, -1);
+            const int hue = m_rainbow.currentValue().toInt();
+            const int lightness = SanctuaryAppearance::isDark() ? 63 : 217;
+            QLinearGradient background(fill.topLeft(), fill.topRight());
+            background.setColorAt(0, QColor::fromHsl(hue % 360, 186, lightness));
+            background.setColorAt(1, QColor::fromHsl((hue + 72) % 360, 186, lightness));
+            QPainter painter(this);
+            painter.setRenderHint(QPainter::Antialiasing);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(background);
+            painter.drawRoundedRect(fill, 4, 4);
+        }
+        // The transparent hover style draws the label and focus border over the fill.
+        QPushButton::paintEvent(event);
+    }
+
+private:
+    void updateRainbow(bool hovered)
+    {
+        if (hovered && isEnabled() && isVisible() && property("playReady").toBool()) {
+            m_rainbow.start();
+        } else {
+            m_rainbow.stop();
+        }
+        update();
+    }
+
+    QVariantAnimation m_rainbow;
+};
+}
 
 static QString navigationGroup(const QString& page)
 {
@@ -95,7 +165,7 @@ void SanctuaryWorkspace::applyAppearance()
         #sanctuaryWorkspace QPushButton[navGroup="game"]:checked { background: @panel; color: @text; }
         #sanctuaryWorkspace QPushButton[navGroup="community"]:hover { background: @selected; }
         #sanctuaryWorkspace QPushButton[navGroup="game"]:hover { background: @navGameHover; }
-        #sanctuaryWorkspace QPushButton#nav-home:hover { background: @hover; }
+        #sanctuaryWorkspace QPushButton#nav-home[playReady="true"]:hover { background: transparent; }
         #sanctuaryWorkspace QPushButton#nav-home[playReady="false"] { background: @disabledPanel; color: @muted; }
         #sanctuaryWorkspace QPushButton[progress="complete"] { background: @greenPanel; color: @greenText; font-weight: 600; }
         #sanctuaryWorkspace QPushButton[progress="complete"]:hover { background: @navGreenHover; }
@@ -170,12 +240,7 @@ void SanctuaryWorkspace::setConnectionButton(QPushButton* button)
 
 void SanctuaryWorkspace::setPlayReady(bool ready)
 {
-    auto* button = m_navigation.value("home");
-    if (!button || button->property("playReady") == QVariant(ready)) return;
-    button->setProperty("playReady", ready);
-    button->style()->unpolish(button);
-    button->style()->polish(button);
-    button->update();
+    if (auto* button = static_cast<PlayPageButton*>(m_navigation.value("home"))) button->setReady(ready);
 }
 
 void SanctuaryWorkspace::appendPages(const QList<BasePage*>& pages)
@@ -187,7 +252,8 @@ void SanctuaryWorkspace::appendPages(const QList<BasePage*>& pages)
         Q_ASSERT(widget);
         page->setParentContainer(this);
         m_stack->addWidget(widget);
-        auto* nav = new QPushButton(name(page), this);
+        const auto label = name(page);
+        QPushButton* nav = page->id() == "home" ? new PlayPageButton(label, this) : new QPushButton(label, this);
         nav->setObjectName("nav-" + page->id());
         nav->setProperty("nav", true);
         nav->setCheckable(true);
