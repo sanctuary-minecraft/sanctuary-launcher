@@ -2,7 +2,7 @@
 
 Fork natif de **Prism Launcher 11.1.1**, avec une fenêtre Sanctuary blanche,
 les outils du jeu intégrés et une seule installation officielle Sanctuary Beta.
-La version **0.2.3** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
+La version **0.2.4** est distribuée pour Windows x64, macOS Apple Silicon et Linux x64.
 
 [Téléchargements Sanctuary](https://sanctuary-minecraft.net/telechargements) · [Sources publiques et releases GitHub](https://github.com/sanctuary-minecraft/sanctuary-launcher)
 
@@ -37,10 +37,11 @@ obligatoires terminées. **Connecté** donne accès aux actions de compte et au
 dossier Sanctuary, qui contient aussi le code de personnage facultatif.
 
 La barre latérale regroupe **Jouer**, **Actualités**, **Carte** et **Wiki**,
-puis les outils de l’instance dans un cadre séparé. **Jouer** garde un style
-neutre au repos. Quand la configuration est terminée, son fond parcourt
-les couleurs de l’arc-en-ciel au survol. Les trois autres pages du groupe
-prennent un accent bleu au survol.
+puis les outils de l’instance dans un cadre séparé. Des icônes monochromes
+accompagnent les libellés. **Jouer** garde un style neutre au repos.
+Quand la configuration est terminée, son fond parcourt les couleurs de
+l’arc-en-ciel au survol. Les trois autres pages du groupe prennent un accent
+bleu au survol.
 Les outils sont neutres au repos et prennent un accent violet.
 
 **Actualités** consulte l'historique des publications du site dans un onglet

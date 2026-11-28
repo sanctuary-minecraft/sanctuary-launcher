@@ -209,8 +209,10 @@ La barre latérale regroupe Jouer, Actualités, Carte et Wiki. Le lien Jouer
 utilise un style neutre et garde son état grisé pendant la configuration.
 Le test Qt vérifie l’ordre des liens et le rendu du lien Jouer.
 
-## Version 0.2.3
+## Version 0.2.4
 
 Le fond de Jouer dans la barre latérale parcourt les couleurs de
 l’arc-en-ciel au survol, une fois la configuration terminée.
-Le test Qt vérifie le défilement et le retour au fond neutre.
+Des icônes monochromes accompagnent les entrées de la barre latérale.
+Le test Qt vérifie le rendu des icônes, le défilement et le retour au fond
+neutre.

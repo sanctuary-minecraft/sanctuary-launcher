@@ -6,6 +6,7 @@
 #include "ui/pages/BasePage.h"
 #include <QButtonGroup>
 #include <QFrame>
+#include <QIcon>
 #include <QLabel>
 #include <QPainter>
 #include <QPushButton>
@@ -15,7 +16,11 @@
 #include <QVariantAnimation>
 #include <QVBoxLayout>
 
-static void initializeWorkspaceResources() { Q_INIT_RESOURCE(sanctuary); }
+static void initializeWorkspaceResources()
+{
+    Q_INIT_RESOURCE(sanctuary);
+    Q_INIT_RESOURCE(flat);
+}
 
 namespace {
 class PlayPageButton final : public QPushButton {
@@ -89,6 +94,26 @@ static QString navigationGroup(const QString& page)
 {
     if (page == "home" || page == "news" || page == "map" || page == "wiki") return QStringLiteral("community");
     return QStringLiteral("game");
+}
+
+static QIcon sidebarIcon(const QString& name)
+{
+    return QIcon(QStringLiteral(":/icons/flat/scalable/%1.svg").arg(name));
+}
+
+static QIcon navigationIcon(BasePage* page)
+{
+    static const QHash<QString, QString> icons{
+        {"home", "launch"}, {"news", "news"}, {"map", "worlds"}, {"wiki", "notes"},
+        {"console", "log"}, {"version", "packages"}, {"mods", "loadermods"}, {"resourcepacks", "resourcepacks"},
+        {"shaderpacks", "shaderpacks"}, {"notes", "rename"}, {"worlds", "minecraft"}, {"servers", "server"},
+        {"screenshots", "screenshots"}, {"settings", "instance-settings"}, {"logs", "log"}, {"Other-Logs", "log"},
+        {"launcher-settings", "settings"}, {"language-settings", "language"}, {"appearance-settings", "appearance"},
+        {"java-settings", "java"}, {"minecraft-settings", "minecraft"}, {"accounts", "accounts"},
+        {"apis", "packages"}, {"external-tools", "externaltools"}, {"proxy-settings", "proxy"},
+    };
+    const auto icon = icons.value(page->id());
+    return icon.isEmpty() ? page->icon() : sidebarIcon(icon);
 }
 
 SanctuaryWorkspace::SanctuaryWorkspace(QWidget* parent, bool showWordmark) : QWidget(parent), m_navSelection(new QButtonGroup(this))
@@ -235,6 +260,8 @@ void SanctuaryWorkspace::setPages(const QList<BasePage*>& pages, bool global)
 void SanctuaryWorkspace::setConnectionButton(QPushButton* button)
 {
     button->setProperty("navGroup", "connection");
+    button->setIcon(sidebarIcon(QStringLiteral("accounts")));
+    button->setIconSize({16, 16});
     m_navLayout->insertWidget(0, button);
 }
 
@@ -255,6 +282,8 @@ void SanctuaryWorkspace::appendPages(const QList<BasePage*>& pages)
         const auto label = name(page);
         QPushButton* nav = page->id() == "home" ? new PlayPageButton(label, this) : new QPushButton(label, this);
         nav->setObjectName("nav-" + page->id());
+        nav->setIcon(navigationIcon(page));
+        nav->setIconSize({16, 16});
         nav->setProperty("nav", true);
         nav->setCheckable(true);
         m_navSelection->addButton(nav);

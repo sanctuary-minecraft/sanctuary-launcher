@@ -140,6 +140,7 @@ private slots:
         workspace.resize(1120, 760);
         workspace.show();
         QApplication::processEvents();
+        QVERIFY(!connection->icon().pixmap(connection->iconSize()).isNull());
         auto* homeNav=workspace.findChild<QPushButton*>("nav-home");
         auto* logsNav=workspace.findChild<QPushButton*>("nav-console");
         auto* communityGroup = workspace.findChild<QFrame*>("communityGroup");
@@ -147,10 +148,13 @@ private slots:
         for (const auto* name : {"nav-home", "nav-news", "nav-map", "nav-wiki"}) {
             auto* button = workspace.findChild<QPushButton*>(name);
             QCOMPARE(button->parentWidget(), communityGroup);
+            QCOMPARE(button->iconSize(), QSize(16, 16));
+            QVERIFY(!button->icon().pixmap(button->iconSize()).isNull());
             QVERIFY(button->y() > previousBottom);
             previousBottom = button->geometry().bottom();
         }
         QCOMPARE(logsNav->parentWidget(), gameGroup);
+        QVERIFY(!logsNav->icon().pixmap(logsNav->iconSize()).isNull());
         QCOMPARE(workspace.findChild<QPushButton*>("nav-mods")->parentWidget(), gameGroup);
         QVERIFY(connection->geometry().bottom() < communityGroup->y());
         QVERIFY(communityGroup->geometry().bottom() < gameGroup->y());
